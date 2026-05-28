@@ -17,6 +17,11 @@ const apps = [
     destination: join(output, "electricity"),
   },
   {
+    name: "mechanics",
+    source: join(root, "apps", "mechanics", "dist"),
+    destination: join(output, "mechanics"),
+  },
+  {
     name: "rainbow",
     source: join(root, "apps", "rainbow", "src", "rainbow_web", "dist"),
     destination: join(output, "rainbow"),

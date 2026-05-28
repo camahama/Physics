@@ -8,6 +8,7 @@ Landing page for physics web apps at <https://physics.martinmagnusson.net>.
 apps/
   landing/
   electricity/
+  mechanics/
   rainbow/
   stirling/
 ```
@@ -26,6 +27,7 @@ Run individual apps from the repo root:
 ```sh
 npm run dev:landing
 npm run dev:electricity
+npm run dev:mechanics
 npm run dev:rainbow
 npm run dev:stirling
 ```
@@ -48,10 +50,11 @@ Individual modules should be published as subdirectories of the same site:
 
 ```text
 https://physics.martinmagnusson.net/electricity/
+https://physics.martinmagnusson.net/mechanics/
 https://physics.martinmagnusson.net/rainbow/
 https://physics.martinmagnusson.net/stirling/
 ```
 
 For GitHub Pages, that means the deployed `dist` folder for this repository
 needs to contain each module at those paths, for example `dist/electricity`,
-`dist/rainbow`, and `dist/stirling`.
+`dist/mechanics`, `dist/rainbow`, and `dist/stirling`.

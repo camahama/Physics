@@ -3,8 +3,8 @@ export const copy = {
     domain: "physics.martinmagnusson.net",
     title: "Physics Apps",
     intro:
-      "A small home for browser-based physics experiments, simulations, and study tools. Work in progress.",
-    creditPrefix: "Vibecoded 2026 by Martin Magnusson, director of studies,",
+      "A humble abode for browser-based physics experiments, simulations, and study tools. Work in progress.",
+    creditPrefix: "Vibecoded 2026 by Martin Magnusson, director of studies, Department of Physics,Lund University, Sweden",
     creditEmail: "martin.magnusson@fysik.lu.se",
     creditLicensePrefix: "Creative Commons licensing",
     creditLicenseLabel: "CC-BY-NC-SA",
@@ -16,17 +16,17 @@ export const copy = {
   apps: {
     electricity: {
       title: "Electricity",
-      description: "Interactive tools for electric fields, potentials, and circuits.",
+      description: "Interactive tools for electric fields, potentials, and circuits",
       label: "Electricity",
     },
     rainbow: {
-      title: "RainbowSim",
-      description: "A browser simulation for exploring rainbows and light.",
+      title: "Rainbow simulator",
+      description: "A browser simulation for exploring rainbows and light",
       label: "Optics",
     },
     stirling: {
       title: "Stirling",
-      description: "An interactive physics app centered on the Stirling cycle.",
+      description: "An interactive physics app for Stirling engine lab",
       label: "Thermodynamics",
     },
   },
