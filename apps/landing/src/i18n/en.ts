@@ -20,12 +20,12 @@ export const copy = {
       label: "Electricity",
     },
     rainbow: {
-      title: "Rainbow simulator",
+      title: "Rainbow Physics",
       description: "A browser simulation for exploring rainbows and light",
       label: "Optics",
     },
     stirling: {
-      title: "Stirling",
+      title: "Stirling Engine Lab",
       description: "An interactive physics app for Stirling engine lab",
       label: "Thermodynamics",
     },
