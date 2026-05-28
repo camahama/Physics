@@ -25,8 +25,7 @@ function resolveInitialLanguage(defaultLanguage) {
     return savedLanguage;
   }
 
-  const browserLanguage = window.navigator.language.slice(0, 2).toLowerCase();
-  return browserLanguage in dictionaries ? browserLanguage : defaultLanguage;
+  return defaultLanguage;
 }
 
 export async function createI18n({ defaultLanguage }) {

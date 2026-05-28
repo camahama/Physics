@@ -3,7 +3,7 @@ import { createPackageCredit } from "./components/packageCredit.js";
 import { createI18n } from "./i18n/index.js";
 
 const DEFAULT_ROUTE = "home";
-const DEFAULT_LANGUAGE = "en";
+const DEFAULT_LANGUAGE = "sv";
 const ASSET_BASE_URL = import.meta.env.BASE_URL;
 
 function getRoute() {
