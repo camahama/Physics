@@ -3,13 +3,24 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "apps/landing",
+    "apps/electricity",
+    "apps/rainbow/src/rainbow_web",
+    "apps/stirling"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
-  },
-  "devDependencies": {
-    "typescript": "^5.8.3",
-    "vite": "^6.3.5"
+    "dev": "npm --workspace @physics/landing run dev",
+    "dev:landing": "npm --workspace @physics/landing run dev",
+    "dev:electricity": "npm --workspace @physics/electricity run dev",
+    "dev:rainbow": "npm --workspace @physics/rainbow run dev",
+    "dev:stirling": "npm --workspace @physics/stirling run dev",
+    "build": "npm run build:landing && npm run build:electricity && npm run build:rainbow && npm run build:stirling && npm run assemble",
+    "build:landing": "npm --workspace @physics/landing run build",
+    "build:electricity": "npm --workspace @physics/electricity run build",
+    "build:rainbow": "npm --workspace @physics/rainbow run build",
+    "build:stirling": "npm --workspace @physics/stirling run build",
+    "assemble": "node scripts/assemble-dist.mjs",
+    "preview": "npm --workspace @physics/landing run preview"
   }
 }

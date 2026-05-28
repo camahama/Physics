@@ -1,0 +1,12 @@
+{
+  "name": "RainbowSim",
+  "description": "Interactive physics simulator for light phenomena",
+  "repository": "https://github.com/yourusername/RainbowSim",
+  "keywords": ["physics", "pygame", "optics", "education"],
+  "env": {
+    "PYTHONUNBUFFERED": {
+      "description": "Ensure Python output is sent straight to logs",
+      "value": "true"
+    }
+  }
+}

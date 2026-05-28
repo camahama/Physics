@@ -2,11 +2,32 @@
 
 Landing page for physics web apps at <https://physics.martinmagnusson.net>.
 
+## Structure
+
+```text
+apps/
+  landing/
+  electricity/
+  rainbow/
+  stirling/
+```
+
+The root build assembles all app builds into one GitHub Pages artifact.
+
 ## Development
 
 ```sh
 npm install
 npm run dev
+```
+
+Run individual apps from the repo root:
+
+```sh
+npm run dev:landing
+npm run dev:electricity
+npm run dev:rainbow
+npm run dev:stirling
 ```
 
 ## Build

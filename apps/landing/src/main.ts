@@ -35,6 +35,9 @@ if (!app) {
   throw new Error("App root was not found.");
 }
 
+const moduleHref = (path: string) =>
+  new URL(path.replace(/^\/+/, ""), window.location.href).pathname;
+
 app.innerHTML = `
   <main class="site-shell">
     <section class="hero" aria-labelledby="page-title">
@@ -47,7 +50,7 @@ app.innerHTML = `
       ${apps
         .map(
           (physicsApp) => `
-            <a class="app-card" href="${physicsApp.href}">
+            <a class="app-card" href="${moduleHref(physicsApp.href)}">
               <span class="status">${physicsApp.label}</span>
               <h2>${physicsApp.title}</h2>
               <p>${physicsApp.description}</p>

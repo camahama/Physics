@@ -1,0 +1,20 @@
+{
+  "name": "@physics/electricity",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "electrostatics:heatmap": "node --import tsx scripts/electrostatics-heatmap.ts",
+    "test": "node --import tsx --test src/modules/electrostatics/physics/potentialGrid.test.ts src/modules/electrostatics/visualization/overlays.test.ts src/modules/three-phase/physics/index.test.ts src/modules/circuit-builder/physics/linearCircuit.test.ts src/modules/rlc-circuit/physics/seriesRlc.test.ts",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.0"
+  }
+}
