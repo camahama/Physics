@@ -4,7 +4,7 @@ export const copy = {
     title: "Physics Apps",
     intro:
       "A humble abode for browser-based physics experiments, simulations, and study tools. Work in progress.",
-    creditPrefix: "Vibecoded 2026 by Martin Magnusson, director of studies, Department of Physics,Lund University, Sweden, ",
+    creditPrefix: "Vibecoded 2026 by Martin Magnusson, director of studies, Department of Physics, Lund University, Sweden, ",
     creditEmail: "martin.magnusson@fysik.lu.se",
     creditLicensePrefix: "Creative Commons licensing",
     creditLicenseLabel: "CC-BY-NC-SA",
