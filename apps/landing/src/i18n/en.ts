@@ -3,7 +3,12 @@ export const copy = {
     domain: "physics.martinmagnusson.net",
     title: "Physics Apps",
     intro:
-      "A small home for browser-based physics experiments, simulations, and study tools.",
+      "A small home for browser-based physics experiments, simulations, and study tools. Work in progress.",
+    creditPrefix: "Vibecoded 2026 by Martin Magnusson, director of studies,",
+    creditEmail: "martin.magnusson@fysik.lu.se",
+    creditLicensePrefix: "Creative Commons licensing",
+    creditLicenseLabel: "CC-BY-NC-SA",
+    creditLicenseUrl: "https://creativecommons.org/licenses/by-nc-sa/4.0/?ref=chooser-v1",
     repositoryLabel: "Public GitHub repo",
     repositoryUrl: "https://github.com/camahama/Physics",
   },

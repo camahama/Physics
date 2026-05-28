@@ -6,11 +6,11 @@
     }
   },
   "home": {
-    "eyebrow": "Grundläggande elektricitetslära, Fysiska institutionen, Lunds universitet",
+    "eyebrow": "Webb-applikationer utvecklade för kurser i grundläggande elektricitetslära vid Fysiska institutionen, Lunds universitet",
     "description": "En samling av enkla och presentationsvänliga simuleringar i elektricitet för föreläsningar och självstudier. Fortsätt att bygga kretsar, utforska elektrostatik och visualisera trefasström tills du har en stark intuition för hur elektriska kretsar och fält beter sig.",
     "menuTitle": "Moduler",
     "languageLabel": "Språk",
-    "creditPrefix": "Vibekodat 2026 av",
+    "creditPrefix": "Vibekodat 2026 av Martin Magnusson, studierektor,",
     "creditLicensePrefix": "Creative Commons-licensiering",
     "creditLicenseLabel": "CC-BY-NC-SA"
   },

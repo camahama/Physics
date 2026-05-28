@@ -122,17 +122,25 @@ h1 {
   line-height: 1.55;
 }
 
+.package-credit,
 .repository-link {
-  margin: 28px 0 0;
+  margin: 24px 0 0;
   color: #4d5663;
   font-weight: 700;
+  line-height: 1.5;
 }
 
+.repository-link {
+  margin-top: 8px;
+}
+
+.package-credit a,
 .repository-link a {
   text-decoration-color: #9fb9b7;
   text-underline-offset: 4px;
 }
 
+.package-credit a:hover,
 .repository-link a:hover {
   color: #2e5b60;
 }

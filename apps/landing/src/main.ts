@@ -60,6 +60,15 @@ app.innerHTML = `
         .join("")}
     </section>
 
+    <p class="package-credit">
+      ${copy.site.creditPrefix}
+      <a href="mailto:${copy.site.creditEmail}">${copy.site.creditEmail}</a>.
+      ${copy.site.creditLicensePrefix}
+      <a href="${copy.site.creditLicenseUrl}" target="_blank" rel="license noopener noreferrer">
+        ${copy.site.creditLicenseLabel}
+      </a>
+    </p>
+
     <p class="repository-link">
       <a href="${copy.site.repositoryUrl}" target="_blank" rel="noopener noreferrer">
         ${copy.site.repositoryLabel}
