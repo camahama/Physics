@@ -10,11 +10,9 @@
     "description": "En samling av enkla och presentationsvänliga simuleringar i elektricitet för föreläsningar och självstudier. Fortsätt att bygga kretsar, utforska elektrostatik och visualisera trefasström tills du har en stark intuition för hur elektriska kretsar och fält beter sig.",
     "menuTitle": "Moduler",
     "languageLabel": "Språk",
-    "logoAlt": "Lunds universitets logotyp",
     "creditPrefix": "Vibekodat 2026 av",
     "creditLicensePrefix": "Creative Commons-licensiering",
-    "creditLicenseLabel": "CC-BY-NC-SA",
-    "repositoryLinkLabel": "Offentlig GitHub-repo"
+    "creditLicenseLabel": "CC-BY-NC-SA"
   },
   "modules": {
     "electrostatics": {

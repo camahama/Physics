@@ -10,11 +10,9 @@
     "description": "A collection of simple, presentation-ready electricity simulations for lectures and self-study. Practice building circuits, explore electrostatics, and visualize three-phase power, and continue until you have a strong intuition for how electric circuits and fields behave.",
     "menuTitle": "Modules",
     "languageLabel": "Language",
-    "logoAlt": "Lund University logo",
     "creditPrefix": "Vibecoded 2026 by",
     "creditLicensePrefix": "Creative Commons licensing",
-    "creditLicenseLabel": "CC-BY-NC-SA",
-    "repositoryLinkLabel": "Public GitHub repo"
+    "creditLicenseLabel": "CC-BY-NC-SA"
   },
   "modules": {
     "electrostatics": {

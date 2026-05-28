@@ -4,7 +4,6 @@ import { createI18n } from "./i18n/index.js";
 
 const DEFAULT_ROUTE = "home";
 const DEFAULT_LANGUAGE = "sv";
-const ASSET_BASE_URL = import.meta.env.BASE_URL;
 
 function getRoute() {
   const hash = window.location.hash.replace(/^#\/?/, "");
@@ -49,11 +48,6 @@ function renderHome({ t, language }) {
   const branding = document.createElement("div");
   branding.className = "branding";
 
-  const logo = document.createElement("img");
-  logo.className = "brand-logo";
-  logo.src = `${ASSET_BASE_URL}images/lunds-universitet-huvudlogotyp-liggande3.png.webp`;
-  logo.alt = t("home.logoAlt");
-
   const eyebrow = document.createElement("p");
   eyebrow.className = "eyebrow";
   eyebrow.textContent = t("home.eyebrow");
@@ -97,17 +91,7 @@ function renderHome({ t, language }) {
 
   const credit = createPackageCredit(t);
 
-  const repository = document.createElement("p");
-  repository.className = "repository-link";
-  const repositoryLink = document.createElement("a");
-  repositoryLink.href = "https://github.com/camahama/Electricity";
-  repositoryLink.target = "_blank";
-  repositoryLink.rel = "noopener noreferrer";
-  repositoryLink.textContent = t("home.repositoryLinkLabel");
-  repository.append(repositoryLink);
-
-  branding.append(logo);
-  hero.append(branding, eyebrow, title, description, languagePicker, menuTitle, menu, credit, repository);
+  hero.append(branding, eyebrow, title, description, languagePicker, menuTitle, menu, credit);
   page.append(hero);
 
   return page;

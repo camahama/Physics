@@ -122,6 +122,21 @@ h1 {
   line-height: 1.55;
 }
 
+.repository-link {
+  margin: 28px 0 0;
+  color: #4d5663;
+  font-weight: 700;
+}
+
+.repository-link a {
+  text-decoration-color: #9fb9b7;
+  text-underline-offset: 4px;
+}
+
+.repository-link a:hover {
+  color: #2e5b60;
+}
+
 @media (max-width: 780px) {
   .site-shell {
     width: min(100% - 24px, 1120px);

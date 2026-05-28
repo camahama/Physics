@@ -59,5 +59,11 @@ app.innerHTML = `
         )
         .join("")}
     </section>
+
+    <p class="repository-link">
+      <a href="${copy.site.repositoryUrl}" target="_blank" rel="noopener noreferrer">
+        ${copy.site.repositoryLabel}
+      </a>
+    </p>
   </main>
 `;

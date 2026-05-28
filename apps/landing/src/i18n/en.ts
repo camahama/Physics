@@ -4,6 +4,8 @@ export const copy = {
     title: "Physics Apps",
     intro:
       "A small home for browser-based physics experiments, simulations, and study tools.",
+    repositoryLabel: "Public GitHub repo",
+    repositoryUrl: "https://github.com/camahama/Physics",
   },
   appsAriaLabel: "Physics apps",
   apps: {
