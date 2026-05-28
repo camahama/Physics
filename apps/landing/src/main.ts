@@ -62,6 +62,7 @@ app.innerHTML = `
 
     <p class="package-credit">
       ${copy.site.creditPrefix}
+      <br />
       <a href="mailto:${copy.site.creditEmail}">${copy.site.creditEmail}</a>.
       ${copy.site.creditLicensePrefix}
       <a href="${copy.site.creditLicenseUrl}" target="_blank" rel="license noopener noreferrer">
