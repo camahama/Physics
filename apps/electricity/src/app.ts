@@ -25,7 +25,14 @@ export async function createApp(container) {
 
     const view = moduleDefinition
       ? moduleDefinition.render({ t: i18n.t, language: i18n.language })
-      : renderHome({ t: i18n.t, language: i18n.language });
+      : renderHome({
+          t: i18n.t,
+          language: i18n.language,
+          onLanguageChange: async (language) => {
+            await i18n.setLanguage(language);
+            render();
+          },
+        });
 
     container.innerHTML = "";
     container.append(view);
@@ -38,7 +45,7 @@ export async function createApp(container) {
   render();
 }
 
-function renderHome({ t, language }) {
+function renderHome({ t, language, onLanguageChange }) {
   const page = document.createElement("main");
   page.className = "page-shell";
 
@@ -63,7 +70,7 @@ function renderHome({ t, language }) {
   const languagePicker = renderLanguagePicker({
     label: t("home.languageLabel"),
     language,
-    onChange: changeLanguage,
+    onChange: onLanguageChange,
   });
 
   const menuTitle = document.createElement("h2");
@@ -226,9 +233,4 @@ function renderLanguagePicker({ label: pickerLabel, language, onChange }) {
 
   wrapper.prepend(label);
   return wrapper;
-}
-
-async function changeLanguage(language) {
-  await window.__electricityI18n?.setLanguage(language);
-  window.dispatchEvent(new HashChangeEvent("hashchange"));
 }
