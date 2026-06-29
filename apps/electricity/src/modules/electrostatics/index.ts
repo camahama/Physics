@@ -293,8 +293,8 @@ export function renderElectrostaticsModule({ t }) {
   const context = canvas.getContext("2d");
   const dragThreshold = 6;
 
-  function getChargeRadius(charge) {
-    return BASE_CHARGE_RADIUS * (1 + 0.25 * Math.log(Math.max(1, Math.abs(charge))));
+  function getChargeRadius(_charge) {
+    return BASE_CHARGE_RADIUS;
   }
 
   function drawGridBackground() {
