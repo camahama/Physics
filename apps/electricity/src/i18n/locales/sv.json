@@ -26,6 +26,7 @@
       "presetsTitle": "Standardkonfigurationer",
       "presetPlateCapacitor": "Plattkondensator",
       "presetDipole": "Dipol",
+      "presetGoldNucleus": "Guldkärna",
       "boardTitle": "Potentiallandskap",
       "fieldProbeToggle": "Aktivera fältprob",
       "boardHint": "Klicka för att placera laddningar, klicka igen för att ändra laddning ±1 och dra för att flytta.",

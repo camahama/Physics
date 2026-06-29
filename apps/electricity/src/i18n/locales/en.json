@@ -26,6 +26,7 @@
       "presetsTitle": "Standard Configurations",
       "presetPlateCapacitor": "Plate capacitor",
       "presetDipole": "Dipole",
+      "presetGoldNucleus": "Gold nucleus",
       "boardTitle": "Potential landscape",
       "fieldProbeToggle": "Enable field probe",
       "boardHint": "Click to place a charge, click again to add charge ±1, and drag to move.",

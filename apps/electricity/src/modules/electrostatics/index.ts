@@ -126,8 +126,8 @@ function createPlateCapacitorPreset() {
 
   for (let index = 0; index < 15; index += 1) {
     const y = startY + spacingY * index;
-    charges.push({ x: positiveX, y, charge: 1 });
-    charges.push({ x: negativeX, y, charge: -1 });
+    charges.push({ x: positiveX, y, charge: 20 });
+    charges.push({ x: negativeX, y, charge: -20 });
   }
 
   return charges;
@@ -146,6 +146,14 @@ function createDipolePreset() {
       charge: 1,
     },
   ];
+}
+
+function createGoldNucleusPreset() {
+  return [{
+    x: Math.round(GRID_WIDTH * 0.5),
+    y: Math.round(GRID_HEIGHT * 0.5),
+    charge: 79,
+  }];
 }
 
 function createChargeButtonContent(charge, label) {
@@ -240,6 +248,11 @@ export function renderElectrostaticsModule({ t }) {
   dipoleButton.className = "preset-button";
   dipoleButton.textContent = t("modules.electrostatics.presetDipole");
 
+  const goldNucleusButton = document.createElement("button");
+  goldNucleusButton.type = "button";
+  goldNucleusButton.className = "preset-button";
+  goldNucleusButton.textContent = t("modules.electrostatics.presetGoldNucleus");
+
   const board = document.createElement("section");
   board.className = "electrostatics-board";
 
@@ -281,7 +294,7 @@ export function renderElectrostaticsModule({ t }) {
   const dragThreshold = 6;
 
   function getChargeRadius(charge) {
-    return BASE_CHARGE_RADIUS * Math.cbrt(Math.abs(charge));
+    return BASE_CHARGE_RADIUS * (1 + 0.25 * Math.log(Math.max(1, Math.abs(charge))));
   }
 
   function drawGridBackground() {
@@ -537,6 +550,10 @@ export function renderElectrostaticsModule({ t }) {
     loadPreset(createDipolePreset());
   });
 
+  goldNucleusButton.addEventListener("click", () => {
+    loadPreset(createGoldNucleusPreset());
+  });
+
   canvas.addEventListener("pointerdown", (event) => {
     const { x, y } = getCanvasPoint(event);
     const existingCharge = findChargeAtPoint(x, y);
@@ -623,7 +640,7 @@ export function renderElectrostaticsModule({ t }) {
   redrawCanvas();
 
   selectionGroup.append(positiveButton, negativeButton);
-  presetButtons.append(plateCapacitorButton, dipoleButton);
+  presetButtons.append(plateCapacitorButton, dipoleButton, goldNucleusButton);
   probeToggleLabel.append(probeToggle, probeToggleText);
   boardToolbar.append(probeToggleLabel);
   controls.append(
