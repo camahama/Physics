@@ -126,8 +126,8 @@ function createPlateCapacitorPreset() {
 
   for (let index = 0; index < 15; index += 1) {
     const y = startY + spacingY * index;
-    charges.push({ x: positiveX, y, charge: 20 });
-    charges.push({ x: negativeX, y, charge: -20 });
+    charges.push({ x: positiveX, y, charge: 1 });
+    charges.push({ x: negativeX, y, charge: -1 });
   }
 
   return charges;
