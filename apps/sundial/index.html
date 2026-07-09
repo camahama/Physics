@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sundial Layout Designer</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="app-shell">
+    <aside class="sidebar" aria-label="Sundial settings">
+      <header class="brand">
+        <p class="eyebrow">Physics module</p>
+        <h1>Sundial Layout Designer</h1>
+        <p>Create location-specific horizontal and vertical sundial artwork.</p>
+      </header>
+
+      <section class="panel">
+        <h2>Layout</h2>
+        <label>
+          Type
+          <select id="kind">
+            <option value="horizontal">Horizontal</option>
+            <option value="vertical">Vertical</option>
+          </select>
+        </label>
+        <div class="grid two">
+          <label>Width <span>mm</span><input id="plateWidth" type="number" min="1" step="1"></label>
+          <label>Height <span>mm</span><input id="plateHeight" type="number" min="1" step="1"></label>
+        </div>
+        <label>Gnomon length <span>mm</span><input id="gnomonLength" type="number" min="1" step="1"></label>
+        <div class="grid two">
+          <label>Gnomon X <span>mm</span><input id="gnomonOffsetX" type="number" step="1"></label>
+          <label>Gnomon Y <span>mm</span><input id="gnomonOffsetY" type="number" step="1"></label>
+        </div>
+        <label>Title text <input id="customText" type="text"></label>
+        <div class="button-row">
+          <button id="setTitleFromPosition" type="button">Set title from position</button>
+          <label class="check"><input id="monochrome" type="checkbox"> Monochrome</label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Location</h2>
+        <div class="grid two">
+          <label>Latitude <span>deg</span><input id="latitude" type="number" min="-89" max="89" step="0.0001"></label>
+          <label>Longitude <span>deg</span><input id="longitude" type="number" step="0.0001"></label>
+        </div>
+        <div class="button-row">
+          <button id="useBrowserLocation" type="button">Current location</button>
+          <button id="applyLund" type="button">Lund preset</button>
+        </div>
+        <p id="locationMessage" class="note" role="status"></p>
+        <label><span id="declinationLabel">Layout angle</span> <span>deg</span><input id="declinationFromSouth" type="number" step="0.1"></label>
+        <div class="grid two">
+          <label>Start hour <input id="startHour" type="number" min="0" max="23" step="1"></label>
+          <label>End hour <input id="endHour" type="number" min="0" max="23" step="1"></label>
+        </div>
+        <label>Standard UTC offset <span>h</span><input id="standardTimeOffset" type="number" step="0.5"></label>
+        <p class="note">Use standard time, not daylight saving time. Longitude and equation-of-time corrections are included.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Gnomon & labels</h2>
+        <label class="check"><input id="gnomonFollowsIdeal" type="checkbox"> Follow ideal polar-axis gnomon</label>
+        <div class="grid two">
+          <label>Gnomon angle <span>deg</span><input id="gnomonAngleFromPlate" type="number" step="0.1"></label>
+          <label>Gnomon direction <span>deg</span><input id="gnomonDirectionFromDown" type="number" step="0.1"></label>
+        </div>
+        <div class="button-row">
+          <button id="setIdealGnomon" type="button">Set ideal</button>
+          <button id="setSimpleGnomon" type="button">Set 45° down</button>
+        </div>
+        <label>
+          Hour labels
+          <select id="hourNumeralStyle">
+            <option value="roman">Roman</option>
+            <option value="arabic">Arabic</option>
+          </select>
+        </label>
+        <label>Hours to label <input id="visibleHourLabels" type="text" placeholder="8, 9, 10, 11, 12"></label>
+        <label class="check"><input id="showsLegendAnalemma" type="checkbox"> Show legend analemma</label>
+        <div class="grid two">
+          <label>Legend X <span>mm</span><input id="legendOffsetX" type="number" step="1"></label>
+          <label>Legend Y <span>mm</span><input id="legendOffsetY" type="number" step="1"></label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Angle helper</h2>
+        <label>
+          Observation
+          <select id="angleHelperMode">
+            <option value="sunPerpendicularToWall">Sun perpendicular to wall</option>
+            <option value="sunParallelToPlateEdge">Sun parallel to plate edge</option>
+          </select>
+        </label>
+        <label>Observed date/time <input id="observationDate" type="datetime-local"></label>
+        <label class="check"><input id="observationIncludesDST" type="checkbox"> Entered time is DST / summer time</label>
+        <div class="button-row">
+          <button id="calculateAngle" type="button">Calculate</button>
+          <button id="applyAngle" type="button">Apply angle</button>
+        </div>
+        <p id="angleResult" class="note"></p>
+      </section>
+
+      <section class="panel output-panel">
+        <h2>Output</h2>
+        <dl>
+          <div><dt>Gnomon angle</dt><dd id="gnomonAngleOutput"></dd></div>
+          <div><dt>Visible hours</dt><dd id="hoursOutput"></dd></div>
+          <div><dt>Out of bounds</dt><dd id="boundsOutput"></dd></div>
+        </dl>
+        <div class="button-row">
+          <button id="downloadSVG" type="button">Download SVG</button>
+          <button id="printPage" type="button">Print / PDF</button>
+        </div>
+      </section>
+
+      <footer class="credit">
+        Vibecoded 2026 by Martin Magnusson, Department of Physics, Lund University, Sweden.
+        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC-BY-NC-SA</a>
+      </footer>
+    </aside>
+
+    <section class="preview-pane" aria-label="Sundial preview">
+      <header class="preview-header">
+        <div>
+          <h2>Sundial layout</h2>
+          <p id="subtitle"></p>
+        </div>
+        <div class="scale-readout" id="scaleReadout"></div>
+      </header>
+      <div class="canvas-card">
+        <svg id="dialSvg" role="img" aria-labelledby="svgTitle"></svg>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

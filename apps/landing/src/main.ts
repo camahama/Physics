@@ -27,6 +27,12 @@ const apps: PhysicsApp[] = [
     href: "/stirling/",
     label: copy.apps.stirling.label,
   },
+  {
+    title: copy.apps.sundial.title,
+    description: copy.apps.sundial.description,
+    href: "/sundial/",
+    label: copy.apps.sundial.label,
+  },
 ];
 
 const app = document.querySelector<HTMLDivElement>("#app");

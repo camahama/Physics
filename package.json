@@ -8,7 +8,8 @@
     "apps/electricity",
     "apps/mechanics",
     "apps/rainbow/src/rainbow_web",
-    "apps/stirling"
+    "apps/stirling",
+    "apps/sundial"
   ],
   "scripts": {
     "dev": "npm --workspace @physics/landing run dev",
@@ -17,13 +18,15 @@
     "dev:mechanics": "npm --workspace @physics/mechanics run dev",
     "dev:rainbow": "npm --workspace @physics/rainbow run dev",
     "dev:stirling": "npm --workspace @physics/stirling run dev",
-    "build": "npm run build:landing && npm run build:electricity && npm run build:mechanics && npm run build:rainbow && npm run build:stirling && npm run assemble",
+    "build": "npm run build:landing && npm run build:electricity && npm run build:mechanics && npm run build:rainbow && npm run build:stirling && npm run build:sundial && npm run assemble",
     "build:landing": "npm --workspace @physics/landing run build",
     "build:electricity": "npm --workspace @physics/electricity run build",
     "build:mechanics": "npm --workspace @physics/mechanics run build",
     "build:rainbow": "npm --workspace @physics/rainbow run build",
     "build:stirling": "npm --workspace @physics/stirling run build",
     "assemble": "node scripts/assemble-dist.mjs",
-    "preview": "npm --workspace @physics/landing run preview"
+    "preview": "npm --workspace @physics/landing run preview",
+    "dev:sundial": "npm --workspace @physics/sundial run dev",
+    "build:sundial": "npm --workspace @physics/sundial run build"
   }
 }

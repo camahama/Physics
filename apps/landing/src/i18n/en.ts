@@ -29,5 +29,10 @@ export const copy = {
       description: "An interactive physics app for Stirling engine lab",
       label: "Thermodynamics",
     },
+    sundial: {
+      title: "Sundial Designer",
+      description: "Design printable location-specific sundial layouts",
+      label: "Astronomy",
+    },
   },
 } as const;

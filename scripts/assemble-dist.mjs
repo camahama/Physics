@@ -31,6 +31,11 @@ const apps = [
     source: join(root, "apps", "stirling", "dist"),
     destination: join(output, "stirling"),
   },
+  {
+    name: "sundial",
+    source: join(root, "apps", "sundial", "dist"),
+    destination: join(output, "sundial"),
+  },
 ];
 
 rmSync(output, { recursive: true, force: true });
