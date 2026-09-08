@@ -192,14 +192,14 @@ function createModuleIcon(slug: string) {
   } else if (slug === "process-builder") {
     line(18, 58, 82, 58, "thermal stroke");
     line(18, 58, 18, 12, "thermal stroke");
-    path("M 30 20 C 42 30 55 33 68 31", "thermal process isotherm");
-    path("M 30 46 C 42 53 56 54 68 49", "thermal process isotherm");
-    line(30, 20, 30, 46, "thermal process isochor");
+    path("M 30 16 C 41 27 55 32 68 31", "thermal process isotherm");
+    path("M 30 42 C 42 49 56 51 68 49", "thermal process isotherm");
+    line(30, 16, 30, 42, "thermal process isochor");
     line(68, 31, 68, 49, "thermal process isochor");
-    circle(30, 20, 3.2, "thermal bulb");
+    circle(30, 16, 3.2, "thermal bulb");
     circle(68, 31, 3.2, "thermal bulb");
     circle(68, 49, 3.2, "thermal bulb");
-    circle(30, 46, 3.2, "thermal bulb");
+    circle(30, 42, 3.2, "thermal bulb");
   } else {
     circle(48, 36, 22, "thermal bulb");
     path("M 26 50 C 38 40 58 40 70 50", "thermal wave");
