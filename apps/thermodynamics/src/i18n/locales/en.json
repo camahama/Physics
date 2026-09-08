@@ -1,0 +1,92 @@
+{
+  "app": {
+    "title": "Thermodynamics Simulations",
+    "meta": {
+      "title": "Thermodynamics Simulations"
+    }
+  },
+  "home": {
+    "eyebrow": "Web applications developed for basic thermodynamics courses at the Department of Physics, Lund University, Sweden",
+    "description": "A collection of simple, presentation-ready thermodynamics simulations for lectures and self-study. Explore temperature, heat flow, engines, entropy, and state variables with visual tools built for classroom intuition.",
+    "menuTitle": "Modules",
+    "languageLabel": "Language",
+    "creditPrefix": "Vibecoded 2026 by Martin Magnusson, director of studies,",
+    "creditLicensePrefix": "Creative Commons licensing",
+    "creditLicenseLabel": "CC-BY-NC-SA"
+  },
+  "modules": {
+    "stirlingEngine": {
+      "title": "Stirling Engine Lab"
+    },
+    "processBuilder": {
+      "title": "Process Builder",
+      "description": "Build a pV process diagram by placing isotherms, adiabats, isochores, and isobars. Snap endpoints together to create numbered states.",
+      "toolsTitle": "Processes",
+      "instructions": "Drag a process into the pV diagram, double-click a process tool, or select one and press Add. Drag endpoints to shape and snap the cycle.",
+      "addSelected": "Add selected",
+      "clearAll": "Clear all",
+      "processCount": "Processes: {count}/{max}",
+      "boardTitle": "pV diagram",
+      "boardLabel": "Thermodynamic process builder pV diagram",
+      "dropHint": "Drag process here",
+      "tableTitle": "Process values",
+      "emptyTable": "Add up to six fundamental processes to start entering values.",
+      "removeProcess": "Remove process",
+      "valueControls": {
+        "pressureUnit": "Pressure unit",
+        "volumeUnit": "Volume unit",
+        "temperatureUnit": "Temperature unit",
+        "gasType": "Working gas",
+        "degreesOfFreedom": "DOF",
+        "molarMass": "Molar mass",
+        "mass": "Mass / g",
+        "molarAmount": "Amount / mol",
+        "solve": "Solve",
+        "clearValues": "Clear"
+      },
+      "errors": {
+        "noProcesses": "Add at least one process before solving.",
+        "inconsistent": "The entered values are overspecified or inconsistent.",
+        "underdetermined": "The entered values are underspecified. Add more known p, V, T, mass, or molar amount values.",
+        "splitState": "The entered value is inconsistent with the connected processes and would split a numbered state."
+      },
+      "energy": {
+        "title": "Calculated heat and work",
+        "heatFlow": "Heat flow",
+        "work": "Work",
+        "empty": "Add processes and state values to calculate heat and work.",
+        "netWork": "Net work",
+        "heatIn": "Heat input",
+        "efficiency": "Efficiency"
+      },
+      "types": {
+        "isotherm": "Isotherm",
+        "adiabat": "Adiabat",
+        "isochor": "Isochor",
+        "isobar": "Isobar"
+      },
+      "gases": {
+        "He": "He",
+        "H2": "H₂",
+        "N2": "N₂",
+        "air": "air",
+        "CO2": "CO₂"
+      },
+      "table": {
+        "state": "State",
+        "p": "p / atm",
+        "v": "V / l",
+        "t": "T / K"
+      }
+    },
+    "heatTemperature": {
+      "title": "Heat and Temperature",
+      "description": "A starting point for interactive illustrations of thermal energy, temperature, heat capacity, and heat flow.",
+      "status": "Scaffolding is ready. The next step is to replace this sketch with an interactive illustration.",
+      "stageLabel": "Placeholder sketch for heat and temperature"
+    }
+  },
+  "common": {
+    "menuButton": "MENU"
+  }
+}

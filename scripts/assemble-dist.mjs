@@ -17,6 +17,11 @@ const apps = [
     destination: join(output, "electricity"),
   },
   {
+    name: "thermodynamics",
+    source: join(root, "apps", "thermodynamics", "dist"),
+    destination: join(output, "thermodynamics"),
+  },
+  {
     name: "mechanics",
     source: join(root, "apps", "mechanics", "dist"),
     destination: join(output, "mechanics"),
@@ -25,11 +30,6 @@ const apps = [
     name: "rainbow",
     source: join(root, "apps", "rainbow", "src", "rainbow_web", "dist"),
     destination: join(output, "rainbow"),
-  },
-  {
-    name: "stirling",
-    source: join(root, "apps", "stirling", "dist"),
-    destination: join(output, "stirling"),
   },
   {
     name: "sundial",

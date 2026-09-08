@@ -1,0 +1,92 @@
+{
+  "app": {
+    "title": "Simuleringar för termodynamik",
+    "meta": {
+      "title": "Simuleringar för termodynamik"
+    }
+  },
+  "home": {
+    "eyebrow": "Webb-applikationer utvecklade för kurser i grundläggande termodynamik vid Fysiska institutionen, Lunds universitet",
+    "description": "En samling enkla och presentationsvänliga simuleringar i termodynamik för föreläsningar och självstudier. Utforska temperatur, värmeflöde, motorer, entropi och tillståndsvariabler med visuella verktyg byggda för klassrumsintuition.",
+    "menuTitle": "Moduler",
+    "languageLabel": "Språk",
+    "creditPrefix": "Vibekodat 2026 av Martin Magnusson, studierektor,",
+    "creditLicensePrefix": "Creative Commons-licensiering",
+    "creditLicenseLabel": "CC-BY-NC-SA"
+  },
+  "modules": {
+    "stirlingEngine": {
+      "title": "Stirlingmotorn"
+    },
+    "processBuilder": {
+      "title": "Processbyggare",
+      "description": "Bygg ett pV-diagram genom att placera isotermer, adiabater, isokorer och isobarer. Fäst ändpunkter mot varandra för att skapa numrerade tillstånd.",
+      "toolsTitle": "Processer",
+      "instructions": "Dra en process till pV-diagrammet, dubbelklicka på ett processverktyg eller välj ett och tryck Lägg till. Dra ändpunkterna för att forma och fästa cykeln.",
+      "addSelected": "Lägg till vald",
+      "clearAll": "Rensa allt",
+      "processCount": "Processer: {count}/{max}",
+      "boardTitle": "pV-diagram",
+      "boardLabel": "pV-diagram för att bygga termodynamiska processer",
+      "dropHint": "Dra process hit",
+      "tableTitle": "Processvärden",
+      "emptyTable": "Lägg till upp till sex grundprocesser för att börja mata in värden.",
+      "removeProcess": "Ta bort process",
+      "valueControls": {
+        "pressureUnit": "Tryckenhet",
+        "volumeUnit": "Volymenhet",
+        "temperatureUnit": "Temperaturenhet",
+        "gasType": "Arbetsgas",
+        "degreesOfFreedom": "Frihetsgrader",
+        "molarMass": "Molmassa",
+        "mass": "Massa / g",
+        "molarAmount": "Substansmängd / mol",
+        "solve": "Lös",
+        "clearValues": "Rensa"
+      },
+      "errors": {
+        "noProcesses": "Lägg till minst en process innan du löser.",
+        "inconsistent": "De inmatade värdena är överspecificerade eller motsägelsefulla.",
+        "underdetermined": "De inmatade värdena är underspecificerade. Lägg till fler kända värden för p, V, T, massa eller substansmängd.",
+        "splitState": "Det inmatade värdet är oförenligt med de anslutna processerna och skulle dela ett numrerat tillstånd."
+      },
+      "energy": {
+        "title": "Beräknade värmeflöden och arbete",
+        "heatFlow": "Värmeflöde",
+        "work": "Arbete",
+        "empty": "Lägg till processer och tillståndsvärden för att beräkna värme och arbete.",
+        "netWork": "Nettoarbete",
+        "heatIn": "Tillförd värme",
+        "efficiency": "Verkningsgrad"
+      },
+      "types": {
+        "isotherm": "Isoterm",
+        "adiabat": "Adiabat",
+        "isochor": "Isokor",
+        "isobar": "Isobar"
+      },
+      "gases": {
+        "He": "He",
+        "H2": "H₂",
+        "N2": "N₂",
+        "air": "luft",
+        "CO2": "CO₂"
+      },
+      "table": {
+        "state": "Tillstånd",
+        "p": "p / atm",
+        "v": "V / l",
+        "t": "T / K"
+      }
+    },
+    "heatTemperature": {
+      "title": "Värme och temperatur",
+      "description": "En startpunkt för interaktiva illustrationer av termisk energi, temperatur, värmekapacitet och värmeflöde.",
+      "status": "Stommen är redo. Nästa steg är att ersätta skissen med en interaktiv illustration.",
+      "stageLabel": "Platshållarskiss för värme och temperatur"
+    }
+  },
+  "common": {
+    "menuButton": "MENY"
+  }
+}

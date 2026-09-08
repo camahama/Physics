@@ -16,16 +16,16 @@ const apps: PhysicsApp[] = [
     label: copy.apps.electricity.label,
   },
   {
+    title: copy.apps.thermodynamics.title,
+    description: copy.apps.thermodynamics.description,
+    href: "/thermodynamics/",
+    label: copy.apps.thermodynamics.label,
+  },
+  {
     title: copy.apps.rainbow.title,
     description: copy.apps.rainbow.description,
     href: "/rainbow/",
     label: copy.apps.rainbow.label,
-  },
-  {
-    title: copy.apps.stirling.title,
-    description: copy.apps.stirling.description,
-    href: "/stirling/",
-    label: copy.apps.stirling.label,
   },
   {
     title: copy.apps.sundial.title,

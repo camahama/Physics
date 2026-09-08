@@ -19,15 +19,15 @@ export const copy = {
       description: "Interactive tools for electric fields, potentials, and circuits",
       label: "Electricity",
     },
+    thermodynamics: {
+      title: "Thermodynamics",
+      description: "Interactive tools for heat, temperature, energy, and entropy",
+      label: "Thermodynamics",
+    },
     rainbow: {
       title: "Rainbow Physics",
       description: "A browser simulation for exploring rainbows and light",
       label: "Optics",
-    },
-    stirling: {
-      title: "Stirling Engine Lab",
-      description: "An interactive physics app for Stirling engine lab",
-      label: "Thermodynamics",
     },
     sundial: {
       title: "Sundial Designer",
