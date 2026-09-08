@@ -49,6 +49,8 @@ type AxisTick = { baseValue: number; displayValue: number; label: string };
 type StateDatum = { pPa: number; vM3: number; tK: number };
 type PhysicalPoint = { volumeLiters: number; pressureAtm: number };
 type StateGeometryTarget = { refs: EndpointRef[]; physical: PhysicalPoint };
+type ValueOrigin = "user" | "calculated";
+type StateValueOrigins = Partial<Record<keyof StateValues, ValueOrigin>>;
 type ProcessCalculation = {
   process: Process;
   fromLabel: number;
@@ -68,17 +70,24 @@ const pressureUnits: PressureUnit[] = ["atm", "Pa", "hPa", "kPa"];
 const volumeUnits: VolumeUnit[] = ["l", "m3"];
 const temperatureUnits: TemperatureUnit[] = ["K", "C"];
 const gasTypes: GasType[] = ["He", "H2", "N2", "air", "CO2"];
-const gasProperties: Record<GasType, { degreesOfFreedom: number; gamma: number; molarMassKgPerMol: number }> = {
-  He: { degreesOfFreedom: 3, gamma: 5 / 3, molarMassKgPerMol: 0.004002602 },
-  H2: { degreesOfFreedom: 5, gamma: 7 / 5, molarMassKgPerMol: 0.00201588 },
-  N2: { degreesOfFreedom: 5, gamma: 7 / 5, molarMassKgPerMol: 0.0280134 },
-  air: { degreesOfFreedom: 5, gamma: 7 / 5, molarMassKgPerMol: 0.0289652 },
-  CO2: { degreesOfFreedom: 5, gamma: 7 / 5, molarMassKgPerMol: 0.0440095 },
+const gasProperties: Record<GasType, {
+  degreesOfFreedom: number;
+  gamma: number;
+  molarMassKgPerMol: number;
+  constantDofRangeK: { low: number; high: number } | null;
+}> = {
+  He: { degreesOfFreedom: 3, gamma: 5 / 3, molarMassKgPerMol: 0.004002602, constantDofRangeK: null },
+  H2: { degreesOfFreedom: 5, gamma: 7 / 5, molarMassKgPerMol: 0.00201588, constantDofRangeK: { low: 80, high: 1500 } },
+  N2: { degreesOfFreedom: 5, gamma: 7 / 5, molarMassKgPerMol: 0.0280134, constantDofRangeK: { low: 100, high: 1000 } },
+  air: { degreesOfFreedom: 5, gamma: 7 / 5, molarMassKgPerMol: 0.0289652, constantDofRangeK: { low: 100, high: 1000 } },
+  CO2: { degreesOfFreedom: 5, gamma: 7 / 5, molarMassKgPerMol: 0.0440095, constantDofRangeK: { low: 200, high: 700 } },
 };
 
 const state = {
   processes: [] as Process[],
   stateValues: {} as Record<number, StateValues>,
+  stateValueOrigins: {} as Record<number, StateValueOrigins>,
+  solvedStateData: {} as Record<number, StateDatum>,
   units: {
     pressure: "atm" as PressureUnit,
     volume: "l" as VolumeUnit,
@@ -87,9 +96,13 @@ const state = {
   axisRange: { ...DEFAULT_AXIS_RANGE } as AxisRange,
   gasType: "He" as GasType,
   gasMass: "",
+  gasMassOrigin: undefined as ValueOrigin | undefined,
   molarAmount: "",
+  molarAmountOrigin: undefined as ValueOrigin | undefined,
+  solvedMolarAmount: Number.NaN,
   solverError: "",
   erasingProcess: false,
+  hasRescaledDiagram: false,
   dragging: null as (
     | { type: "endpoint"; refs: EndpointRef[] }
     | { type: "state"; refs: EndpointRef[] }
@@ -228,7 +241,10 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     }
 
     for (const numberedState of states) {
-      svg.append(renderStateLabel(numberedState));
+      svg.append(renderStateLabel(numberedState, () => {
+        removeProcessesByRefs(numberedState.refs);
+        update();
+      }));
     }
   }
 
@@ -278,6 +294,10 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     table.append(head, body);
     if (state.solverError) {
       tableWrap.append(element("p", "process-builder-solver-error", state.solverError));
+    }
+    const temperatureWarning = getTemperatureModelWarning(numberedStates, t);
+    if (temperatureWarning) {
+      tableWrap.append(element("p", "process-builder-solver-warning", temperatureWarning));
     }
     tableWrap.append(table, renderEnergyTable(numberedStates));
     valueLayout.append(valueControls, tableWrap);
@@ -411,17 +431,23 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
       gasInfo,
       inputRow(t("modules.processBuilder.valueControls.mass"), state.gasMass, (value) => {
         state.gasMass = value;
-      }),
+        state.gasMassOrigin = value.trim() === "" ? undefined : "user";
+      }, state.gasMassOrigin === "user"),
       inputRow(t("modules.processBuilder.valueControls.molarAmount"), state.molarAmount, (value) => {
         state.molarAmount = value;
-      }),
+        state.molarAmountOrigin = value.trim() === "" ? undefined : "user";
+      }, state.molarAmountOrigin === "user"),
     );
 
     const actions = element("div", "process-builder-solver-actions");
     const solveButton = document.createElement("button");
     solveButton.type = "button";
     solveButton.className = "process-builder-solve";
-    solveButton.textContent = t("modules.processBuilder.valueControls.solve");
+    solveButton.textContent = t(
+      hasCalculatedValues()
+        ? "modules.processBuilder.valueControls.recalculate"
+        : "modules.processBuilder.valueControls.calculate",
+    );
     solveButton.addEventListener("click", () => {
       solveValues(t);
       update();
@@ -433,8 +459,13 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     clearButton.textContent = t("modules.processBuilder.valueControls.clearValues");
     clearButton.addEventListener("click", () => {
       state.stateValues = {};
+      state.stateValueOrigins = {};
+      state.solvedStateData = {};
       state.gasMass = "";
+      state.gasMassOrigin = undefined;
       state.molarAmount = "";
+      state.molarAmountOrigin = undefined;
+      state.solvedMolarAmount = Number.NaN;
       state.solverError = "";
       update();
     });
@@ -482,6 +513,11 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     handle.tabIndex = 0;
     handle.addEventListener("pointerdown", (event) => {
       event.preventDefault();
+      if (state.erasingProcess) {
+        removeProcessesByRefs(getConnectedEndpointRefs(process[endpoint]));
+        update();
+        return;
+      }
       handle.setPointerCapture(event.pointerId);
       state.dragging = {
         type: "endpoint",
@@ -505,7 +541,7 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     }
 
     state.dragging = null;
-    rescaleAxesToFit();
+    rescaleAxesToFitIfReady();
     update();
   }
 
@@ -519,7 +555,7 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     state.solverError = "";
     state.erasingProcess = false;
     state.processes.push(createProcess(type, preferredCenter));
-    rescaleAxesToFit();
+    rescaleAxesToFitIfReady();
     update();
   }
 
@@ -534,16 +570,30 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     state.solverError = "";
     state.erasingProcess = false;
     state.processes.push(...processes);
-    rescaleAxesToFit();
+    rescaleAxesToFitIfReady();
     update();
   }
 
   function removeProcess(processId: string) {
-    state.processes = state.processes.filter((process) => process.id !== processId);
+    removeProcesses([processId]);
+  }
+
+  function removeProcessesByRefs(refs: EndpointRef[]) {
+    removeProcesses(refs.map((ref) => ref.processId));
+  }
+
+  function removeProcesses(processIds: string[]) {
+    const processIdSet = new Set(processIds);
+    state.processes = state.processes.filter((process) => !processIdSet.has(process.id));
     state.dragging = null;
-    state.erasingProcess = false;
+    state.erasingProcess = state.processes.length > 0 && state.erasingProcess;
     state.solverError = "";
-    rescaleAxesToFit();
+    if (state.processes.length === 0) {
+      state.axisRange = { ...DEFAULT_AXIS_RANGE };
+      state.hasRescaledDiagram = false;
+    } else {
+      rescaleAxesToFitIfReady();
+    }
   }
 
   function tableTypeCell(process: Process) {
@@ -580,11 +630,13 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     input.dataset.stateKey = key;
     const values = getStateValues(stateLabel);
     input.value = values[key];
+    input.className = getStateValueOrigin(stateLabel, key) === "user" ? "user-defined" : "";
     input.setAttribute("aria-label", label);
     input.addEventListener("input", () => {
-      getStateValues(stateLabel)[key] = input.value;
+      setStateFieldValue(stateLabel, key, input.value, input.value.trim() === "" ? undefined : "user");
     });
     input.addEventListener("change", () => {
+      setStateFieldValue(stateLabel, key, input.value, input.value.trim() === "" ? undefined : "user");
       if (key === "p" || key === "v") {
         applyStateValuesToGeometry(stateLabel, t);
         update();
@@ -601,7 +653,7 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
       }
 
       event.preventDefault();
-      getStateValues(stateLabel)[key] = input.value;
+      setStateFieldValue(stateLabel, key, input.value, input.value.trim() === "" ? undefined : "user");
       if (key === "p" || key === "v") {
         applyStateValuesToGeometry(stateLabel, t);
       }
@@ -634,13 +686,19 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     return label;
   }
 
-  function inputRow(labelText: string, value: string, onInput: (value: string) => void) {
+  function inputRow(
+    labelText: string,
+    value: string,
+    onInput: (value: string) => void,
+    isUserDefined = false,
+  ) {
     const label = element("label", "process-builder-control-row");
     const text = element("span", "", labelText);
     const input = document.createElement("input");
     input.type = "text";
     input.inputMode = "decimal";
     input.value = value;
+    input.className = isUserDefined ? "user-defined" : "";
     input.addEventListener("input", () => {
       onInput(input.value);
     });
@@ -662,7 +720,9 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
       return null;
     }
 
-    const nextIndex = reverse ? index - 1 : index + 1;
+    const nextIndex = reverse
+      ? (index - 1 + targets.length) % targets.length
+      : (index + 1) % targets.length;
     return targets[nextIndex] ?? null;
   }
 
@@ -1027,7 +1087,7 @@ function createDropHint(t: ModuleRenderContext["t"]) {
   return group;
 }
 
-function renderStateLabel(statePoint: StatePoint) {
+function renderStateLabel(statePoint: StatePoint, onErase: () => void) {
   const group = svgGroup("process-state");
   const badge = svgNode("circle", {
     cx: String(statePoint.x),
@@ -1043,6 +1103,10 @@ function renderStateLabel(statePoint: StatePoint) {
   label.textContent = String(statePoint.label);
   group.addEventListener("pointerdown", (event) => {
     event.preventDefault();
+    if (state.erasingProcess) {
+      onErase();
+      return;
+    }
     group.setPointerCapture(event.pointerId);
     state.dragging = {
       type: "state",
@@ -1221,6 +1285,18 @@ function cloneStateValues(values: Record<number, StateValues>): Record<number, S
   ) as Record<number, StateValues>;
 }
 
+function cloneStateValueOrigins(origins: Record<number, StateValueOrigins>): Record<number, StateValueOrigins> {
+  return Object.fromEntries(
+    Object.entries(origins).map(([label, entry]) => [label, { ...entry }]),
+  ) as Record<number, StateValueOrigins>;
+}
+
+function cloneSolvedStateData(values: Record<number, StateDatum>): Record<number, StateDatum> {
+  return Object.fromEntries(
+    Object.entries(values).map(([label, entry]) => [label, { ...entry }]),
+  ) as Record<number, StateDatum>;
+}
+
 function getMergedRefGroups() {
   return getNumberedStates().map((statePoint) => statePoint.refs.map((ref) => ({ ...ref })));
 }
@@ -1255,6 +1331,51 @@ function uniqueRefs(refs: EndpointRef[]): EndpointRef[] {
 function getStateValues(stateLabel: number): StateValues {
   state.stateValues[stateLabel] ??= { p: "", v: "", t: "" };
   return state.stateValues[stateLabel];
+}
+
+function getStateValueOrigins(stateLabel: number): StateValueOrigins {
+  state.stateValueOrigins[stateLabel] ??= {};
+  return state.stateValueOrigins[stateLabel];
+}
+
+function getStateValueOrigin(stateLabel: number, key: keyof StateValues) {
+  return getStateValueOrigins(stateLabel)[key];
+}
+
+function setStateFieldValue(
+  stateLabel: number,
+  key: keyof StateValues,
+  value: string,
+  origin: ValueOrigin | undefined,
+) {
+  getStateValues(stateLabel)[key] = value;
+  const origins = getStateValueOrigins(stateLabel);
+  if (origin) {
+    origins[key] = origin;
+  } else {
+    delete origins[key];
+  }
+  if (origin === "user") {
+    delete state.solvedStateData[stateLabel];
+    state.hasRescaledDiagram = true;
+  }
+}
+
+function setSolvedStateFieldValue(stateLabel: number, key: keyof StateValues, value: string) {
+  if (getStateValueOrigin(stateLabel, key) === "user") {
+    return;
+  }
+  setStateFieldValue(stateLabel, key, value, value.trim() === "" ? undefined : "calculated");
+}
+
+function hasCalculatedValues() {
+  return (
+    Object.values(state.stateValueOrigins).some((origins) => (
+      Object.values(origins).some((origin) => origin === "calculated")
+    ))
+    || state.gasMassOrigin === "calculated"
+    || state.molarAmountOrigin === "calculated"
+  );
 }
 
 function applyStateValuesToGeometry(stateLabel: number, t?: ModuleRenderContext["t"]) {
@@ -1325,18 +1446,24 @@ function solveValues(t?: ModuleRenderContext["t"]) {
     equations.push(idealGas);
 
     const values = getStateValues(label);
-    addKnownLogEquation(equations, variableNames.length, variableIndex.get(`p${label}`)!, parsePressure(values.p));
-    addKnownLogEquation(equations, variableNames.length, variableIndex.get(`v${label}`)!, parseVolume(values.v));
-    addKnownLogEquation(equations, variableNames.length, variableIndex.get(`t${label}`)!, parseTemperature(values.t));
+    if (getStateValueOrigin(label, "p") === "user") {
+      addKnownLogEquation(equations, variableNames.length, variableIndex.get(`p${label}`)!, parsePressure(values.p));
+    }
+    if (getStateValueOrigin(label, "v") === "user") {
+      addKnownLogEquation(equations, variableNames.length, variableIndex.get(`v${label}`)!, parseVolume(values.v));
+    }
+    if (getStateValueOrigin(label, "t") === "user") {
+      addKnownLogEquation(equations, variableNames.length, variableIndex.get(`t${label}`)!, parseTemperature(values.t));
+    }
   }
 
   const molarAmount = parseNumericInput(state.molarAmount);
-  if (Number.isFinite(molarAmount) && molarAmount > 0) {
+  if (state.molarAmountOrigin === "user" && Number.isFinite(molarAmount) && molarAmount > 0) {
     addKnownLogEquation(equations, variableNames.length, variableIndex.get("n")!, molarAmount);
   }
 
   const massGrams = parseNumericInput(state.gasMass);
-  if (Number.isFinite(massGrams) && massGrams > 0) {
+  if (state.gasMassOrigin === "user" && Number.isFinite(massGrams) && massGrams > 0) {
     addKnownLogEquation(equations, variableNames.length, variableIndex.get("n")!, (massGrams / 1000) / gas.molarMassKgPerMol);
   }
 
@@ -1390,12 +1517,18 @@ function solveValues(t?: ModuleRenderContext["t"]) {
       temperatureK: Math.exp(result.solution[variableIndex.get(`t${label}`)!]),
     };
   });
+  const amountMol = Math.exp(result.solution[variableIndex.get("n")!]);
 
   const processSnapshot = cloneProcesses(state.processes);
   const axisSnapshot = { ...state.axisRange };
   const valueSnapshot = cloneStateValues(state.stateValues);
+  const valueOriginSnapshot = cloneStateValueOrigins(state.stateValueOrigins);
+  const solvedStateDataSnapshot = cloneSolvedStateData(state.solvedStateData);
   const gasMassSnapshot = state.gasMass;
+  const gasMassOriginSnapshot = state.gasMassOrigin;
   const molarAmountSnapshot = state.molarAmount;
+  const molarAmountOriginSnapshot = state.molarAmountOrigin;
+  const solvedMolarAmountSnapshot = state.solvedMolarAmount;
   const mergedRefGroups = getMergedRefGroups();
 
   for (const target of geometryTargets) {
@@ -1406,34 +1539,38 @@ function solveValues(t?: ModuleRenderContext["t"]) {
     state.processes = processSnapshot;
     state.axisRange = axisSnapshot;
     state.stateValues = valueSnapshot;
+    state.stateValueOrigins = valueOriginSnapshot;
+    state.solvedStateData = solvedStateDataSnapshot;
     state.gasMass = gasMassSnapshot;
+    state.gasMassOrigin = gasMassOriginSnapshot;
     state.molarAmount = molarAmountSnapshot;
+    state.molarAmountOrigin = molarAmountOriginSnapshot;
+    state.solvedMolarAmount = solvedMolarAmountSnapshot;
     state.solverError = t?.("modules.processBuilder.errors.splitState") ?? "The solved values would split a numbered state.";
     return;
   }
 
   state.solverError = "";
   for (const target of geometryTargets) {
-    const values = getStateValues(target.label);
-
-    if (values.p.trim() === "") {
-      values.p = formatDisplayNumber(formatPressure(target.pressurePa));
-    }
-    if (values.v.trim() === "") {
-      values.v = formatDisplayNumber(formatVolume(target.volumeM3));
-    }
-    if (values.t.trim() === "") {
-      values.t = formatDisplayNumber(formatTemperature(target.temperatureK));
-    }
+    state.solvedStateData[target.label] = {
+      pPa: target.pressurePa,
+      vM3: target.volumeM3,
+      tK: target.temperatureK,
+    };
+    setSolvedStateFieldValue(target.label, "p", formatDisplayNumber(formatPressure(target.pressurePa)));
+    setSolvedStateFieldValue(target.label, "v", formatDisplayNumber(formatVolume(target.volumeM3)));
+    setSolvedStateFieldValue(target.label, "t", formatDisplayNumber(formatTemperature(target.temperatureK)));
   }
   rescaleAxesToFit();
 
-  const amountMol = Math.exp(result.solution[variableIndex.get("n")!]);
-  if (state.molarAmount.trim() === "") {
+  state.solvedMolarAmount = amountMol;
+  if (state.molarAmountOrigin !== "user") {
     state.molarAmount = formatDisplayNumber(amountMol);
+    state.molarAmountOrigin = "calculated";
   }
-  if (state.gasMass.trim() === "") {
+  if (state.gasMassOrigin !== "user") {
     state.gasMass = formatDisplayNumber(amountMol * gas.molarMassKgPerMol * 1000);
+    state.gasMassOrigin = "calculated";
   }
 }
 
@@ -1500,24 +1637,68 @@ function calculateProcessEnergy(
 
 function getParsedStateDatum(label: number): StateDatum | null {
   const values = getStateValues(label);
-  const pPa = parsePressure(values.p);
-  const vM3 = parseVolume(values.v);
-  const tK = parseTemperature(values.t);
+  const solvedDatum = state.solvedStateData[label];
+  const pPa = getStateValueOrigin(label, "p") === "user"
+    ? parsePressure(values.p)
+    : solvedDatum?.pPa ?? parsePressure(values.p);
+  const vM3 = getStateValueOrigin(label, "v") === "user"
+    ? parseVolume(values.v)
+    : solvedDatum?.vM3 ?? parseVolume(values.v);
+  const tK = getStateValueOrigin(label, "t") === "user"
+    ? parseTemperature(values.t)
+    : solvedDatum?.tK ?? parseTemperature(values.t);
   if (!Number.isFinite(pPa) || !Number.isFinite(vM3) || !Number.isFinite(tK)) {
     return null;
   }
   return { pPa, vM3, tK };
 }
 
+function getTemperatureModelWarning(
+  numberedStates: StatePoint[],
+  t: ModuleRenderContext["t"],
+) {
+  const temperatures = numberedStates
+    .map((statePoint) => parseTemperature(getStateValues(statePoint.label).t))
+    .filter((temperature): temperature is number => Number.isFinite(temperature));
+  if (temperatures.length === 0) {
+    return "";
+  }
+
+  const minTemperature = Math.min(...temperatures);
+  const maxTemperature = Math.max(...temperatures);
+  const range = gasProperties[state.gasType].constantDofRangeK;
+  if (!range) {
+    return "";
+  }
+
+  const { low, high } = range;
+  if (minTemperature >= low && maxTemperature <= high) {
+    return "";
+  }
+
+  return t("modules.processBuilder.warnings.temperatureDof", {
+    min: formatDisplayNumber(minTemperature),
+    max: formatDisplayNumber(maxTemperature),
+    low: formatDisplayNumber(low),
+    high: formatDisplayNumber(high),
+  });
+}
+
 function getMolarAmount(numberedStates: StatePoint[]) {
   const molarAmount = parseNumericInput(state.molarAmount);
-  if (Number.isFinite(molarAmount) && molarAmount > 0) {
+  if (state.molarAmountOrigin === "user" && Number.isFinite(molarAmount) && molarAmount > 0) {
     return molarAmount;
+  }
+  if (state.molarAmountOrigin === "calculated" && Number.isFinite(state.solvedMolarAmount)) {
+    return state.solvedMolarAmount;
   }
 
   const massGrams = parseNumericInput(state.gasMass);
-  if (Number.isFinite(massGrams) && massGrams > 0) {
+  if (state.gasMassOrigin === "user" && Number.isFinite(massGrams) && massGrams > 0) {
     return (massGrams / 1000) / gasProperties[state.gasType].molarMassKgPerMol;
+  }
+  if (state.gasMassOrigin === "calculated" && Number.isFinite(state.solvedMolarAmount)) {
+    return state.solvedMolarAmount;
   }
 
   const inferred = numberedStates
@@ -1690,6 +1871,20 @@ function yToPressureAtm(y: number) {
   return state.axisRange.pressureMinAtm + fraction * (state.axisRange.pressureMaxAtm - state.axisRange.pressureMinAtm);
 }
 
+function rescaleAxesToFitIfReady(extraPoints: PhysicalPoint[] = []) {
+  if (extraPoints.length > 0 || state.hasRescaledDiagram || hasClosedCycle()) {
+    rescaleAxesToFit(extraPoints);
+  }
+}
+
+function hasClosedCycle() {
+  if (state.processes.length < 2) {
+    return false;
+  }
+  const states = getNumberedStates();
+  return states.length >= 2 && states.every((statePoint) => statePoint.refs.length >= 2);
+}
+
 function rescaleAxesToFit(extraPoints: PhysicalPoint[] = []) {
   const endpoints = state.processes.flatMap((process) => [
     {
@@ -1715,6 +1910,7 @@ function rescaleAxesToFit(extraPoints: PhysicalPoint[] = []) {
 
   if (physicalPoints.length === 0) {
     state.axisRange = { ...DEFAULT_AXIS_RANGE };
+    state.hasRescaledDiagram = false;
     return;
   }
 
@@ -1740,6 +1936,7 @@ function rescaleAxesToFit(extraPoints: PhysicalPoint[] = []) {
       y: pressureToY(endpoint.pressureAtm),
     };
   }
+  state.hasRescaledDiagram = true;
 }
 
 function createNiceDisplayRange(values: number[], originValue: number) {
@@ -2109,8 +2306,8 @@ function createPresetIcon(type: PresetType) {
     svg.append(
       presetIconPath("M 14 11 C 25 21 39 25 50 25", "isotherm"),
       presetIconPath("M 50 25 V 35", "isochor"),
-      presetIconPath("M 14 31 C 24 35 38 37 50 35", "isotherm"),
-      presetIconPath("M 14 11 V 31", "isochor"),
+      presetIconPath("M 14 29 C 24 33 38 35 50 35", "isotherm"),
+      presetIconPath("M 14 11 V 29", "isochor"),
     );
     return svg;
   }

@@ -38,7 +38,8 @@
         "molarMass": "Molar mass",
         "mass": "Mass / g",
         "molarAmount": "Amount / mol",
-        "solve": "Solve",
+        "calculate": "Calculate",
+        "recalculate": "Recalculate",
         "clearValues": "Clear"
       },
       "errors": {
@@ -47,6 +48,9 @@
         "underdetermined": "The entered values are underspecified. Add more known p, V, T, mass, or molar amount values.",
         "splitState": "The entered value is inconsistent with the connected state changes and would split a numbered state.",
         "maxProcesses": "The diagram can contain at most six state changes."
+      },
+      "warnings": {
+        "temperatureDof": "The state temperatures span {min}–{max} K. For this gas, the fixed degrees of freedom model is only a rough approximation outside about {low}–{high} K."
       },
       "energy": {
         "title": "Calculated heat and work",

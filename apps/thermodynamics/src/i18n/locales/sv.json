@@ -38,7 +38,8 @@
         "molarMass": "Molmassa",
         "mass": "Massa / g",
         "molarAmount": "Substansmängd / mol",
-        "solve": "Lös",
+        "calculate": "Beräkna",
+        "recalculate": "Räkna om",
         "clearValues": "Rensa"
       },
       "errors": {
@@ -47,6 +48,9 @@
         "underdetermined": "De inmatade värdena är underspecificerade. Lägg till fler kända värden för p, V, T, massa eller substansmängd.",
         "splitState": "Det inmatade värdet är oförenligt med de anslutna tillståndsändringarna och skulle dela ett numrerat tillstånd.",
         "maxProcesses": "Diagrammet kan innehålla högst sex tillståndsändringar."
+      },
+      "warnings": {
+        "temperatureDof": "Tillståndstemperaturerna spänner över {min}–{max} K. För den här gasen är modellen med konstanta frihetsgrader bara en grov approximation utanför ungefär {low}–{high} K."
       },
       "energy": {
         "title": "Beräknade värmeflöden och arbete",
