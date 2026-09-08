@@ -28,6 +28,7 @@ const LINEAR_TOLERANCE = 1e-7;
 const DISPLAY_SIGNIFICANT_DIGITS = 3;
 
 type ProcessType = "isotherm" | "adiabat" | "isochor" | "isobar";
+type PresetType = "square" | "stirling";
 type PressureUnit = "atm" | "Pa" | "hPa" | "kPa";
 type VolumeUnit = "l" | "m3";
 type TemperatureUnit = "K" | "C";
@@ -47,6 +48,7 @@ type LinearEquation = { coefficients: number[]; value: number };
 type AxisTick = { baseValue: number; displayValue: number; label: string };
 type StateDatum = { pPa: number; vM3: number; tK: number };
 type PhysicalPoint = { volumeLiters: number; pressureAtm: number };
+type StateGeometryTarget = { refs: EndpointRef[]; physical: PhysicalPoint };
 type ProcessCalculation = {
   process: Process;
   fromLabel: number;
@@ -61,6 +63,7 @@ type StatePoint = Point & {
 };
 
 const processTypes: ProcessType[] = ["isotherm", "adiabat", "isochor", "isobar"];
+const presetTypes: PresetType[] = ["square", "stirling"];
 const pressureUnits: PressureUnit[] = ["atm", "Pa", "hPa", "kPa"];
 const volumeUnits: VolumeUnit[] = ["l", "m3"];
 const temperatureUnits: TemperatureUnit[] = ["K", "C"];
@@ -86,7 +89,7 @@ const state = {
   gasMass: "",
   molarAmount: "",
   solverError: "",
-  selectedType: "isotherm" as ProcessType,
+  erasingProcess: false,
   dragging: null as (
     | { type: "endpoint"; refs: EndpointRef[] }
     | { type: "state"; refs: EndpointRef[] }
@@ -173,15 +176,10 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
       const button = document.createElement("button");
       button.type = "button";
       button.draggable = true;
-      button.className = type === state.selectedType ? "process-builder-tool active" : "process-builder-tool";
+      button.className = "process-builder-tool";
       button.append(createProcessIcon(type), element("span", "", t(`modules.processBuilder.types.${type}`)));
-      button.addEventListener("click", () => {
-        state.selectedType = type;
-        update();
-      });
       button.addEventListener("dblclick", () => addProcess(type));
       button.addEventListener("dragstart", (event) => {
-        state.selectedType = type;
         event.dataTransfer?.setData("application/x-process-type", type);
         event.dataTransfer?.setData("text/plain", type);
         event.dataTransfer?.setDragImage(button, 24, 24);
@@ -189,37 +187,30 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
       toolGrid.append(button);
     }
 
-    const actions = element("div", "process-builder-actions");
-    const addButton = document.createElement("button");
-    addButton.type = "button";
-    addButton.className = "process-builder-action";
-    addButton.textContent = t("modules.processBuilder.addSelected");
-    addButton.disabled = state.processes.length >= MAX_PROCESSES;
-    addButton.addEventListener("click", () => addProcess(state.selectedType));
+    const presetGrid = element("div", "process-builder-preset-grid");
+    for (const preset of presetTypes) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "process-builder-tool process-builder-preset";
+      button.append(createPresetIcon(preset), element("span", "", t(`modules.processBuilder.presets.${preset}`)));
+      button.addEventListener("click", () => addPresetCycle(preset));
+      presetGrid.append(button);
+    }
 
-    const clearButton = document.createElement("button");
-    clearButton.type = "button";
-    clearButton.className = "process-builder-reset";
-    clearButton.textContent = t("modules.processBuilder.clearAll");
-    clearButton.addEventListener("click", () => {
-      state.processes = [];
-      state.stateValues = {};
-      state.dragging = null;
-      state.axisRange = { ...DEFAULT_AXIS_RANGE };
+    const actions = element("div", "process-builder-actions");
+    const eraseButton = document.createElement("button");
+    eraseButton.type = "button";
+    eraseButton.className = state.erasingProcess ? "process-builder-erase active" : "process-builder-erase";
+    eraseButton.textContent = t("modules.processBuilder.removeProcess");
+    eraseButton.disabled = state.processes.length === 0;
+    eraseButton.setAttribute("aria-pressed", String(state.erasingProcess));
+    eraseButton.addEventListener("click", () => {
+      state.erasingProcess = !state.erasingProcess;
       update();
     });
 
-    const count = element(
-      "p",
-      "process-builder-count",
-      t("modules.processBuilder.processCount", {
-        count: state.processes.length,
-        max: MAX_PROCESSES,
-      }),
-    );
-
-    actions.append(addButton, clearButton, count);
-    controls.append(toolGrid, actions);
+    actions.append(eraseButton);
+    controls.append(toolGrid, actions, presetGrid);
   }
 
   function renderBoard() {
@@ -463,6 +454,11 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     hitPath.setAttribute("class", "process-hit-line");
     hitPath.addEventListener("pointerdown", (event) => {
       event.preventDefault();
+      if (state.erasingProcess) {
+        removeProcess(process.id);
+        update();
+        return;
+      }
       hitPath.setPointerCapture(event.pointerId);
       state.dragging = {
         type: "process",
@@ -515,13 +511,39 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
 
   function addProcess(type: ProcessType, preferredCenter?: Point) {
     if (state.processes.length >= MAX_PROCESSES) {
+      state.solverError = t("modules.processBuilder.errors.maxProcesses");
+      update();
       return;
     }
 
-    state.selectedType = type;
+    state.solverError = "";
+    state.erasingProcess = false;
     state.processes.push(createProcess(type, preferredCenter));
     rescaleAxesToFit();
     update();
+  }
+
+  function addPresetCycle(type: PresetType) {
+    const processes = createPresetCycle(type);
+    if (state.processes.length + processes.length > MAX_PROCESSES) {
+      state.solverError = t("modules.processBuilder.errors.maxProcesses");
+      update();
+      return;
+    }
+
+    state.solverError = "";
+    state.erasingProcess = false;
+    state.processes.push(...processes);
+    rescaleAxesToFit();
+    update();
+  }
+
+  function removeProcess(processId: string) {
+    state.processes = state.processes.filter((process) => process.id !== processId);
+    state.dragging = null;
+    state.erasingProcess = false;
+    state.solverError = "";
+    rescaleAxesToFit();
   }
 
   function tableTypeCell(process: Process) {
@@ -554,6 +576,8 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     const input = document.createElement("input");
     input.type = "text";
     input.inputMode = "decimal";
+    input.dataset.stateLabel = String(stateLabel);
+    input.dataset.stateKey = key;
     const values = getStateValues(stateLabel);
     input.value = values[key];
     input.setAttribute("aria-label", label);
@@ -565,6 +589,24 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
         applyStateValuesToGeometry(stateLabel, t);
         update();
       }
+    });
+    input.addEventListener("keydown", (event) => {
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      const nextTarget = getNextStateInputTarget(stateLabel, key, event.shiftKey);
+      if (!nextTarget) {
+        return;
+      }
+
+      event.preventDefault();
+      getStateValues(stateLabel)[key] = input.value;
+      if (key === "p" || key === "v") {
+        applyStateValuesToGeometry(stateLabel, t);
+      }
+      update();
+      focusStateInput(nextTarget.label, nextTarget.key);
     });
     cell.append(input);
     return cell;
@@ -606,6 +648,33 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     return label;
   }
 
+  function getNextStateInputTarget(
+    stateLabel: number,
+    key: keyof StateValues,
+    reverse: boolean,
+  ): { label: number; key: keyof StateValues } | null {
+    const keys: Array<keyof StateValues> = ["p", "v", "t"];
+    const targets = getNumberedStates().flatMap((statePoint) => (
+      keys.map((entryKey) => ({ label: statePoint.label, key: entryKey }))
+    ));
+    const index = targets.findIndex((target) => target.label === stateLabel && target.key === key);
+    if (index < 0) {
+      return null;
+    }
+
+    const nextIndex = reverse ? index - 1 : index + 1;
+    return targets[nextIndex] ?? null;
+  }
+
+  function focusStateInput(stateLabel: number, key: keyof StateValues) {
+    requestAnimationFrame(() => {
+      const selector = `input[data-state-label="${stateLabel}"][data-state-key="${key}"]`;
+      const nextInput = tablePanel.querySelector<HTMLInputElement>(selector);
+      nextInput?.focus();
+      nextInput?.select();
+    });
+  }
+
   function pressureColumnLabel() {
     return `p / ${state.units.pressure}`;
   }
@@ -644,8 +713,9 @@ function createProcess(type: ProcessType, preferredCenter?: Point): Process {
     x: 250 + state.processes.length * 72,
     y: 430 - state.processes.length * 38,
   });
-  const start = clampPoint({ x: center.x - 78, y: center.y + 46 });
-  const end = clampPoint({ x: center.x + 78, y: center.y - 46 });
+  const isCurved = type === "isotherm" || type === "adiabat";
+  const start = clampPoint({ x: center.x - 78, y: center.y + (isCurved ? -46 : 46) });
+  const end = clampPoint({ x: center.x + 78, y: center.y + (isCurved ? 46 : -46) });
   const baseProcess: Process = {
     id: `process-${nextProcessId}`,
     type,
@@ -657,6 +727,47 @@ function createProcess(type: ProcessType, preferredCenter?: Point): Process {
   baseProcess.end = constrainProcessEndpoint(type, "end", end, baseProcess);
   normalizeProcessEndpoints(baseProcess);
   return baseProcess;
+}
+
+function createPresetCycle(type: PresetType): Process[] {
+  const left = PLOT.left + 230;
+  const right = PLOT.left + 560;
+  const top = PLOT.top + 140;
+  const bottom = PLOT.top + 390;
+  const topRightY = type === "stirling" ? PLOT.top + 230 : top;
+  const bottomLeftY = type === "stirling" ? PLOT.top + 300 : bottom;
+  const topLeft = { x: left, y: top };
+  const topRight = { x: right, y: topRightY };
+  const bottomRight = { x: right, y: bottom };
+  const bottomLeft = { x: left, y: bottomLeftY };
+
+  if (type === "stirling") {
+    return [
+      createProcessFromEndpoints("isotherm", topLeft, topRight),
+      createProcessFromEndpoints("isochor", topRight, bottomRight),
+      createProcessFromEndpoints("isotherm", bottomLeft, bottomRight),
+      createProcessFromEndpoints("isochor", bottomLeft, topLeft),
+    ];
+  }
+
+  return [
+    createProcessFromEndpoints("isobar", topLeft, topRight),
+    createProcessFromEndpoints("isochor", topRight, bottomRight),
+    createProcessFromEndpoints("isobar", bottomLeft, bottomRight),
+    createProcessFromEndpoints("isochor", bottomLeft, topLeft),
+  ];
+}
+
+function createProcessFromEndpoints(type: ProcessType, start: Point, end: Point): Process {
+  const process = {
+    id: `process-${nextProcessId}`,
+    type,
+    start: clampPoint(start),
+    end: clampPoint(end),
+  };
+  nextProcessId += 1;
+  normalizeProcessEndpoints(process);
+  return process;
 }
 
 function constrainProcessEndpoint(
@@ -691,12 +802,9 @@ function normalizeProcessEndpoints(process: Process) {
   }
 
   if (process.type === "isotherm" || process.type === "adiabat") {
-    const lowVolume = process.start.x <= process.end.x ? process.start : process.end;
-    const highVolume = process.start.x <= process.end.x ? process.end : process.start;
-    const highPressureY = Math.min(process.start.y, process.end.y);
-    const lowPressureY = Math.max(process.start.y, process.end.y);
-    process.start = { x: lowVolume.x, y: highPressureY };
-    process.end = { x: highVolume.x, y: lowPressureY };
+    if (process.start.x > process.end.x) {
+      [process.start, process.end] = [process.end, process.start];
+    }
   }
 }
 
@@ -1103,6 +1211,16 @@ function cloneProcesses(processes: Process[]): Process[] {
   }));
 }
 
+function cloneRefs(refs: EndpointRef[]): EndpointRef[] {
+  return refs.map((ref) => ({ ...ref }));
+}
+
+function cloneStateValues(values: Record<number, StateValues>): Record<number, StateValues> {
+  return Object.fromEntries(
+    Object.entries(values).map(([label, entry]) => [label, { ...entry }]),
+  ) as Record<number, StateValues>;
+}
+
 function getMergedRefGroups() {
   return getNumberedStates().map((statePoint) => statePoint.refs.map((ref) => ({ ...ref })));
 }
@@ -1142,7 +1260,7 @@ function getStateValues(stateLabel: number): StateValues {
 function applyStateValuesToGeometry(stateLabel: number, t?: ModuleRenderContext["t"]) {
   const statePoint = getNumberedStates().find((entry) => entry.label === stateLabel);
   if (!statePoint) {
-    return;
+    return false;
   }
 
   const processSnapshot = cloneProcesses(state.processes);
@@ -1156,22 +1274,29 @@ function applyStateValuesToGeometry(stateLabel: number, t?: ModuleRenderContext[
     pressureAtm: Number.isFinite(pressurePa) ? pressurePa / ATM_TO_PA : yToPressureAtm(statePoint.y),
   };
 
-  rescaleAxesToFit([targetPhysical]);
-  const target = {
-    x: volumeToX(targetPhysical.volumeLiters),
-    y: pressureToY(targetPhysical.pressureAtm),
-  };
-  moveEndpointRefsWithConstraints(statePoint.refs, target);
-  rescaleAxesToFit();
+  applyPhysicalStateToGeometry({
+    refs: cloneRefs(statePoint.refs),
+    physical: targetPhysical,
+  });
 
   if (!areRefGroupsMerged(mergedRefGroups)) {
     state.processes = processSnapshot;
     state.axisRange = axisSnapshot;
     state.solverError = t?.("modules.processBuilder.errors.splitState") ?? "The entered value would split a numbered state.";
-    return;
+    return false;
   }
 
   state.solverError = "";
+  return true;
+}
+
+function applyPhysicalStateToGeometry(target: StateGeometryTarget) {
+  rescaleAxesToFit([target.physical]);
+  moveEndpointRefsWithConstraints(target.refs, {
+    x: volumeToX(target.physical.volumeLiters),
+    y: pressureToY(target.physical.pressureAtm),
+  });
+  rescaleAxesToFit();
 }
 
 function solveValues(t?: ModuleRenderContext["t"]) {
@@ -1248,23 +1373,58 @@ function solveValues(t?: ModuleRenderContext["t"]) {
     return;
   }
 
-  state.solverError = "";
-  for (const label of labels) {
-    const values = getStateValues(label);
+  const geometryTargets = labels.map((label) => {
+    const statePoint = numberedStates.find((entry) => entry.label === label)!;
     const pressurePa = Math.exp(result.solution[variableIndex.get(`p${label}`)!]);
     const volumeM3 = Math.exp(result.solution[variableIndex.get(`v${label}`)!]);
-    const temperatureK = Math.exp(result.solution[variableIndex.get(`t${label}`)!]);
+
+    return {
+      label,
+      refs: cloneRefs(statePoint.refs),
+      physical: {
+        volumeLiters: volumeM3 / LITER_TO_CUBIC_METER,
+        pressureAtm: pressurePa / ATM_TO_PA,
+      },
+      pressurePa,
+      volumeM3,
+      temperatureK: Math.exp(result.solution[variableIndex.get(`t${label}`)!]),
+    };
+  });
+
+  const processSnapshot = cloneProcesses(state.processes);
+  const axisSnapshot = { ...state.axisRange };
+  const valueSnapshot = cloneStateValues(state.stateValues);
+  const gasMassSnapshot = state.gasMass;
+  const molarAmountSnapshot = state.molarAmount;
+  const mergedRefGroups = getMergedRefGroups();
+
+  for (const target of geometryTargets) {
+    applyPhysicalStateToGeometry(target);
+  }
+
+  if (!areRefGroupsMerged(mergedRefGroups)) {
+    state.processes = processSnapshot;
+    state.axisRange = axisSnapshot;
+    state.stateValues = valueSnapshot;
+    state.gasMass = gasMassSnapshot;
+    state.molarAmount = molarAmountSnapshot;
+    state.solverError = t?.("modules.processBuilder.errors.splitState") ?? "The solved values would split a numbered state.";
+    return;
+  }
+
+  state.solverError = "";
+  for (const target of geometryTargets) {
+    const values = getStateValues(target.label);
 
     if (values.p.trim() === "") {
-      values.p = formatDisplayNumber(formatPressure(pressurePa));
+      values.p = formatDisplayNumber(formatPressure(target.pressurePa));
     }
     if (values.v.trim() === "") {
-      values.v = formatDisplayNumber(formatVolume(volumeM3));
+      values.v = formatDisplayNumber(formatVolume(target.volumeM3));
     }
     if (values.t.trim() === "") {
-      values.t = formatDisplayNumber(formatTemperature(temperatureK));
+      values.t = formatDisplayNumber(formatTemperature(target.temperatureK));
     }
-    applyStateValuesToGeometry(label, t);
   }
   rescaleAxesToFit();
 
@@ -1419,15 +1579,25 @@ function getProcessPath(process: Process) {
 
 function getCurvePoints(process: Process): Point[] {
   const sampleCount = 40;
+  const useMonotoneFallback = shouldUseMonotoneCurve(process);
   return Array.from({ length: sampleCount + 1 }, (_unused, index) => (
-    curvePointAt(process, index / sampleCount)
+    curvePointAt(process, index / sampleCount, useMonotoneFallback)
   ));
 }
 
-function curvePointAt(process: Process, fraction: number): Point {
+function curvePointAt(process: Process, fraction: number, useMonotoneFallback = false): Point {
   const start = process.start;
   const end = process.end;
   const x = start.x + (end.x - start.x) * fraction;
+
+  if (useMonotoneFallback) {
+    const interpolation = fraction * fraction * (3 - 2 * fraction);
+    return {
+      x,
+      y: start.y + (end.y - start.y) * interpolation,
+    };
+  }
+
   const startVolume = xToVolume(start.x);
   const endVolume = xToVolume(end.x);
   const currentVolume = xToVolume(x);
@@ -1443,6 +1613,55 @@ function curvePointAt(process: Process, fraction: number): Point {
     x,
     y: start.y + (end.y - start.y) * interpolation,
   };
+}
+
+function shouldUseMonotoneCurve(process: Process) {
+  if (!isCurvedProcess(process)) {
+    return false;
+  }
+
+  return state.processes.some((otherProcess) => (
+    otherProcess.id !== process.id
+    && isCurvedProcess(otherProcess)
+    && orderedCurvesWouldCross(process, otherProcess)
+  ));
+}
+
+function orderedCurvesWouldCross(first: Process, second: Process) {
+  const minX = Math.max(Math.min(first.start.x, first.end.x), Math.min(second.start.x, second.end.x));
+  const maxX = Math.min(Math.max(first.start.x, first.end.x), Math.max(second.start.x, second.end.x));
+  if (maxX - minX < 4) {
+    return false;
+  }
+
+  const startDelta = curveYAtX(first, minX) - curveYAtX(second, minX);
+  const endDelta = curveYAtX(first, maxX) - curveYAtX(second, maxX);
+  if (Math.abs(startDelta) < 1 || Math.abs(endDelta) < 1 || startDelta * endDelta <= 0) {
+    return false;
+  }
+
+  const expectedSign = Math.sign(startDelta);
+  for (let index = 1; index < 20; index += 1) {
+    const x = minX + ((maxX - minX) * index) / 20;
+    const delta = curveYAtX(first, x) - curveYAtX(second, x);
+    if (Math.abs(delta) < 1 || Math.sign(delta) !== expectedSign) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function curveYAtX(process: Process, x: number) {
+  if (Math.abs(process.end.x - process.start.x) < 1e-6) {
+    return process.start.y;
+  }
+  const fraction = (x - process.start.x) / (process.end.x - process.start.x);
+  return curvePointAt(process, clamp(fraction, 0, 1)).y;
+}
+
+function isCurvedProcess(process: Process) {
+  return process.type === "isotherm" || process.type === "adiabat";
 }
 
 function xToVolume(x: number) {
@@ -1878,6 +2097,38 @@ function createProcessIcon(type: ProcessType) {
   }
   svg.append(path);
   return svg;
+}
+
+function createPresetIcon(type: PresetType) {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 64 44");
+  svg.setAttribute("class", "process-tool-icon");
+  svg.setAttribute("aria-hidden", "true");
+
+  if (type === "stirling") {
+    svg.append(
+      presetIconPath("M 14 11 C 25 21 39 25 50 25", "isotherm"),
+      presetIconPath("M 50 25 V 35", "isochor"),
+      presetIconPath("M 14 31 C 24 35 38 37 50 35", "isotherm"),
+      presetIconPath("M 14 11 V 31", "isochor"),
+    );
+    return svg;
+  }
+
+  svg.append(
+    presetIconPath("M 14 10 H 50", "isobar"),
+    presetIconPath("M 50 10 V 34", "isochor"),
+    presetIconPath("M 14 34 H 50", "isobar"),
+    presetIconPath("M 14 10 V 34", "isochor"),
+  );
+  return svg;
+}
+
+function presetIconPath(pathData: string, type: ProcessType) {
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("class", `process-tool-path process-${type}`);
+  path.setAttribute("d", pathData);
+  return path;
 }
 
 function tableTextCell(text: string) {

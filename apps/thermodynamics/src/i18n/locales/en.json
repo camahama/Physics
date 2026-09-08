@@ -19,19 +19,16 @@
       "title": "Stirling Engine Lab"
     },
     "processBuilder": {
-      "title": "Process Builder",
+      "title": "Circuit Processes",
       "description": "Build a pV process diagram by placing isotherms, adiabats, isochores, and isobars. Snap endpoints together to create numbered states.",
-      "toolsTitle": "Processes",
-      "instructions": "Drag a process into the pV diagram, double-click a process tool, or select one and press Add. Drag endpoints to shape and snap the cycle.",
-      "addSelected": "Add selected",
-      "clearAll": "Clear all",
-      "processCount": "Processes: {count}/{max}",
+      "toolsTitle": "State changes",
+      "instructions": "Drag a state change into the pV diagram or double-click a state-change tool. Drag endpoints to shape and snap the cycle.",
       "boardTitle": "pV diagram",
       "boardLabel": "Thermodynamic process builder pV diagram",
-      "dropHint": "Drag process here",
+      "dropHint": "Drag state change here",
       "tableTitle": "Process values",
-      "emptyTable": "Add up to six fundamental processes to start entering values.",
-      "removeProcess": "Remove process",
+      "emptyTable": "Add state changes to start entering values.",
+      "removeProcess": "Erase state change",
       "valueControls": {
         "pressureUnit": "Pressure unit",
         "volumeUnit": "Volume unit",
@@ -45,16 +42,17 @@
         "clearValues": "Clear"
       },
       "errors": {
-        "noProcesses": "Add at least one process before solving.",
+        "noProcesses": "Add at least one state change before solving.",
         "inconsistent": "The entered values are overspecified or inconsistent.",
         "underdetermined": "The entered values are underspecified. Add more known p, V, T, mass, or molar amount values.",
-        "splitState": "The entered value is inconsistent with the connected processes and would split a numbered state."
+        "splitState": "The entered value is inconsistent with the connected state changes and would split a numbered state.",
+        "maxProcesses": "The diagram can contain at most six state changes."
       },
       "energy": {
         "title": "Calculated heat and work",
         "heatFlow": "Heat flow",
         "work": "Work",
-        "empty": "Add processes and state values to calculate heat and work.",
+        "empty": "Add state changes and state values to calculate heat and work.",
         "netWork": "Net work",
         "heatIn": "Heat input",
         "efficiency": "Efficiency"
@@ -64,6 +62,10 @@
         "adiabat": "Adiabat",
         "isochor": "Isochor",
         "isobar": "Isobar"
+      },
+      "presets": {
+        "square": "Square cycle",
+        "stirling": "Stirling cycle"
       },
       "gases": {
         "He": "He",

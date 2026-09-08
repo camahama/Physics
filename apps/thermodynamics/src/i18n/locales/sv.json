@@ -16,22 +16,19 @@
   },
   "modules": {
     "stirlingEngine": {
-      "title": "Stirlingmotorn"
+      "title": "Laboration: Stirlingmotorn"
     },
     "processBuilder": {
-      "title": "Processbyggare",
+      "title": "Kretsprocesser",
       "description": "Bygg ett pV-diagram genom att placera isotermer, adiabater, isokorer och isobarer. Fäst ändpunkter mot varandra för att skapa numrerade tillstånd.",
-      "toolsTitle": "Processer",
-      "instructions": "Dra en process till pV-diagrammet, dubbelklicka på ett processverktyg eller välj ett och tryck Lägg till. Dra ändpunkterna för att forma och fästa cykeln.",
-      "addSelected": "Lägg till vald",
-      "clearAll": "Rensa allt",
-      "processCount": "Processer: {count}/{max}",
+      "toolsTitle": "Tillståndsändringar",
+      "instructions": "Dra en tillståndsändring till pV-diagrammet eller dubbelklicka på ett verktyg. Dra ändpunkterna för att forma och fästa cykeln.",
       "boardTitle": "pV-diagram",
       "boardLabel": "pV-diagram för att bygga termodynamiska processer",
-      "dropHint": "Dra process hit",
+      "dropHint": "Dra tillståndsändring hit",
       "tableTitle": "Processvärden",
-      "emptyTable": "Lägg till upp till sex grundprocesser för att börja mata in värden.",
-      "removeProcess": "Ta bort process",
+      "emptyTable": "Lägg till tillståndsändringar för att börja mata in värden.",
+      "removeProcess": "Radera tillståndsändring",
       "valueControls": {
         "pressureUnit": "Tryckenhet",
         "volumeUnit": "Volymenhet",
@@ -45,16 +42,17 @@
         "clearValues": "Rensa"
       },
       "errors": {
-        "noProcesses": "Lägg till minst en process innan du löser.",
+        "noProcesses": "Lägg till minst en tillståndsändring innan du löser.",
         "inconsistent": "De inmatade värdena är överspecificerade eller motsägelsefulla.",
         "underdetermined": "De inmatade värdena är underspecificerade. Lägg till fler kända värden för p, V, T, massa eller substansmängd.",
-        "splitState": "Det inmatade värdet är oförenligt med de anslutna processerna och skulle dela ett numrerat tillstånd."
+        "splitState": "Det inmatade värdet är oförenligt med de anslutna tillståndsändringarna och skulle dela ett numrerat tillstånd.",
+        "maxProcesses": "Diagrammet kan innehålla högst sex tillståndsändringar."
       },
       "energy": {
         "title": "Beräknade värmeflöden och arbete",
         "heatFlow": "Värmeflöde",
         "work": "Arbete",
-        "empty": "Lägg till processer och tillståndsvärden för att beräkna värme och arbete.",
+        "empty": "Lägg till tillståndsändringar och tillståndsvärden för att beräkna värme och arbete.",
         "netWork": "Nettoarbete",
         "heatIn": "Tillförd värme",
         "efficiency": "Verkningsgrad"
@@ -64,6 +62,10 @@
         "adiabat": "Adiabat",
         "isochor": "Isokor",
         "isobar": "Isobar"
+      },
+      "presets": {
+        "square": "Kvadratisk cykel",
+        "stirling": "Stirlingcykel"
       },
       "gases": {
         "He": "He",

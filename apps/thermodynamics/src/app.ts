@@ -154,6 +154,16 @@ function createModuleIcon(slug: string) {
     node.setAttribute("class", className);
     svg.append(node);
   };
+  const rect = (x: number, y: number, width: number, height: number, className = "stroke") => {
+    const node = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    node.setAttribute("x", String(x));
+    node.setAttribute("y", String(y));
+    node.setAttribute("width", String(width));
+    node.setAttribute("height", String(height));
+    node.setAttribute("rx", "2");
+    node.setAttribute("class", className);
+    svg.append(node);
+  };
   const path = (d: string, className = "stroke") => {
     const node = document.createElementNS("http://www.w3.org/2000/svg", "path");
     node.setAttribute("d", d);
@@ -168,20 +178,28 @@ function createModuleIcon(slug: string) {
     path("M 22 57 C 34 48 62 48 74 57", "thermal wave");
     path("M 28 49 C 38 41 58 41 68 49", "thermal wave faint");
   } else if (slug === "stirling-engine") {
-    path("M 20 52 H 76 M 28 52 V 24 H 68 V 52", "thermal stroke");
-    path("M 34 46 C 38 30 58 30 62 46", "thermal wave");
-    line(48, 24, 48, 11, "thermal mercury");
-    circle(48, 11, 5, "thermal bulb");
-    path("M 73 28 C 82 28 82 48 73 48", "thermal stroke");
-    path("M 21 58 C 34 64 62 64 75 58", "thermal faint");
+    rect(12, 22, 58, 24, "thermal chamber");
+    rect(36, 26, 10, 16, "thermal piston regenerator");
+    rect(54, 26, 8, 16, "thermal piston");
+    path("M 37 29 L 45 25 M 37 35 L 45 31 M 37 41 L 45 37", "thermal heat-exchanger");
+    line(46, 34, 77, 34, "thermal stroke");
+    line(62, 34, 77, 42, "thermal stroke");
+    circle(79, 38, 13, "thermal flywheel");
+    circle(79, 38, 3.2, "thermal crank");
+    line(79, 38, 88, 30, "thermal stroke");
+    circle(88, 30, 3.2, "thermal crank");
+    path("M 13 57 H 32 M 19 54 C 14 48 18 43 25 40 C 23 47 33 49 27 55", "thermal heat-source");
   } else if (slug === "process-builder") {
     line(18, 58, 82, 58, "thermal stroke");
     line(18, 58, 18, 12, "thermal stroke");
-    path("M 28 49 H 66", "thermal process isobar");
-    path("M 28 49 C 42 32 54 21 66 16", "thermal process isotherm");
-    path("M 28 49 C 38 26 50 18 66 16", "thermal process adiabat");
-    circle(28, 49, 4, "thermal bulb");
-    circle(66, 16, 4, "thermal bulb");
+    path("M 30 20 C 42 30 55 33 68 31", "thermal process isotherm");
+    path("M 30 46 C 42 53 56 54 68 49", "thermal process isotherm");
+    line(30, 20, 30, 46, "thermal process isochor");
+    line(68, 31, 68, 49, "thermal process isochor");
+    circle(30, 20, 3.2, "thermal bulb");
+    circle(68, 31, 3.2, "thermal bulb");
+    circle(68, 49, 3.2, "thermal bulb");
+    circle(30, 46, 3.2, "thermal bulb");
   } else {
     circle(48, 36, 22, "thermal bulb");
     path("M 26 50 C 38 40 58 40 70 50", "thermal wave");
