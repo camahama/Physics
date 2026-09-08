@@ -82,7 +82,7 @@
       }
     },
     "heatTemperature": {
-      "title": "Heat and Temperature",
+      "title": "Heat and Temperature (unfinished)",
       "description": "A starting point for interactive illustrations of thermal energy, temperature, heat capacity, and heat flow.",
       "status": "Scaffolding is ready. The next step is to replace this sketch with an interactive illustration.",
       "stageLabel": "Placeholder sketch for heat and temperature"

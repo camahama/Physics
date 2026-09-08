@@ -82,7 +82,7 @@
       }
     },
     "heatTemperature": {
-      "title": "Värme och temperatur",
+      "title": "Värme och temperatur (ofärdig)",
       "description": "En startpunkt för interaktiva illustrationer av termisk energi, temperatur, värmekapacitet och värmeflöde.",
       "status": "Stommen är redo. Nästa steg är att ersätta skissen med en interaktiv illustration.",
       "stageLabel": "Platshållarskiss för värme och temperatur"
