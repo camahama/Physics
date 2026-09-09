@@ -46,6 +46,7 @@ type AxisRange = typeof DEFAULT_AXIS_RANGE;
 type StateValues = { p: string; v: string; t: string };
 type LinearEquation = { coefficients: number[]; value: number };
 type AxisTick = { baseValue: number; displayValue: number; label: string };
+type AxisUnitLabel = { unit: string; scaleExponent: number | null };
 type StateDatum = { pPa: number; vM3: number; tK: number };
 type PhysicalPoint = { volumeLiters: number; pressureAtm: number };
 type StateGeometryTarget = { refs: EndpointRef[]; physical: PhysicalPoint };
@@ -799,11 +800,17 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
   }
 
   function pressureUnitLabel() {
-    return state.units.pressure;
+    return {
+      unit: state.units.pressure,
+      scaleExponent: getPressureAxisScaleExponent(6),
+    };
   }
 
   function volumeUnitLabel() {
-    return state.units.volume === "m3" ? "m³" : "l";
+    return {
+      unit: state.units.volume === "m3" ? "m³" : "l",
+      scaleExponent: getVolumeAxisScaleExponent(6),
+    };
   }
 
   function formatVolumeUnitOption(value: string) {
@@ -961,7 +968,7 @@ function createGrid() {
   return group;
 }
 
-function createAxes(t: ModuleRenderContext["t"], pressureUnit: string, volumeUnit: string) {
+function createAxes(t: ModuleRenderContext["t"], pressureUnit: AxisUnitLabel, volumeUnit: AxisUnitLabel) {
   const group = svgGroup("process-axes");
   const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
   const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
@@ -998,8 +1005,8 @@ function createAxes(t: ModuleRenderContext["t"], pressureUnit: string, volumeUni
     }),
   );
 
-  const vLabel = createAxisLabel(PLOT.right - 12, PLOT.bottom + 54, "V", volumeUnit, false);
-  const pLabel = createAxisLabel(PLOT.left + 14, PLOT.top - 30, "p", pressureUnit, true);
+  const vLabel = createAxisLabel(PLOT.right - 12, PLOT.bottom + 58, "V", volumeUnit, false);
+  const pLabel = createAxisLabel(PLOT.left + 14, PLOT.top - 22, "p", pressureUnit, true);
   const title = svgNode("text", {
     x: String((PLOT.left + PLOT.right) / 2),
     y: String(PLOT.top - 18),
@@ -1010,7 +1017,7 @@ function createAxes(t: ModuleRenderContext["t"], pressureUnit: string, volumeUni
   return group;
 }
 
-function createAxisLabel(x: number, y: number, symbol: string, unit: string, isYAxis: boolean) {
+function createAxisLabel(x: number, y: number, symbol: string, unitLabel: AxisUnitLabel, isYAxis: boolean) {
   const label = svgNode("text", {
     x: String(x),
     y: String(y),
@@ -1021,8 +1028,17 @@ function createAxisLabel(x: number, y: number, symbol: string, unit: string, isY
   symbolSpan.textContent = symbol;
   const unitSpan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
   unitSpan.setAttribute("class", "process-axis-unit-span");
-  unitSpan.textContent = ` / ${unit}`;
+  unitSpan.textContent = unitLabel.scaleExponent == null ? ` / ${unitLabel.unit}` : " / (10";
   label.append(symbolSpan, unitSpan);
+  if (unitLabel.scaleExponent != null) {
+    const exponentSpan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+    const scaledUnitSpan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+    exponentSpan.setAttribute("class", "process-axis-unit-exponent");
+    exponentSpan.textContent = String(unitLabel.scaleExponent);
+    scaledUnitSpan.setAttribute("class", "process-axis-unit-span");
+    scaledUnitSpan.textContent = ` ${unitLabel.unit})`;
+    label.append(exponentSpan, scaledUnitSpan);
+  }
   return label;
 }
 
@@ -2059,13 +2075,42 @@ function createNiceDisplayRange(values: number[], originValue: number) {
 function createVolumeTicks(preferredCount: number) {
   const min = volumeLitersToDisplay(state.axisRange.volumeMinLiters);
   const max = volumeLitersToDisplay(state.axisRange.volumeMaxLiters);
-  return createTicks(min, max, preferredCount, displayVolumeToLiters);
+  const scaleDivisor = axisScaleDivisor(getVolumeAxisScaleExponent(preferredCount));
+  return createTicks(min, max, preferredCount, displayVolumeToLiters, scaleDivisor);
 }
 
 function createPressureTicks(preferredCount: number) {
   const min = pressureAtmToDisplay(state.axisRange.pressureMinAtm);
   const max = pressureAtmToDisplay(state.axisRange.pressureMaxAtm);
-  return createTicks(min, max, preferredCount, displayPressureToAtm);
+  const scaleDivisor = axisScaleDivisor(getPressureAxisScaleExponent(preferredCount));
+  return createTicks(min, max, preferredCount, displayPressureToAtm, scaleDivisor);
+}
+
+function getVolumeAxisScaleExponent(preferredCount: number) {
+  const min = volumeLitersToDisplay(state.axisRange.volumeMinLiters);
+  const max = volumeLitersToDisplay(state.axisRange.volumeMaxLiters);
+  return getAxisScaleExponent(min, max, preferredCount);
+}
+
+function getPressureAxisScaleExponent(preferredCount: number) {
+  const min = pressureAtmToDisplay(state.axisRange.pressureMinAtm);
+  const max = pressureAtmToDisplay(state.axisRange.pressureMaxAtm);
+  return getAxisScaleExponent(min, max, preferredCount);
+}
+
+function getAxisScaleExponent(min: number, max: number, preferredCount: number) {
+  const span = Math.abs(max - min);
+  if (!Number.isFinite(span) || span <= 0) {
+    return null;
+  }
+
+  const step = niceStep(span / Math.max(1, preferredCount - 1));
+  const exponent = Math.floor(Math.log10(Math.abs(step)));
+  return Math.abs(exponent) >= 3 ? exponent : null;
+}
+
+function axisScaleDivisor(exponent: number | null) {
+  return exponent == null ? 1 : 10 ** exponent;
 }
 
 function createTicks(
@@ -2073,6 +2118,7 @@ function createTicks(
   max: number,
   preferredCount: number,
   toBaseValue: (value: number) => number,
+  labelScaleDivisor = 1,
 ): AxisTick[] {
   const step = niceStep((max - min) / Math.max(1, preferredCount - 1));
   const first = Math.ceil((min - step * 1e-8) / step) * step;
@@ -2083,7 +2129,7 @@ function createTicks(
     ticks.push({
       baseValue: toBaseValue(cleaned),
       displayValue: cleaned,
-      label: formatTickLabel(cleaned),
+      label: formatTickLabel(cleaned / labelScaleDivisor),
     });
   }
 

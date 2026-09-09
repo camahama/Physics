@@ -633,7 +633,7 @@ button {
 }
 
 .process-axis-label {
-  font-size: 34.5px;
+  font-size: 29px;
   text-anchor: end;
 }
 
@@ -655,6 +655,12 @@ button {
 }
 
 .process-axis-unit-span {
+  font-style: normal;
+}
+
+.process-axis-unit-exponent {
+  baseline-shift: super;
+  font-size: 0.58em;
   font-style: normal;
 }
 

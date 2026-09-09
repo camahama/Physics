@@ -1,6 +1,6 @@
 const dictionaries = {
-  en: () => import("./locales/en.json", { with: { type: "json" } }),
-  sv: () => import("./locales/sv.json", { with: { type: "json" } }),
+  en: () => import("./locales/en.json"),
+  sv: () => import("./locales/sv.json"),
 };
 
 type Language = keyof typeof dictionaries;
