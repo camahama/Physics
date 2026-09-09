@@ -179,8 +179,13 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
 
   function renderControls() {
     controls.replaceChildren();
-    controls.append(
+    const heading = element("div", "process-builder-heading-row");
+    heading.append(
       element("h2", "process-builder-panel-title", t("modules.processBuilder.toolsTitle")),
+      createHelpBadge(t("modules.processBuilder.help.stateChanges")),
+    );
+    controls.append(
+      heading,
       richTextElement("p", "process-builder-instructions", t("modules.processBuilder.instructions")),
     );
 
@@ -250,7 +255,12 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
 
   function renderTable() {
     tablePanel.replaceChildren();
-    tablePanel.append(element("h2", "process-builder-panel-title", t("modules.processBuilder.tableTitle")));
+    const heading = element("div", "process-builder-heading-row");
+    heading.append(
+      element("h2", "process-builder-panel-title", t("modules.processBuilder.tableTitle")),
+      createHelpBadge(t("modules.processBuilder.help.values")),
+    );
+    tablePanel.append(heading);
     const valueLayout = element("div", "process-builder-value-layout");
     const valueControls = renderValueControls();
 
@@ -306,7 +316,12 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
 
   function renderEnergyTable(numberedStates: StatePoint[]) {
     const section = element("section", "process-builder-energy-section");
-    section.append(element("h3", "process-builder-subtitle", t("modules.processBuilder.energy.title")));
+    const heading = element("div", "process-builder-heading-row");
+    heading.append(
+      element("h3", "process-builder-subtitle", t("modules.processBuilder.energy.title")),
+      createHelpBadge(t("modules.processBuilder.help.energy")),
+    );
+    section.append(heading);
 
     const table = document.createElement("table");
     table.className = "process-builder-table process-builder-energy-table";
@@ -345,7 +360,7 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     }
 
     table.append(head, body);
-    section.append(table, renderEnergySummary(calculations));
+    section.append(table, renderEnergySummary(calculations), renderStirlingEnergySummary(calculations));
     return section;
   }
 
@@ -368,6 +383,25 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
       definitionRichItem(createSymbolName("W", "netto"), formatEnergyValue(netWork)),
       definitionRichItem(createSymbolName("Q", "in"), formatEnergyValue(heatIn)),
       definitionRichItem(createEfficiencyName(), formatEfficiencyValue(efficiency)),
+    );
+    return summary;
+  }
+
+  function renderStirlingEnergySummary(calculations: ProcessCalculation[]) {
+    const stirlingCalculations = getStirlingCycleCalculations(calculations);
+    if (!stirlingCalculations) {
+      return document.createDocumentFragment();
+    }
+
+    const netWork = stirlingCalculations.reduce((sum, calculation) => sum + calculation.wJ, 0);
+    const hotIsothermHeat = stirlingCalculations[0].qJ;
+    const efficiency = hotIsothermHeat > 0 ? netWork / hotIsothermHeat : Number.NaN;
+    const summary = element("dl", "process-builder-energy-summary process-builder-stirling-summary");
+    const note = element("div", "process-builder-stirling-note", t("modules.processBuilder.energy.stirlingRegeneratorNote"));
+    summary.append(
+      note,
+      definitionRichItem(createStirlingHeatInputName(), formatEnergyValue(hotIsothermHeat)),
+      definitionRichItem(createStirlingEfficiencyName(), formatEfficiencyValue(efficiency)),
     );
     return summary;
   }
@@ -407,7 +441,10 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
         (value) => value === "C" ? "°C" : value,
       ),
       selectorRow(
-        t("modules.processBuilder.valueControls.gasType"),
+        [
+          t("modules.processBuilder.valueControls.gasType"),
+          createHelpBadge(t("modules.processBuilder.help.gasModel")),
+        ],
         state.gasType,
         gasTypes,
         (value) => {
@@ -432,10 +469,16 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
       inputRow(t("modules.processBuilder.valueControls.mass"), state.gasMass, (value) => {
         state.gasMass = value;
         state.gasMassOrigin = value.trim() === "" ? undefined : "user";
+        if (state.gasMassOrigin === "user") {
+          state.solvedMolarAmount = Number.NaN;
+        }
       }, state.gasMassOrigin === "user"),
       inputRow(t("modules.processBuilder.valueControls.molarAmount"), state.molarAmount, (value) => {
         state.molarAmount = value;
         state.molarAmountOrigin = value.trim() === "" ? undefined : "user";
+        if (state.molarAmountOrigin === "user") {
+          state.solvedMolarAmount = Number.NaN;
+        }
       }, state.molarAmountOrigin === "user"),
     );
 
@@ -634,12 +677,14 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     input.setAttribute("aria-label", label);
     input.addEventListener("input", () => {
       setStateFieldValue(stateLabel, key, input.value, input.value.trim() === "" ? undefined : "user");
+      input.classList.toggle("user-defined", input.value.trim() !== "");
     });
     input.addEventListener("change", () => {
       setStateFieldValue(stateLabel, key, input.value, input.value.trim() === "" ? undefined : "user");
+      input.classList.toggle("user-defined", input.value.trim() !== "");
       if (key === "p" || key === "v") {
         applyStateValuesToGeometry(stateLabel, t);
-        update();
+        window.setTimeout(update, 0);
       }
     });
     input.addEventListener("keydown", (event) => {
@@ -665,14 +710,19 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
   }
 
   function selectorRow(
-    labelText: string,
+    labelText: string | Array<string | HTMLElement>,
     value: string,
     options: string[],
     onChange: (value: string) => void,
     formatLabel = (option: string) => option,
   ) {
     const label = element("label", "process-builder-control-row");
-    const text = element("span", "", labelText);
+    const text = element("span", "process-builder-control-label");
+    if (Array.isArray(labelText)) {
+      text.append(...labelText);
+    } else {
+      text.textContent = labelText;
+    }
     const select = document.createElement("select");
     for (const option of options) {
       const optionElement = document.createElement("option");
@@ -701,6 +751,7 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     input.className = isUserDefined ? "user-defined" : "";
     input.addEventListener("input", () => {
       onInput(input.value);
+      input.classList.toggle("user-defined", input.value.trim() !== "");
     });
     label.append(text, input);
     return label;
@@ -1596,6 +1647,46 @@ function calculateProcessEnergies(numberedStates: StatePoint[]): ProcessCalculat
     .sort((a, b) => labels.indexOf(a.fromLabel) - labels.indexOf(b.fromLabel));
 }
 
+function getStirlingCycleCalculations(calculations: ProcessCalculation[]) {
+  if (calculations.length !== 4) {
+    return null;
+  }
+
+  const ordered = [1, 2, 3, 4].map((fromLabel) => (
+    calculations.find((calculation) => calculation.fromLabel === fromLabel)
+  ));
+  if (ordered.some((calculation) => calculation == null)) {
+    return null;
+  }
+
+  const [first, second, third, fourth] = ordered as [
+    ProcessCalculation,
+    ProcessCalculation,
+    ProcessCalculation,
+    ProcessCalculation,
+  ];
+  const hasStirlingOrder = (
+    first.toLabel === 2
+    && second.toLabel === 3
+    && third.toLabel === 4
+    && fourth.toLabel === 1
+    && first.process.type === "isotherm"
+    && second.process.type === "isochor"
+    && third.process.type === "isotherm"
+    && fourth.process.type === "isochor"
+    && Number.isFinite(first.qJ)
+    && Number.isFinite(second.qJ)
+    && Number.isFinite(third.qJ)
+    && Number.isFinite(fourth.qJ)
+    && Number.isFinite(first.wJ)
+    && Number.isFinite(second.wJ)
+    && Number.isFinite(third.wJ)
+    && Number.isFinite(fourth.wJ)
+  );
+
+  return hasStirlingOrder ? [first, second, third, fourth] : null;
+}
+
 function calculateProcessEnergy(
   type: ProcessType,
   fromState: StateDatum | null,
@@ -2403,6 +2494,18 @@ function definitionRichItem(term: HTMLElement, description: string) {
   return wrapper;
 }
 
+function createHelpBadge(textContent: string) {
+  const badge = element("span", "process-help-badge");
+  const tooltip = element("span", "process-help-tooltip");
+  badge.tabIndex = 0;
+  badge.setAttribute("aria-label", textContent);
+  badge.textContent = "?";
+  tooltip.setAttribute("role", "tooltip");
+  appendRichText(tooltip, textContent);
+  badge.append(tooltip);
+  return badge;
+}
+
 function createEfficiencyName() {
   const expression = element("span", "process-energy-expression");
   const eta = document.createElement("var");
@@ -2414,6 +2517,31 @@ function createEfficiencyName() {
     createSymbolName("W", "netto"),
     document.createTextNode(" / "),
     createSymbolName("Q", "in"),
+  );
+  return expression;
+}
+
+function createStirlingHeatInputName() {
+  const expression = element("span", "process-energy-expression");
+  expression.append(
+    createSymbolName("Q", "in"),
+    document.createTextNode(" = "),
+    createSymbolName("Q", "12"),
+  );
+  return expression;
+}
+
+function createStirlingEfficiencyName() {
+  const expression = element("span", "process-energy-expression");
+  const eta = document.createElement("var");
+  eta.className = "process-math-symbol";
+  eta.textContent = "η";
+  expression.append(
+    eta,
+    document.createTextNode(" = "),
+    createSymbolName("W", "netto"),
+    document.createTextNode(" / "),
+    createSymbolName("Q", "12"),
   );
   return expression;
 }

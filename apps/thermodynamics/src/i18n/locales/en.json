@@ -52,6 +52,12 @@
       "warnings": {
         "temperatureDof": "The state temperatures span {min}–{max} K. For this gas, the fixed degrees of freedom model is only a rough approximation outside about {low}–{high} K."
       },
+      "help": {
+        "stateChanges": "Drag state changes into the pV diagram. Endpoints snap into numbered states; use Erase state change and then click lines, endpoints, or state markers to remove them.",
+        "values": "Values in bold are manual inputs and are kept as constraints. Values not in bold have been calculated. The button Calculate fills in missing values; Recalculate replaces calculated values based on the bold manual ones.",
+        "gasModel": "Choose units and working gas here. Mass and amount also become bold manual constraints when typed; if one is calculated, Recalculate may replace it.",
+        "energy": "Heat and work are calculated from the current state changes and state values. For an ideal Stirling cycle, the extra boxes assume perfect regeneration, so the isochoric heat flows are recovered internally."
+      },
       "energy": {
         "title": "Calculated heat and work",
         "heatFlow": "Heat flow",
@@ -59,7 +65,8 @@
         "empty": "Add state changes and state values to calculate heat and work.",
         "netWork": "Net work",
         "heatIn": "Heat input",
-        "efficiency": "Efficiency"
+        "efficiency": "Efficiency",
+        "stirlingRegeneratorNote": "Ideal Stirling cycle with perfect regeneration: the isochoric heat flows are internally recovered."
       },
       "types": {
         "isotherm": "Isotherm",

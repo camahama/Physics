@@ -406,10 +406,73 @@ button {
   gap: 1rem;
 }
 
+.process-builder-heading-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  justify-content: flex-start;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .process-builder-panel-title {
+  min-width: 0;
   margin: 0;
   font-family: var(--font-display);
   font-size: 1.35rem;
+  hyphens: auto;
+  line-height: 1.12;
+}
+
+.process-help-badge {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border: 1px solid #90a6b5;
+  border-radius: 999px;
+  background: #f4f9fc;
+  color: #315163;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: help;
+}
+
+.process-help-badge:focus-visible {
+  outline: 2px solid #1d6fd6;
+  outline-offset: 2px;
+}
+
+.process-help-tooltip {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  left: 0;
+  z-index: 20;
+  width: min(17rem, 72vw);
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  background: #1c2730;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+  color: #f4f8fb;
+  font-family: system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.35;
+  opacity: 0;
+  pointer-events: none;
+  transform: none;
+}
+
+.process-help-tooltip .process-builder-pv {
+  color: inherit;
+}
+
+.process-help-badge:hover .process-help-tooltip,
+.process-help-badge:focus-visible .process-help-tooltip {
+  opacity: 1;
 }
 
 .process-builder-instructions {
@@ -714,6 +777,12 @@ button {
   font-weight: 700;
 }
 
+.process-builder-control-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .process-builder-control-row input,
 .process-builder-control-row select {
   width: 100%;
@@ -889,6 +958,25 @@ button {
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.7);
   padding: 0.42rem;
+}
+
+.process-builder-stirling-summary {
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(43, 60, 67, 0.1);
+}
+
+.process-builder-stirling-summary div {
+  background: rgba(19, 123, 95, 0.08);
+}
+
+.process-builder-energy-summary .process-builder-stirling-note {
+  align-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.3;
+  padding: 0.15rem 0;
 }
 
 .process-builder-energy-summary dt {
