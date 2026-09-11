@@ -17,14 +17,9 @@ export type ModuleDefinition = {
 
 export const moduleRegistry: ModuleDefinition[] = [
   {
-    slug: "stirling-engine",
-    titleKey: "modules.stirlingEngine.title",
-    render: renderStirlingEngineModule,
-  },
-  {
-    slug: "stirling-illustration",
-    titleKey: "modules.stirlingIllustration.title",
-    render: renderStirlingIllustrationModule,
+    slug: "heat-temperature",
+    titleKey: "modules.heatTemperature.title",
+    render: renderHeatTemperatureModule,
   },
   {
     slug: "process-builder",
@@ -32,8 +27,13 @@ export const moduleRegistry: ModuleDefinition[] = [
     render: renderProcessBuilderModule,
   },
   {
-    slug: "heat-temperature",
-    titleKey: "modules.heatTemperature.title",
-    render: renderHeatTemperatureModule,
+    slug: "stirling-illustration",
+    titleKey: "modules.stirlingIllustration.title",
+    render: renderStirlingIllustrationModule,
+  },
+  {
+    slug: "stirling-engine",
+    titleKey: "modules.stirlingEngine.title",
+    render: renderStirlingEngineModule,
   },
 ];

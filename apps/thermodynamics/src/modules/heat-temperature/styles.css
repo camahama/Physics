@@ -1,0 +1,63 @@
+.gas-shell { padding: 1rem; align-items: start; }
+.gas-page { width: min(1600px, 100%); padding: clamp(1rem, 2vw, 2rem); display: grid; gap: 1rem; }
+.gas-header { display: flex; justify-content: space-between; gap: 2rem; align-items: center; }
+.gas-header .module-title { font-size: clamp(1.7rem, 3vw, 2.6rem); }
+.gas-eyebrow { color: #94703d; text-transform: uppercase; letter-spacing: .14em; font-size: .75rem; font-weight: 800; margin: 0 0 .4rem; }
+.gas-intro { color: var(--text-secondary); margin: .4rem 0 0; max-width: 70ch; }
+.gas-experiments { display: grid; grid-template-columns: repeat(4, 1fr); gap: .65rem; }
+.gas-button { border: 1px solid #b8c9d4; background: #f6f9fb; color: #314e62; border-radius: 9px; padding: .65rem 1rem; cursor: pointer; font-weight: 650; }
+.gas-button:hover { background: #e7eff5; }
+.gas-button[aria-pressed="true"] { background: #264f65; border-color: #264f65; color: white; }
+.gas-button:focus-visible, .gas-slider input:focus-visible { outline: 3px solid #d29d48; outline-offset: 3px; }
+.gas-lesson { display: grid; gap: .3rem; border-left: 4px solid #c79a54; padding: .55rem 1rem; background: #f8f3e9; }
+.gas-lesson strong { color: #354f60; font-size: 1.15rem; }
+.gas-lesson span { color: #596673; }
+.gas-stage { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.gas-panel { min-width: 0; border: 1px solid #d6e0e7; border-radius: 14px; background: linear-gradient(145deg,#fff,#f3f7fa); padding: 1rem; }
+.gas-panel-title { margin: 0; color: #385264; font-size: 1rem; font-weight: 700; }
+.gas-panel > svg { display: block; width: 100%; height: clamp(260px, 40vh, 430px); }
+.gas-caption { color: #627583; font-size: .85rem; margin: .35rem 0 0; }
+.gas-graph-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.gas-view-buttons { display: flex; gap: .25rem; }
+.gas-view-buttons button { padding: .3rem .65rem; }
+.gas-svg-label { fill: #355165; font: 18px system-ui,sans-serif; }
+.gas-tick { fill: #617989; font: 13px system-ui,sans-serif; }
+.gas-grid { fill: none; stroke: #c5d3de; stroke-width: 1; }
+.gas-axis { fill: none; stroke: #607b8e; stroke-width: 2; }
+.gas-full-curve { fill: none; stroke: #c0c3c6; stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+.gas-trace { fill: none; stroke: #223f57; stroke-width: 3.5; stroke-linejoin: round; stroke-linecap: round; }
+.gas-meters { display: grid; grid-template-columns: repeat(3,1fr); gap: .75rem; }
+.gas-meters > div { display: flex; justify-content: space-between; align-items: baseline; background: #eaf0f4; border-radius: 9px; padding: .65rem 1rem; }
+.gas-meters span { color: #5d7180; }
+.gas-meters strong { color: #254b63; font: 650 1.8rem ui-monospace,monospace; }
+.gas-controls { display: flex; gap: 1rem; align-items: center; border: 1px solid #d6e0e7; border-radius: 12px; padding: 1rem; }
+.gas-slider { flex: 1; display: grid; gap: .4rem; color: #385264; }
+.gas-slider[hidden] { display: none; }
+.gas-slider-heading { display: flex; justify-content: space-between; gap: 1rem; }
+.gas-slider input { width: 100%; accent-color: #326d88; cursor: pointer; }
+.gas-energy { padding: .25rem 0; }
+.gas-energy-rows { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-top: .6rem; }
+.gas-energy-item { position: relative; display: grid; grid-template-columns: 1fr auto; gap: .4rem; padding: .7rem .8rem; background: #f1f5f7; border-radius: 6px; overflow: hidden; color: #3d5665; }
+.gas-energy-item strong { white-space: nowrap; font-family: ui-monospace,monospace; }
+.gas-energy-track { position: relative; grid-column: 1 / -1; height: 42px; margin-top: .2rem; background: linear-gradient(to bottom, transparent 12px, #dbe4ea 12px, #dbe4ea 26px, transparent 26px); }
+.gas-energy-bar { position: absolute; height: 14px; left: 50%; top: 12px; background: #cc6940; }
+.gas-energy-zero { position: absolute; left: 50%; top: 0; height: 42px; transform: translateX(-50%); padding-top: 27px; font: 11px ui-monospace, monospace; color: #385264; }
+.gas-energy-zero::before { content: ""; position: absolute; top: 6px; left: 50%; width: 2px; height: 22px; background: #385264; }
+.gas-energy-negative, .gas-energy-positive { position: absolute; top: 27px; font-size: 12px; color: #627583; }
+.gas-energy-negative { left: 0; }
+.gas-energy-positive { right: 0; }
+.gas-quantity { font-style: italic; }
+.gas-energy-item.work .gas-energy-bar { background: #4684a5; }
+.gas-energy-item.internal .gas-energy-bar { background: #ae924f; }
+.gas-model-details { color: #627583; font-size: .85rem; }
+.gas-model-details summary { cursor: pointer; }
+@media(max-width: 760px) {
+  .gas-stage { grid-template-columns: 1fr; }
+  .gas-experiments { grid-template-columns: 1fr; }
+  .gas-controls { flex-wrap: wrap; }
+  .gas-controls .gas-slider { flex-basis: 100%; }
+  .gas-energy-rows { grid-template-columns: 1fr; }
+  .gas-header { align-items: start; gap: .7rem; }
+  .gas-meters > div { display: grid; padding: .5rem; }
+  .gas-meters strong { font-size: 1.4rem; }
+}
