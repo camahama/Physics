@@ -18,6 +18,40 @@
     "stirlingEngine": {
       "title": "Stirling Engine Lab"
     },
+    "stirlingIllustration": {
+      "title": "Stirling Engine Illustration",
+      "description": "Explore an ideal Stirling cycle with helium. The pV diagram, calculations, and engine model are synchronized.",
+      "diagramTitle": "pV diagram",
+      "diagramLabel": "pV diagram for an ideal Stirling cycle",
+      "controlsTitle": "Model values",
+      "engineTitle": "Model engine",
+      "engineLabel": "Cutaway model of a Stirling engine with regenerator, cylinder, pistons, and flywheel",
+      "controls": {
+        "coldTemperature": "Cold temperature",
+        "hotTemperature": "Hot temperature",
+        "compressionRatio": "Compression ratio",
+        "minVolume": "Lowest volume",
+        "minPressure": "Lowest pressure",
+        "amount": "Helium amount / mol",
+        "start": "Start",
+        "stop": "Stop",
+        "manual": "Manual",
+        "phase": "Cycle angle",
+        "manualHint": "Drag around the flywheel to turn the cycle in either direction. Release and grab again as needed, or use the angle slider. Start resumes automatic motion."
+      },
+      "results": {
+        "netWork": "Work per cycle",
+        "heatIn": "Heat input Q_12",
+        "efficiency": "Ideal efficiency"
+      },
+      "engine": {
+        "hot": "heat source",
+        "cooler": "cooler",
+        "regenerator": "regenerator",
+        "cam": "Flywheel · two closed-groove cams",
+        "idealNote": "Ideal cycle: cam-controlled dwells; perfect regeneration. Rod volume and matrix pore volume neglected."
+      }
+    },
     "processBuilder": {
       "title": "Circuit Processes",
       "description": "Build a pV process diagram by placing isotherms, adiabats, isochores, and isobars. Snap endpoints together to create numbered states.",

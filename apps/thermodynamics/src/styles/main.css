@@ -1028,6 +1028,330 @@ button {
   padding: 0.7rem 0.85rem;
 }
 
+.stirling-illustration-page {
+  gap: 1.2rem;
+}
+
+.stirling-illustration-header {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.stirling-illustration-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.stirling-panel {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 1rem;
+}
+
+.stirling-pv-panel,
+.stirling-engine-panel {
+  min-width: 0;
+}
+
+.stirling-section-title {
+  margin: 0 0 0.6rem;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.stirling-pv-diagram,
+.stirling-engine-model {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.stirling-plot-background {
+  fill: #ffffff;
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.stirling-grid-line {
+  stroke: rgba(24, 35, 41, 0.12);
+  stroke-width: 1;
+}
+
+.stirling-axis {
+  stroke: #182329;
+  stroke-linecap: round;
+  stroke-width: 3;
+}
+
+.stirling-axis-label,
+.stirling-axis-tick-label,
+.stirling-state-label {
+  fill: var(--text-secondary);
+  font-family: var(--font-display);
+  font-weight: 400;
+}
+
+.stirling-axis-label {
+  fill: var(--text-primary);
+  font-size: 26px;
+  text-anchor: end;
+}
+
+.stirling-axis-label.y {
+  text-anchor: start;
+}
+
+.stirling-axis-tick-label {
+  font-size: 18px;
+  text-anchor: middle;
+}
+
+.stirling-axis-tick-label.y {
+  text-anchor: end;
+}
+
+.stirling-cycle-path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 5;
+}
+
+.stirling-cycle-path.hot {
+  stroke: #c54232;
+}
+
+.stirling-cycle-path.cool {
+  stroke: #6d56d9;
+}
+
+.stirling-cycle-path.cold {
+  stroke: #2f72d6;
+}
+
+.stirling-cycle-path.heat {
+  stroke: #d4881c;
+}
+
+.stirling-state-point {
+  fill: #ffffff;
+  stroke: #182329;
+  stroke-width: 3;
+}
+
+.stirling-state-label {
+  fill: var(--text-primary);
+  font-size: 18px;
+}
+
+.stirling-cycle-dot {
+  fill: #182329;
+  stroke: #ffffff;
+  stroke-width: 3;
+}
+
+.stirling-controls-panel {
+  display: grid;
+  gap: 0.85rem;
+  align-content: start;
+}
+
+.stirling-run-button {
+  border: 0;
+  border-radius: 999px;
+  background: #168565;
+  color: #ffffff;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  padding: 0.65rem 1rem;
+}
+
+.stirling-run-button.running {
+  background: #c9252d;
+}
+
+.stirling-slider-row,
+.stirling-control-row {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.stirling-slider-header {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.stirling-control-label {
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.stirling-control-value {
+  color: var(--text-primary);
+  font-family: ui-monospace, "SFMono-Regular", monospace;
+  font-size: 0.95rem;
+}
+
+.stirling-slider-row input[type="range"] {
+  width: 100%;
+  accent-color: #168565;
+}
+
+.stirling-control-row input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font: inherit;
+  padding: 0.48rem 0.6rem;
+}
+
+.stirling-results {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.45rem;
+  margin-top: 0.2rem;
+}
+
+.stirling-result-item {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: baseline;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.55rem 0.65rem;
+}
+
+.stirling-result-label {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.stirling-result-value {
+  color: var(--text-primary);
+  font-family: ui-monospace, "SFMono-Regular", monospace;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.stirling-cylinder-shell {
+  fill: #eef3f4;
+  stroke: #182329;
+  stroke-width: 5;
+}
+
+.stirling-cylinder-cut {
+  fill: #ffffff;
+  stroke: rgba(24, 35, 41, 0.3);
+  stroke-width: 2;
+}
+
+.stirling-hot-space {
+  fill: rgba(201, 66, 50, 0.16);
+}
+
+.stirling-cold-space {
+  fill: rgba(47, 114, 214, 0.16);
+}
+
+.stirling-regenerator {
+  fill: rgba(216, 136, 28, 0.2);
+  stroke: #d4881c;
+  stroke-width: 3;
+}
+
+.stirling-heat-exchanger-line {
+  stroke: #b56b12;
+  stroke-linecap: round;
+  stroke-width: 4;
+}
+
+.stirling-displacer-piston {
+  fill: #f6efe1;
+  stroke: #182329;
+  stroke-width: 4;
+}
+
+.stirling-power-piston {
+  fill: #dfe8ec;
+  stroke: #182329;
+  stroke-width: 4;
+}
+
+.stirling-rod {
+  stroke: #182329;
+  stroke-linecap: round;
+  stroke-width: 5;
+}
+
+.stirling-rod.secondary {
+  stroke-width: 3.5;
+}
+
+.stirling-flywheel {
+  fill: none;
+  stroke: #182329;
+  stroke-width: 8;
+}
+
+.stirling-flywheel-hub,
+.stirling-crank-pin {
+  fill: #182329;
+}
+
+.stirling-crank-pin.secondary {
+  fill: #6d56d9;
+}
+
+.stirling-heat-source {
+  fill: rgba(201, 66, 50, 0.16);
+  stroke: #c54232;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 5;
+}
+
+.stirling-cooler {
+  fill: rgba(47, 114, 214, 0.16);
+  stroke: #2f72d6;
+  stroke-width: 3;
+}
+
+.stirling-cooler-wave {
+  fill: none;
+  stroke: #2f72d6;
+  stroke-linecap: round;
+  stroke-width: 4;
+}
+
+.stirling-engine-label {
+  fill: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.stirling-engine-label.hot {
+  fill: #9f2f25;
+}
+
+.stirling-engine-label.cool {
+  fill: #245cac;
+}
+
 .react-module-host {
   display: block;
   width: 100%;
@@ -1059,4 +1383,119 @@ button {
   .process-builder-energy-summary {
     grid-template-columns: 1fr;
   }
+
+  .stirling-illustration-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stirling-engine-model .stirling-power-piston { fill: url(#stirling-metal); }
+.stirling-wheel-spoke { stroke: #c5cdd2; stroke-width: 13; }
+.stirling-cam-track { fill: none; stroke-width: 5; }
+.stirling-cam-track.power { stroke: #42677e; }
+.stirling-cam-track.regenerator { stroke: #b97821; }
+.stirling-power-shaft { stroke: #7c929f; stroke-width: 16; }
+.stirling-regenerator-shaft { stroke: #bf832f; stroke-width: 4; }
+.stirling-cam-follower { fill: #fff; stroke-width: 4; }
+.stirling-cam-follower.power { stroke: #42677e; }
+.stirling-cam-follower.regenerator { stroke: #b97821; }
+.stirling-mesh { stroke: #98631e; stroke-width: 1; }
+.stirling-cooling-fin { stroke: #5288aa; stroke-width: 5; }
+.stirling-dead-centre { stroke: #647580; stroke-width: 1; stroke-dasharray: 4 5; }
+.stirling-model-note { fill: var(--text-secondary); font-size: 16px; }
+
+/* Machined surfaces retain highlights across the cutaway and rotating wheel. */
+.stirling-engine-model .stirling-cylinder-shell {
+  fill: url(#stirling-metal);
+  stroke: #40515d;
+  stroke-width: 3;
+}
+.stirling-engine-model .stirling-cylinder-cut {
+  fill: url(#stirling-bore);
+  stroke: #586c79;
+}
+.stirling-engine-model .stirling-flywheel {
+  stroke: url(#stirling-dark-metal);
+  stroke-width: 18;
+}
+.stirling-rim-highlight { fill: none; stroke: #d7e3e9; stroke-width: 2; }
+.stirling-engine-model .stirling-wheel-spoke { stroke: url(#stirling-metal); stroke-width: 16; }
+.stirling-engine-model .stirling-flywheel-hub {
+  fill: url(#stirling-metal);
+  stroke: #40515d;
+  stroke-width: 3;
+}
+.stirling-engine-model .stirling-power-shaft { stroke: url(#stirling-shaft); }
+.stirling-engine-model .stirling-regenerator { fill: url(#stirling-bronze); stroke: #825923; }
+.stirling-engine-model .stirling-cam-follower { fill: url(#stirling-metal); }
+.stirling-engine-model .stirling-cooling-fin { stroke: url(#stirling-dark-metal); stroke-width: 6; }
+.stirling-engine-model .stirling-heat-source { fill: url(#stirling-flame); stroke: #c25727; stroke-width: 3; }
+.stirling-piston-ring { stroke: #536874; stroke-width: 2; }
+.stirling-fastener { fill: url(#stirling-dark-metal); stroke: #394c58; stroke-width: 1; }
+.stirling-fastener-slot { stroke: #e4edf2; stroke-width: 1; }
+
+.stirling-cooling-flange {
+  fill: url(#stirling-metal);
+  stroke: #536b7a;
+  stroke-width: 1.5;
+}
+.stirling-engine-label.bronze { fill: #a67532; }
+
+/* Lecture layout keeps the two synchronized illustrations in one row. */
+.stirling-lecture-shell { padding: 1rem; align-items: start; }
+.stirling-illustration-page {
+  display: grid;
+  width: min(1800px, 100%);
+  padding: clamp(0.75rem, 1.5vw, 1.5rem);
+  gap: 0.75rem;
+}
+.stirling-illustration-header { gap: 0.35rem; }
+.stirling-illustration-header .module-title { font-size: clamp(1.5rem, 2.5vw, 2.25rem); }
+.stirling-illustration-header .module-description { margin: 0; font-size: 1rem; }
+.stirling-illustration-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 0.75rem;
+}
+.stirling-illustration-page .stirling-panel { padding: 0.75rem; }
+.stirling-illustration-layout .stirling-panel { display: flex; flex-direction: column; }
+.stirling-illustration-layout svg {
+  height: clamp(260px, 48vh, 540px);
+  min-height: 0;
+}
+.stirling-engine-model { overflow: hidden; }
+.stirling-controls-panel {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem 1.5rem;
+}
+.stirling-controls-heading {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.stirling-controls-heading .stirling-section-title { margin: 0; }
+.stirling-controls-panel .stirling-results {
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.stirling-lecture-note { margin: 0; color: var(--text-secondary); font-size: 0.85rem; }
+@media (max-width: 700px) {
+  .stirling-illustration-layout { grid-template-columns: 1fr; }
+  .stirling-illustration-layout svg { height: auto; }
+  .stirling-controls-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stirling-controls-panel .stirling-results { grid-template-columns: 1fr; }
+}
+@media (max-width: 420px) {
+  .stirling-controls-panel { grid-template-columns: 1fr; }
+}
+
+.stirling-playback-buttons { display: flex; gap: 0.5rem; }
+.stirling-manual-button { background: #526978; }
+.stirling-manual-button[aria-pressed="true"] { background: #996b2e; }
+.stirling-manual-controls { grid-column: 1 / -1; }
+.stirling-manual-controls:not([hidden]) { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; align-items: center; }
+.stirling-engine-model.manual { touch-action: none; cursor: grab; user-select: none; }
+.stirling-engine-model.manual.dragging { cursor: grabbing; }
+@media (max-width: 700px) {
+  .stirling-manual-controls:not([hidden]) { grid-template-columns: 1fr; }
 }

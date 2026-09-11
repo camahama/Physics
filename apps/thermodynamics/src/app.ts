@@ -189,6 +189,22 @@ function createModuleIcon(slug: string) {
     line(79, 38, 88, 30, "thermal stroke");
     circle(88, 30, 3.2, "thermal crank");
     path("M 13 57 H 32 M 19 54 C 14 48 18 43 25 40 C 23 47 33 49 27 55", "thermal heat-source");
+  } else if (slug === "stirling-illustration") {
+    line(12, 58, 46, 58, "thermal stroke");
+    line(12, 58, 12, 18, "thermal stroke");
+    path("M 20 20 C 31 25 38 30 45 31", "thermal process isotherm");
+    path("M 20 44 C 30 48 38 50 45 50", "thermal process isotherm");
+    line(20, 20, 20, 44, "thermal process isochor");
+    line(45, 31, 45, 50, "thermal process isochor");
+    circle(20, 20, 2.6, "thermal bulb");
+    circle(45, 31, 2.6, "thermal bulb");
+    circle(45, 50, 2.6, "thermal bulb");
+    circle(20, 44, 2.6, "thermal bulb");
+    rect(54, 31, 24, 10, "thermal chamber");
+    rect(62, 33, 4, 6, "thermal piston regenerator");
+    rect(72, 33, 4, 6, "thermal piston");
+    circle(84, 36, 7, "thermal flywheel");
+    line(76, 36, 84, 31, "thermal stroke");
   } else if (slug === "process-builder") {
     line(18, 58, 82, 58, "thermal stroke");
     line(18, 58, 18, 12, "thermal stroke");

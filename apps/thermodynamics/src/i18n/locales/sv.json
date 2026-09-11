@@ -18,6 +18,40 @@
     "stirlingEngine": {
       "title": "Laboration: Stirlingmotorn"
     },
+    "stirlingIllustration": {
+      "title": "Stirlingmotor: illustration",
+      "description": "Utforska en ideal Stirlingcykel med helium. pV-diagrammet, beräkningarna och modellen av motorn är synkroniserade.",
+      "diagramTitle": "pV-diagram",
+      "diagramLabel": "pV-diagram för en ideal Stirlingcykel",
+      "controlsTitle": "Modellvärden",
+      "engineTitle": "Modellmotor",
+      "engineLabel": "Genomskuren modell av en Stirlingmotor med regenerator, cylinder, kolvar och svänghjul",
+      "controls": {
+        "coldTemperature": "Kall temperatur",
+        "hotTemperature": "Varm temperatur",
+        "compressionRatio": "Kompressionsförhållande",
+        "minVolume": "Minsta volym",
+        "minPressure": "Lägsta tryck",
+        "amount": "Heliummängd / mol",
+        "start": "Starta",
+        "stop": "Stoppa",
+        "manual": "Manuell",
+        "phase": "Cykelvinkel",
+        "manualHint": "Dra runt svänghjulet för att vrida cykeln åt valfritt håll. Släpp och ta nytt grepp vid behov, eller använd vinkelreglaget. Starta återupptar automatisk rörelse."
+      },
+      "results": {
+        "netWork": "Arbete per cykel",
+        "heatIn": "Tillförd värme Q_12",
+        "efficiency": "Ideal verkningsgrad"
+      },
+      "engine": {
+        "hot": "värmekälla",
+        "cooler": "kylare",
+        "regenerator": "regenerator",
+        "cam": "Svänghjul · två spårkammar",
+        "idealNote": "Ideal cykel: kamstyrda vilolägen; perfekt regenerering. Stångvolym och matrisens porvolym försummas."
+      }
+    },
     "processBuilder": {
       "title": "Kretsprocesser",
       "description": "Bygg ett pV-diagram genom att placera isotermer, adiabater, isokorer och isobarer. Fäst ändpunkter mot varandra för att skapa numrerade tillstånd.",

@@ -1,5 +1,6 @@
 import { renderHeatTemperatureModule } from "../modules/heat-temperature/index.js";
 import { renderProcessBuilderModule } from "../modules/process-builder/index.js";
+import { renderStirlingIllustrationModule } from "../modules/stirling-illustration/index.js";
 import { renderStirlingEngineModule } from "../modules/stirling-engine/index.js";
 
 export type ModuleRenderContext = {
@@ -19,6 +20,11 @@ export const moduleRegistry: ModuleDefinition[] = [
     slug: "stirling-engine",
     titleKey: "modules.stirlingEngine.title",
     render: renderStirlingEngineModule,
+  },
+  {
+    slug: "stirling-illustration",
+    titleKey: "modules.stirlingIllustration.title",
+    render: renderStirlingIllustrationModule,
   },
   {
     slug: "process-builder",
