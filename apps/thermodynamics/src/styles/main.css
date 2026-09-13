@@ -1499,3 +1499,15 @@ button {
 @media (max-width: 700px) {
   .stirling-manual-controls:not([hidden]) { grid-template-columns: 1fr; }
 }
+
+.module-icon .gas-particle { fill: #3984a1; stroke: #3984a1; stroke-width: 1; }
+.module-icon .thermometer { stroke-width: 2.5; }
+.module-icon .gas-thermometer-bulb { fill: var(--warm); stroke: var(--warm); stroke-width: 2; }
+
+.stirling-flywheel-caption {
+  margin: 0.25rem 0 0;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  text-align: right;
+}

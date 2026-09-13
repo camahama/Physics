@@ -172,11 +172,17 @@ function createModuleIcon(slug: string) {
   };
 
   if (slug === "heat-temperature") {
-    circle(48, 38, 18, "thermal bulb");
-    line(48, 12, 48, 41, "thermal mercury");
-    path("M 40 14 L 56 14 M 40 22 L 52 22 M 40 30 L 56 30", "thermal tick");
-    path("M 22 57 C 34 48 62 48 74 57", "thermal wave");
-    path("M 28 49 C 38 41 58 41 68 49", "thermal wave faint");
+    // Gas cylinder and thermometer, matching the experiment inside the module.
+    path("M 16 18 V 59 H 58 V 18", "thermal stroke");
+    rect(18, 29, 38, 7, "thermal piston");
+    line(37, 13, 37, 28, "thermal stroke");
+    line(29, 13, 45, 13, "thermal stroke");
+    for (const [x, y] of [[25, 44], [39, 48], [49, 42], [29, 53], [49, 53]]) {
+      circle(x, y, 1.5, "thermal gas-particle");
+    }
+    path("M 73 44 V 18 A 5 5 0 0 1 83 18 V 44 A 10 10 0 1 1 73 44 Z", "thermal thermometer");
+    line(78, 27, 78, 50, "thermal mercury");
+    circle(78, 52, 3, "thermal gas-thermometer-bulb");
   } else if (slug === "stirling-engine") {
     rect(12, 22, 58, 24, "thermal chamber");
     rect(36, 26, 10, 16, "thermal piston regenerator");
@@ -189,7 +195,7 @@ function createModuleIcon(slug: string) {
     line(79, 38, 88, 30, "thermal stroke");
     circle(88, 30, 3.2, "thermal crank");
     path("M 13 57 H 32 M 19 54 C 14 48 18 43 25 40 C 23 47 33 49 27 55", "thermal heat-source");
-  } else if (slug === "stirling-illustration") {
+  } else if ((slug === "stirling-illustration" || slug === "stirling-experimental")) {
     line(12, 58, 46, 58, "thermal stroke");
     line(12, 58, 12, 18, "thermal stroke");
     path("M 20 20 C 31 25 38 30 45 31", "thermal process isotherm");

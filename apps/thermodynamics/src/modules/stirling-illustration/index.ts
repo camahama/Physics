@@ -76,8 +76,7 @@ export function renderStirlingIllustrationModule({ t }: ModuleRenderContext): HT
   let animationFrame = 0;
   let startedAt = performance.now();
   let pausedPhase = 0;
-  let isRunning = true;
-  let isManual = false;
+  let isRunning = false;
   let dragPointer: number | null = null;
   let previousAngle: number | null = null;
 
@@ -119,11 +118,6 @@ export function renderStirlingIllustrationModule({ t }: ModuleRenderContext): HT
   const runButton = document.createElement("button");
   runButton.type = "button";
   runButton.className = "stirling-run-button running";
-  const manualButton = document.createElement("button");
-  manualButton.type = "button";
-  manualButton.className = "stirling-run-button stirling-manual-button";
-  manualButton.textContent = t("modules.stirlingIllustration.controls.manual");
-  manualButton.setAttribute("aria-pressed", "false");
   const manualControls = element("div", "stirling-manual-controls");
   manualControls.hidden = true;
   const manualHint = element("p", "stirling-lecture-note", t("modules.stirlingIllustration.controls.manualHint"));
@@ -207,7 +201,7 @@ export function renderStirlingIllustrationModule({ t }: ModuleRenderContext): HT
   const results = createResults();
 
   function updateModel() {
-    if (isManual) syncSlider(phaseControl, pausedPhase * 360);
+    if (!isRunning) syncSlider(phaseControl, pausedPhase * 360);
     const values = calculateCycle(state);
     syncControlValues();
     updateResults(results, values);
@@ -280,6 +274,7 @@ export function renderStirlingIllustrationModule({ t }: ModuleRenderContext): HT
     if (nextRunning === isRunning) {
       return;
     }
+    endDrag();
     if (nextRunning) {
       isRunning = true;
       startedAt = performance.now() - pausedPhase * 6400;
@@ -300,6 +295,8 @@ export function renderStirlingIllustrationModule({ t }: ModuleRenderContext): HT
       ? t("modules.stirlingIllustration.controls.stop")
       : t("modules.stirlingIllustration.controls.start");
     runButton.classList.toggle("running", isRunning);
+    manualControls.hidden = isRunning;
+    engineSvg.classList.toggle("manual", !isRunning);
   }
 
   function syncControlValues() {
@@ -321,17 +318,6 @@ export function renderStirlingIllustrationModule({ t }: ModuleRenderContext): HT
     if (pointer !== null && engineSvg.hasPointerCapture(pointer)) engineSvg.releasePointerCapture(pointer);
   }
 
-  function setManual(enabled: boolean) {
-    endDrag();
-    if (enabled) setRunning(false);
-    isManual = enabled;
-    manualButton.setAttribute("aria-pressed", String(enabled));
-    manualControls.hidden = !enabled;
-    engineSvg.classList.toggle("manual", enabled);
-    if (enabled) updateModel();
-    else setRunning(true);
-  }
-
   // Transform through the SVG screen matrix to account for letterboxing and zoom.
   function pointerPosition(event: PointerEvent) {
     const matrix = engineSvg.getScreenCTM();
@@ -342,7 +328,7 @@ export function renderStirlingIllustrationModule({ t }: ModuleRenderContext): HT
   }
 
   engineSvg.addEventListener("pointerdown", (event) => {
-    if (!isManual || dragPointer !== null || event.button !== 0) return;
+    if (isRunning || dragPointer !== null || event.button !== 0) return;
     const point = pointerPosition(event);
     if (!point || point.radius < 30 || point.radius > 288) return;
     event.preventDefault();
@@ -369,11 +355,7 @@ export function renderStirlingIllustrationModule({ t }: ModuleRenderContext): HT
       if (event.pointerId === dragPointer) endDrag();
     });
   }
-  manualButton.addEventListener("click", () => setManual(!isManual));
-  runButton.addEventListener("click", () => {
-    if (isManual) setManual(false);
-    else setRunning(!isRunning);
-  });
+  runButton.addEventListener("click", () => setRunning(!isRunning));
   updateRunButton();
 
   diagramPanel.append(
@@ -382,7 +364,7 @@ export function renderStirlingIllustrationModule({ t }: ModuleRenderContext): HT
   );
   const controlsHeading = element("div", "stirling-controls-heading");
   const playbackButtons = element("div", "stirling-playback-buttons");
-  playbackButtons.append(runButton, manualButton);
+  playbackButtons.append(runButton);
   controlsHeading.append(
     element("h2", "stirling-section-title", t("modules.stirlingIllustration.controlsTitle")),
     playbackButtons,
@@ -402,15 +384,13 @@ export function renderStirlingIllustrationModule({ t }: ModuleRenderContext): HT
   enginePanel.append(
     element("h2", "stirling-section-title", t("modules.stirlingIllustration.engineTitle")),
     engineSvg,
+    element("p", "stirling-flywheel-caption", t("modules.stirlingIllustration.engine.cam")),
   );
   const modelNote = element("p", "stirling-lecture-note", t("modules.stirlingIllustration.engine.idealNote"));
   content.append(header, layout, controlPanel, modelNote, createPackageCredit(t));
   page.append(content);
 
   updateModel();
-  renderEngine(engineSvg, calculateCycle(state), 0, t);
-  startedAt = performance.now();
-  animationFrame = requestAnimationFrame(animate);
 
   return page;
 }
@@ -549,6 +529,15 @@ function engineGeometry(values: CycleValues, phase: number) {
   return { moving, power: 104 + freeLength, regenerator: 80 + freeLength * hotFraction };
 }
 
+// Qualitative matrix temperature: stores heat on 2→3, returns it on 4→1.
+// The ideal cycle does not specify a matrix heat capacity or absolute temperature.
+function regeneratorHeatFraction(phase: number) {
+  const cycle = ((phase % 1 + 1) % 1) * 4;
+  const segment = Math.floor(cycle);
+  const progress = smoothStep(cycle - segment);
+  return segment === 0 ? 0 : segment === 1 ? progress : segment === 2 ? 1 : 1 - progress;
+}
+
 function renderEngine(svg: SVGSVGElement, values: CycleValues, phase: number, t: ModuleRenderContext["t"]) {
   const { moving, power, regenerator } = engineGeometry(values, phase);
   const cx = 810, cy = 310;
@@ -582,7 +571,16 @@ function renderEngine(svg: SVGSVGElement, values: CycleValues, phase: number, t:
   };
   metalGradient("stirling-metal", ["#394954", "#9caeb9", "#f5fafc", "#afbec7", "#71848f", "#dbe5ea", "#455b68"]);
   metalGradient("stirling-dark-metal", ["#27333e", "#758692", "#d6e0e6", "#637582", "#263843"]);
-  metalGradient("stirling-bronze", ["#69421e", "#b78643", "#f1d597", "#ba8740", "#624320"]);
+  const storedHeat = regeneratorHeatFraction(phase);
+  const thermalTint = (cold: number[], hot: number[]) =>
+    `rgb(${cold.map((channel, i) => Math.round(lerp(channel, hot[i], storedHeat))).join(" ")})`;
+  metalGradient("stirling-bronze", [
+    thermalTint([39, 67, 103], [119, 42, 28]),
+    thermalTint([83, 147, 193], [207, 98, 53]),
+    thermalTint([202, 231, 242], [255, 214, 160]),
+    thermalTint([76, 130, 176], [192, 77, 42]),
+    thermalTint([36, 64, 95], [100, 39, 27]),
+  ]);
   metalGradient("stirling-bore", ["#647581", "#cbd6dc", "#f5f8fa", "#c2cfd7", "#647783"]);
   metalGradient("stirling-shaft", ["#3c515e", "#eff8ff", "#a8bcc9", "#405866"], true);
   metalGradient("stirling-flame", ["#ffdf74", "#ffad32", "#e85020"]);
@@ -634,7 +632,6 @@ function renderEngine(svg: SVGSVGElement, values: CycleValues, phase: number, t:
     svgText(t("modules.stirlingIllustration.engine.regenerator"), 80, 510, "stirling-engine-label bronze"),
     svgText(`V = ${formatNumber(moving.volumeLiters)} l    p = ${formatNumber(moving.pressureAtm)} atm`, 80, 100, "stirling-engine-label"),
     svgText(`Vmax / Vmin = ${formatNumber(values.points[1].volumeLiters / values.points[0].volumeLiters)} : 1`, 80, 138, "stirling-engine-label"),
-    svgText(t("modules.stirlingIllustration.engine.cam"), 420, 545, "stirling-engine-label"),
   );
   // Dead-centre references measure gas length, excluding the solid matrix.
   for (const point of [values.points[0], values.points[1]]) {
@@ -868,7 +865,18 @@ function svgText(textContent: string, x: number, y: number, className: string) {
     y: String(y),
     class: className,
   });
-  text.textContent = textContent;
+  const parts = textContent.split(/(Vmax|Vmin|\bpV\b|\bp\b|\bV\b)/g);
+  parts.forEach(part => {
+    if (/^(Vmax|Vmin|pV|p|V)$/.test(part)) {
+      const symbol = svgNode("tspan", { "font-style": "italic" });
+      symbol.textContent = part.startsWith("V") ? "V" : part;
+      text.append(symbol);
+      if (part === "Vmax" || part === "Vmin") {
+        const subscript = svgNode("tspan", { "baseline-shift": "sub", "font-size": "70%", "font-style": "normal" });
+        subscript.textContent = part.slice(1); text.append(subscript);
+      }
+    } else text.append(document.createTextNode(part));
+  });
   return text;
 }
 

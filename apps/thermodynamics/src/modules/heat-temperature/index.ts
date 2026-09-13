@@ -10,7 +10,7 @@ const fmt = (n: number, digits = 0) => (Math.abs(n) < 1e-8 ? 0 : n).toFixed(digi
 
 export function renderHeatTemperatureModule({ t }: ModuleRenderContext): HTMLElement {
   const tr = (key: string) => t(`modules.heatTemperature.${key}`);
-  let mode: Experiment = "locked", view = "pv", input = 0, target = 0, paused = false, rotation = 145;
+  let mode: Experiment = "locked", view = "pv", input = 0, target = 0, rotation = 145;
   let previousTime = 0;
   let state = gasState(mode, input);
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -52,10 +52,22 @@ export function renderHeatTemperatureModule({ t }: ModuleRenderContext): HTMLEle
       vx: magnitude * Math.cos(angle) * 48, vy: magnitude * Math.sin(angle) * 48 };
   });
   const piston = svg("g", {});
-  piston.append(svg("rect", { x: 122, y: -14, width: 216, height: 20, rx: 3, fill: "url(#gas-steel)", stroke: "#4f6676", "stroke-width": 2 }), svg("rect", { x: 219, y: -51, width: 22, height: 37, fill: "url(#gas-steel)" }));
+  // The bore runs from x=129 to x=331. Leave metal clearance on both sides;
+  // only the small elastomer seals extend into that clearance.
+  piston.append(
+    svg("rect", { x: 130, y: -9, width: 8, height: 10, rx: 4, fill: "#283c48" }),
+    svg("rect", { x: 322, y: -9, width: 8, height: 10, rx: 4, fill: "#283c48" }),
+    svg("rect", { x: 135, y: -14, width: 190, height: 20, rx: 3, fill: "url(#gas-steel)", stroke: "#4f6676", "stroke-width": 2 }),
+    svg("rect", { x: 219, y: -51, width: 22, height: 37, fill: "url(#gas-steel)" }),
+  );
   const load = svg("rect", { x: 187, y: -75, width: 86, height: 25, rx: 4, fill: "#445768" });
   piston.append(load);
-  const lock = svg("path", { d: "M105 205H150M310 205H355", stroke: "#d58b30", "stroke-width": 9 });
+  const lock = svg("g", {});
+  lock.append(
+    svg("path", { d: "M120 164V192H155 M340 164V192H305", fill: "none", stroke: "#b98537", "stroke-width": 6, "stroke-linejoin": "round" }),
+    svg("circle", { cx: 120, cy: 172, r: 3, fill: "#4f5961" }),
+    svg("circle", { cx: 340, cy: 172, r: 3, fill: "#4f5961" }),
+  );
   const thermo = svg("rect", { x: 415, width: 12, rx: 6, fill: "#da643b" });
   cylinder.append(jacket, gas, particles, shell, piston, lock,
     svg("rect", { x: 410, y: 100, width: 22, height: 200, rx: 11, fill: "#e6ecf0", stroke: "#91a2ad" }), thermo,
@@ -92,15 +104,12 @@ export function renderHeatTemperatureModule({ t }: ModuleRenderContext): HTMLEle
     const box = el("div"); const value = el("strong"); box.append(el("span", "", label), value); meters.append(box); return value;
   });
   const controls = el("section", "gas-controls");
-  const control = slider(tr("heatControl"), -75, 225, 1, 0, value => { target = value; if (paused || reducedMotion) { input = target; update(); } });
-  const reset = button(tr("reset"), () => { input = target = (mode === "insulated" || mode === "isothermal") ? 1 : 0; update(); });
-  const pause = button(tr("pause"), () => { paused = !paused; pause.textContent = tr(paused ? "resume" : "pause"); pause.setAttribute("aria-pressed", String(paused)); });
-  pause.setAttribute("aria-pressed", "false");
-  controls.append(control.row, reset, pause);
+  const control = slider(tr("heatControl"), -75, 225, 1, 0, value => { target = value; if (reducedMotion) { input = target; update(); } });
+  controls.append(control.row);
   const energy = el("section", "gas-energy");
   energy.append(el("h2", "gas-panel-title", tr("energyTitle")));
   const energyRows = el("div", "gas-energy-rows");
-  const energyOutputs = ["heat", "work", "internal"].map(key => {
+  const energyOutputs = ["work", "heat", "internal"].map(key => {
     const row = el("div", `gas-energy-item ${key}`); const output = el("strong");
     const bar = el("div", "gas-energy-bar");
     const track = el("div", "gas-energy-track");
@@ -137,9 +146,9 @@ export function renderHeatTemperatureModule({ t }: ModuleRenderContext): HTMLEle
     lock.setAttribute("visibility", mode === "locked" ? "visible" : "hidden");
     const height = (state.temperature - 100) / 700 * 190;
     thermo.setAttribute("y", String(300 - height)); thermo.setAttribute("height", String(height)); thermo.setAttribute("fill", color(state.temperature));
-    setMathText(heatArrow, mode === "insulated" ? "Q = 0" : `${state.heat >= 0 ? "↑" : "↓"} Q = ${fmt(state.heat)} J`);
-    setMathText(workArrow, `${Math.abs(state.work) < 0.05 ? "" : state.work > 0 ? "↑ " : "↓ "}W = ${fmt(state.work)} J`);
-    [state.heat, state.work, state.energy].forEach((value, i) => {
+    setMathText(heatArrow, mode === "insulated" ? "Q = 0" : `${state.heat >= 0 ? "↑" : "↓"} Q = ${fmt(-state.heat)} J`);
+    setMathText(workArrow, `${Math.abs(state.work) < 0.05 ? "" : state.work > 0 ? "↑ " : "↓ "}W = ${fmt(-state.work)} J`);
+    [-state.work, -state.heat, state.energy].forEach((value, i) => {
       energyOutputs[i].output.textContent = `${fmt(value, 1)} J`;
       const extent = Math.min(50, Math.abs(value) / 225 * 50);
       energyOutputs[i].bar.style.width = `${extent}%`;
@@ -254,10 +263,8 @@ export function renderHeatTemperatureModule({ t }: ModuleRenderContext): HTMLEle
   function animate(now: number) {
     if (!page.isConnected) return;
     const dt = Math.min(.05, (now - (previousTime || now)) / 1000); previousTime = now;
-    if (!paused) {
-      if (Math.abs(target-input) > .0001) { input += (target-input)*Math.min(1,dt*7); if(Math.abs(target-input)<.0001) input=target; update(); }
-      if (!reducedMotion) { drawParticles(dt); }
-    }
+    if (Math.abs(target-input) > .0001) { input += (target-input)*Math.min(1,dt*7); if(Math.abs(target-input)<.0001) input=target; update(); }
+    if (!reducedMotion) { drawParticles(dt); }
     requestAnimationFrame(animate);
   }
   configure(); update(); requestAnimationFrame(animate);

@@ -1,3 +1,4 @@
+import { renderStirlingExperimentalModule } from "../modules/stirling-experimental/index.js";
 import { renderHeatTemperatureModule } from "../modules/heat-temperature/index.js";
 import { renderProcessBuilderModule } from "../modules/process-builder/index.js";
 import { renderStirlingIllustrationModule } from "../modules/stirling-illustration/index.js";
@@ -30,6 +31,12 @@ export const moduleRegistry: ModuleDefinition[] = [
     slug: "stirling-illustration",
     titleKey: "modules.stirlingIllustration.title",
     render: renderStirlingIllustrationModule,
+  },
+  {
+    slug: "stirling-experimental",
+    titleKey: "modules.stirlingExperimental.title",
+    render: renderStirlingExperimentalModule,
+    hiddenFromMenu: true,
   },
   {
     slug: "stirling-engine",
