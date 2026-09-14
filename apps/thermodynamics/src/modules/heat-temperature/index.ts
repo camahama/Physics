@@ -109,7 +109,7 @@ export function renderHeatTemperatureModule({ t }: ModuleRenderContext): HTMLEle
   const energy = el("section", "gas-energy");
   energy.append(el("h2", "gas-panel-title", tr("energyTitle")));
   const energyRows = el("div", "gas-energy-rows");
-  const energyOutputs = ["work", "heat", "internal"].map(key => {
+  const energyOutputs = ["heat", "work", "internal"].map(key => {
     const row = el("div", `gas-energy-item ${key}`); const output = el("strong");
     const bar = el("div", "gas-energy-bar");
     const track = el("div", "gas-energy-track");
@@ -148,7 +148,7 @@ export function renderHeatTemperatureModule({ t }: ModuleRenderContext): HTMLEle
     thermo.setAttribute("y", String(300 - height)); thermo.setAttribute("height", String(height)); thermo.setAttribute("fill", color(state.temperature));
     setMathText(heatArrow, mode === "insulated" ? "Q = 0" : `${state.heat >= 0 ? "↑" : "↓"} Q = ${fmt(state.heat)} J`);
     setMathText(workArrow, `${Math.abs(state.work) < 0.05 ? "" : state.work > 0 ? "↑ " : "↓ "}W = ${fmt(state.work)} J`);
-    [state.work, state.heat, state.energy].forEach((value, i) => {
+    [state.heat, state.work, state.energy].forEach((value, i) => {
       energyOutputs[i].output.textContent = `${fmt(value, 1)} J`;
       const extent = Math.min(50, Math.abs(value) / 225 * 50);
       energyOutputs[i].bar.style.width = `${extent}%`;

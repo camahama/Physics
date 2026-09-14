@@ -146,7 +146,7 @@
       "rotate": "Rotera ytan",
       "heatControl": "Tillförd nettovärme från starttillståndet",
       "volumeControl": "Kolvvolym",
-      "energyTitle": "Följ energin · W = Q − ΔU",
+      "energyTitle": "Följ energin · Q = W + ΔU",
       "heat": "Värme till gasen · Q",
       "work": "Arbete av gasen · W",
       "internal": "Inre energi · ΔU",

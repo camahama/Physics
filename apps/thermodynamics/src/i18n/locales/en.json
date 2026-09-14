@@ -146,7 +146,7 @@
       "rotate": "Rotate the surface",
       "heatControl": "Net heat added from the starting state",
       "volumeControl": "Piston volume",
-      "energyTitle": "Follow the energy · W = Q − ΔU",
+      "energyTitle": "Follow the energy · Q = W + ΔU",
       "heat": "Heat into gas · Q",
       "work": "Work by gas · W",
       "internal": "Internal energy · ΔU",
