@@ -146,9 +146,9 @@ export function renderHeatTemperatureModule({ t }: ModuleRenderContext): HTMLEle
     lock.setAttribute("visibility", mode === "locked" ? "visible" : "hidden");
     const height = (state.temperature - 100) / 700 * 190;
     thermo.setAttribute("y", String(300 - height)); thermo.setAttribute("height", String(height)); thermo.setAttribute("fill", color(state.temperature));
-    setMathText(heatArrow, mode === "insulated" ? "Q = 0" : `${state.heat >= 0 ? "↑" : "↓"} Q = ${fmt(-state.heat)} J`);
-    setMathText(workArrow, `${Math.abs(state.work) < 0.05 ? "" : state.work > 0 ? "↑ " : "↓ "}W = ${fmt(-state.work)} J`);
-    [-state.work, -state.heat, state.energy].forEach((value, i) => {
+    setMathText(heatArrow, mode === "insulated" ? "Q = 0" : `${state.heat >= 0 ? "↑" : "↓"} Q = ${fmt(state.heat)} J`);
+    setMathText(workArrow, `${Math.abs(state.work) < 0.05 ? "" : state.work > 0 ? "↑ " : "↓ "}W = ${fmt(state.work)} J`);
+    [state.work, state.heat, state.energy].forEach((value, i) => {
       energyOutputs[i].output.textContent = `${fmt(value, 1)} J`;
       const extent = Math.min(50, Math.abs(value) / 225 * 50);
       energyOutputs[i].bar.style.width = `${extent}%`;
