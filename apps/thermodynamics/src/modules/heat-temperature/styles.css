@@ -79,4 +79,6 @@
 .gas-equation-column-0 { justify-self: end; }
 .gas-equation-column-1 { justify-self: center; }
 .gas-equation-column-2 { justify-self: start; }
-.gas-poisson-brace { grid-column: 1; grid-row: 2 / 4; width: 100%; height: 100%; min-height: 0; align-self: stretch; }
+/* The SVG must not contribute its intrinsic height to the equation rows. */
+.gas-poisson-brace-slot { grid-column: 1; grid-row: 2 / 4; position: relative; min-height: 0; align-self: stretch; }
+.gas-poisson-brace { position: absolute; inset: 0; display: block; width: 100%; height: 100%; overflow: hidden; }

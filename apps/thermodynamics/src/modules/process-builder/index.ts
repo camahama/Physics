@@ -1,3 +1,4 @@
+import { svgClientPoint, pointerDrag, paletteDrag, primaryPointer } from "../../../../shared/interaction.js";
 import type { ModuleRenderContext } from "../../config/modules.js";
 import { createPackageCredit } from "../../components/packageCredit.js";
 
@@ -114,6 +115,7 @@ const state = {
 let nextProcessId = 1;
 
 export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElement {
+  state.dragging = null;
   const page = document.createElement("main");
   page.className = "page-shell process-builder-shell";
 
@@ -141,17 +143,7 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
   svg.setAttribute("class", "process-builder-board");
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", t("modules.processBuilder.boardLabel"));
-  svg.addEventListener("dragover", (event) => {
-    event.preventDefault();
-  });
-  svg.addEventListener("drop", (event) => {
-    event.preventDefault();
-    const processType = event.dataTransfer?.getData("application/x-process-type");
-    if (isProcessType(processType)) {
-      addProcess(processType, svgPointFromEvent(event, svg));
-    }
-  });
-  svg.addEventListener("pointermove", (event) => {
+  const boardDrag = pointerDrag(svg, (event) => {
     if (!state.dragging) {
       return;
     }
@@ -167,10 +159,8 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
       moveProcessBy(state.dragging.processId, delta);
       state.dragging.lastPoint = point;
     }
-    update();
-  });
-  svg.addEventListener("pointerup", () => finishDragging());
-  svg.addEventListener("pointerleave", () => finishDragging());
+    renderBoard();
+  }, (_event, cancelled) => finishDragging(cancelled));
 
   function update() {
     renderControls();
@@ -194,15 +184,9 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     for (const type of processTypes) {
       const button = document.createElement("button");
       button.type = "button";
-      button.draggable = true;
       button.className = "process-builder-tool";
       button.append(createProcessIcon(type), element("span", "", t(`modules.processBuilder.types.${type}`)));
-      button.addEventListener("dblclick", () => addProcess(type));
-      button.addEventListener("dragstart", (event) => {
-        event.dataTransfer?.setData("application/x-process-type", type);
-        event.dataTransfer?.setData("text/plain", type);
-        event.dataTransfer?.setDragImage(button, 24, 24);
-      });
+      paletteDrag(button, svg, () => addProcess(type), point => addProcess(type, clampPoint(point)), "dblclick");
       toolGrid.append(button);
     }
 
@@ -247,7 +231,7 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     }
 
     for (const numberedState of states) {
-      svg.append(renderStateLabel(numberedState, () => {
+      svg.append(renderStateLabel(numberedState, event => boardDrag.start(event), () => {
         removeProcessesByRefs(numberedState.refs);
         update();
       }));
@@ -528,13 +512,14 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     hitPath.setAttribute("d", pathData);
     hitPath.setAttribute("class", "process-hit-line");
     hitPath.addEventListener("pointerdown", (event) => {
+      if (!primaryPointer(event) || boardDrag.active) return;
       event.preventDefault();
       if (state.erasingProcess) {
         removeProcess(process.id);
         update();
         return;
       }
-      hitPath.setPointerCapture(event.pointerId);
+      if (!boardDrag.start(event)) return;
       state.dragging = {
         type: "process",
         processId: process.id,
@@ -556,13 +541,14 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     handle.setAttribute("class", `process-endpoint ${endpoint}`);
     handle.tabIndex = 0;
     handle.addEventListener("pointerdown", (event) => {
+      if (!primaryPointer(event) || boardDrag.active) return;
       event.preventDefault();
       if (state.erasingProcess) {
         removeProcessesByRefs(getConnectedEndpointRefs(process[endpoint]));
         update();
         return;
       }
-      handle.setPointerCapture(event.pointerId);
+      if (!boardDrag.start(event)) return;
       state.dragging = {
         type: "endpoint",
         refs: getConnectedEndpointRefs(process[endpoint]),
@@ -571,12 +557,12 @@ export function renderProcessBuilderModule({ t }: ModuleRenderContext): HTMLElem
     return handle;
   }
 
-  function finishDragging() {
+  function finishDragging(cancelled = false) {
     if (!state.dragging) {
       return;
     }
 
-    if (state.dragging.type === "endpoint" || state.dragging.type === "state") {
+    if (!cancelled && (state.dragging.type === "endpoint" || state.dragging.type === "state")) {
       const currentPoint = getEndpointPoint(state.dragging.refs[0]);
       const snapTarget = currentPoint ? getSnapTarget(currentPoint, state.dragging.refs) : null;
       if (snapTarget) {
@@ -1154,7 +1140,7 @@ function createDropHint(t: ModuleRenderContext["t"]) {
   return group;
 }
 
-function renderStateLabel(statePoint: StatePoint, onErase: () => void) {
+function renderStateLabel(statePoint: StatePoint, startDrag: (event: PointerEvent) => boolean, onErase: () => void) {
   const group = svgGroup("process-state");
   const badge = svgNode("circle", {
     cx: String(statePoint.x),
@@ -1169,12 +1155,13 @@ function renderStateLabel(statePoint: StatePoint, onErase: () => void) {
   });
   label.textContent = String(statePoint.label);
   group.addEventListener("pointerdown", (event) => {
+    if (!primaryPointer(event)) return;
     event.preventDefault();
     if (state.erasingProcess) {
       onErase();
       return;
     }
-    group.setPointerCapture(event.pointerId);
+    if (!startDrag(event)) return;
     state.dragging = {
       type: "state",
       refs: getConnectedEndpointRefs(statePoint),
@@ -2501,11 +2488,7 @@ function tableQuantityHeaderCell(symbol: string, unit: string) {
 }
 
 function svgPointFromEvent(event: MouseEvent | PointerEvent | DragEvent, svg: SVGSVGElement): Point {
-  const rect = svg.getBoundingClientRect();
-  return clampPoint({
-    x: ((event.clientX - rect.left) / rect.width) * BOARD_WIDTH,
-    y: ((event.clientY - rect.top) / rect.height) * BOARD_HEIGHT,
-  });
+  return clampPoint(svgClientPoint(svg, event));
 }
 
 function findStateLabel(point: Point, states: StatePoint[]) {

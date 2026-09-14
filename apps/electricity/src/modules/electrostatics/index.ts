@@ -555,6 +555,7 @@ export function renderElectrostaticsModule({ t }) {
   });
 
   canvas.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0 || event.isPrimary === false || pointerState.pointerId !== null) return;
     const { x, y } = getCanvasPoint(event);
     const existingCharge = findChargeAtPoint(x, y);
 
@@ -617,6 +618,10 @@ export function renderElectrostaticsModule({ t }) {
     }
 
     resetPointerState();
+  });
+
+  canvas.addEventListener("lostpointercapture", (event) => {
+    if (pointerState.pointerId === event.pointerId) resetPointerState();
   });
 
   canvas.addEventListener("pointercancel", (event) => {

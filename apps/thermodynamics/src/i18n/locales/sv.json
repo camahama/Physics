@@ -56,7 +56,7 @@
       "title": "Kretsprocesser",
       "description": "Bygg ett pV-diagram genom att placera isotermer, adiabater, isokorer och isobarer. Fäst ändpunkter mot varandra för att skapa numrerade tillstånd.",
       "toolsTitle": "Tillstånds­ändringar",
-      "instructions": "Dra en tillståndsändring till pV-diagrammet eller dubbelklicka på ett verktyg. Dra ändpunkterna för att forma och sluta cykeln.",
+      "instructions": "Dubbelklicka på en process för att lägga till den, eller dra den till diagrammet.",
       "boardTitle": "pV-diagram",
       "boardLabel": "pV-diagram för att bygga termodynamiska processer",
       "dropHint": "Dra tillståndsändring hit",
@@ -87,7 +87,7 @@
         "temperatureDof": "Tillståndstemperaturerna spänner över {min}–{max} K. För den här gasen är modellen med konstanta frihetsgrader bara en grov approximation utanför ungefär {low}–{high} K."
       },
       "help": {
-        "stateChanges": "Dra tillståndsändringar till pV-diagrammet. Ändpunkter fäster ihop till numrerade tillstånd; använd Radera tillståndsändring och klicka på linjer, ändpunkter eller tillståndsmarkörer för att ta bort dem.",
+        "stateChanges": "Dubbelklicka eller dra in en process i pV-diagrammet. Ändpunkter fäster vid numrerade tillstånd; välj Radera tillståndsändring och klicka på en linje, ändpunkt eller tillståndsmarkör för att ta bort den.",
         "values": "Värden i fetstil är manuellt inmatade och används som villkor. Värden utan fetstil har beräknats. Knappen Beräkna fyller i saknade värden; Räkna om ersätter beräknade värden men baserat på de fetstilta manuella värdena.",
         "gasModel": "Välj enheter och arbetsgas här. Massa och substansmängd kan också fyllas i som manuella villkor; om ett värde är beräknat kan Räkna om ersätta det.",
         "energy": "Värme och arbete beräknas från tillståndsändringarna och tillståndsvärdena. För en ideal Stirlingcykel antar de extra rutorna längst ner perfekt regenerering, dvs de isokora värmeflödena återvinns internt."

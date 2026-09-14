@@ -1,3 +1,4 @@
+import { svgClientPoint, pointerDrag, paletteDrag, primaryPointer } from "../../../../shared/interaction.js";
 import type { ModuleRenderContext } from "../../config/modules.js";
 import { createPackageCredit } from "../../components/packageCredit.js";
 import { solveLinearCircuit, type LinearCircuitComponent } from "./physics/linearCircuit.js";
@@ -17,6 +18,7 @@ const REAL_BATTERY_RESISTANCE_OHMS = 1;
 
 type Tool =
   | "select"
+  | "edit"
   | "wire"
   | "resistor"
   | "idealBattery"
@@ -78,6 +80,8 @@ let nextComponentId = 1;
 let nextProbeId = 1;
 
 export function renderCircuitBuilderModule({ t, language = "en" }: ModuleRenderContext): HTMLElement {
+  state.draggingNode = null; state.draggingComponent = null; state.draggingProbe = null; state.lastComponentClick = null;
+  let suppressDoubleClickUntil = 0;
   const page = document.createElement("main");
   page.className = "page-shell circuit-builder-shell";
 
@@ -115,6 +119,40 @@ export function renderCircuitBuilderModule({ t, language = "en" }: ModuleRenderC
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", t("modules.circuitBuilder.boardLabel"));
 
+  const editor = element("form", "circuit-builder-value-editor");
+  editor.hidden = true;
+  const valueLabel = element("label", "");
+  const valueCaption = element("span", "");
+  const valueInput = document.createElement("input");
+  valueInput.type = "text"; valueInput.inputMode = "decimal";
+  valueLabel.append(valueCaption, valueInput);
+  const saveValue = element("button", "", t("modules.circuitBuilder.saveValue")); saveValue.type = "submit";
+  const cancelValue = element("button", "", t("modules.circuitBuilder.cancelEdit")); cancelValue.type = "button";
+  let editedComponent: BoardComponent | null = null;
+  function closeEditor() { editor.hidden = true; editedComponent = null; valueInput.setCustomValidity(""); svg.focus(); }
+  cancelValue.addEventListener("click", closeEditor);
+  valueInput.addEventListener("input", () => valueInput.setCustomValidity(""));
+  editor.addEventListener("keydown", event => { if (event.key === "Escape") { event.preventDefault(); closeEditor(); } });
+  editor.addEventListener("submit", event => {
+    event.preventDefault();
+    if (!editedComponent || !state.components.includes(editedComponent)) { closeEditor(); return; }
+    const value = parseSiValue(valueInput.value.replace(",", "."));
+    if (!Number.isFinite(value) || (editedComponent.type === "resistor" && value <= 0)) {
+      valueInput.setCustomValidity(t("modules.circuitBuilder.invalidValue")); valueInput.reportValidity(); return;
+    }
+    if (editedComponent.type === "resistor") { editedComponent.resistanceOhms = value; state.lastResistanceOhms = value; }
+    else if (editedComponent.type === "idealBattery") { editedComponent.voltageVolts = value; state.lastBatteryVoltageVolts = value; }
+    closeEditor(); update();
+  });
+  editor.append(valueLabel, saveValue, cancelValue);
+  function editComponentValue(component: BoardComponent) {
+    if (component.type === "wire") return;
+    boardDrag.cancel(); editedComponent = component;
+    valueCaption.textContent = t(component.type === "resistor" ? "modules.circuitBuilder.resistanceValue" : "modules.circuitBuilder.voltageValue");
+    valueInput.value = component.type === "resistor" ? formatResistance(component.resistanceOhms) : formatVoltage(component.voltageVolts);
+    valueInput.setCustomValidity(""); editor.hidden = false; valueInput.focus(); valueInput.select();
+  }
+
   function update() {
     renderControls();
     renderBoard();
@@ -127,6 +165,7 @@ export function renderCircuitBuilderModule({ t, language = "en" }: ModuleRenderC
     const toolGrid = element("div", "circuit-builder-tool-grid");
 
     const tools: Array<{ tool: Tool; label: string; info: string }> = [
+      { tool: "edit", label: t("modules.circuitBuilder.editTool"), info: t("modules.circuitBuilder.editInfo") },
       { tool: "select", label: t("modules.circuitBuilder.selectTool"), info: t("modules.circuitBuilder.selectInfo") },
       { tool: "wire", label: t("modules.circuitBuilder.wireTool"), info: t("modules.circuitBuilder.wireInfo") },
       { tool: "resistor", label: t("modules.circuitBuilder.resistorTool"), info: t("modules.circuitBuilder.resistorInfo") },
@@ -146,11 +185,17 @@ export function renderCircuitBuilderModule({ t, language = "en" }: ModuleRenderC
       button.type = "button";
       button.className = entry.tool === state.selectedTool ? "circuit-builder-tool active" : "circuit-builder-tool";
       button.append(createToolIcon(entry.tool), element("span", "circuit-builder-tool-label", entry.label));
-      button.addEventListener("click", () => {
-        cancelPendingActions();
+      const activate = () => {
+        boardDrag.cancel(); cancelPendingActions();
         state.selectedTool = entry.tool;
         update();
-      });
+      };
+      if (["resistor", "idealBattery", "realBattery"].includes(entry.tool)) {
+        paletteDrag(button, svg, activate, point => {
+          boardDrag.cancel(); cancelPendingActions(); state.selectedTool = entry.tool;
+          placeAt(point); returnToSelect(); update();
+        });
+      } else button.addEventListener("click", activate);
       const infoButton = document.createElement("button");
       infoButton.type = "button";
       infoButton.className = "circuit-builder-tool-info";
@@ -252,16 +297,21 @@ export function renderCircuitBuilderModule({ t, language = "en" }: ModuleRenderC
     const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
     group.setAttribute("class", `circuit-builder-component circuit-builder-${component.type}`);
     group.addEventListener("pointerdown", (event) => {
+      if (!primaryPointer(event) || boardDrag.active) return;
       const point = svgPoint(svg, event);
+      if (state.selectedTool === "edit") {
+        event.preventDefault(); event.stopPropagation(); editComponentValue(component); return;
+      }
       if (state.selectedTool === "select") {
         event.preventDefault();
         event.stopPropagation();
-        if (handleComponentDoubleClick(component, point, event.target)) {
+        if (handleComponentDoubleClick(component, point, event.target, editComponentValue)) {
+          suppressDoubleClickUntil = performance.now() + 750;
           update();
           return;
         }
         state.draggingComponent = createDraggingComponent(component, point);
-        svg.setPointerCapture(event.pointerId);
+        boardDrag.start(event);
         return;
       }
       if (state.selectedTool === "currentProbe") {
@@ -293,7 +343,7 @@ export function renderCircuitBuilderModule({ t, language = "en" }: ModuleRenderC
     });
     group.addEventListener("dblclick", (event) => {
       event.stopPropagation();
-      if (state.selectedTool === "erase" || state.selectedTool === "currentProbe") {
+      if (performance.now() < suppressDoubleClickUntil || state.selectedTool === "erase" || state.selectedTool === "currentProbe") {
         return;
       }
       if (shouldEditComponentOnDoubleClick(component, event.target)) {
@@ -311,6 +361,14 @@ export function renderCircuitBuilderModule({ t, language = "en" }: ModuleRenderC
       return group;
     }
 
+    group.setAttribute("tabindex", "0");
+    group.setAttribute("role", "button");
+    group.setAttribute("aria-label", t("modules.circuitBuilder.componentAction"));
+    group.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault(); editComponentValue(component);
+      }
+    });
     if (isBatteryComponent(component)) {
       const positive = getNode(component.positiveNode);
       const negative = getNode(component.negativeNode);
@@ -362,6 +420,7 @@ export function renderCircuitBuilderModule({ t, language = "en" }: ModuleRenderC
     );
     group.setAttribute("transform", `translate(${node.x} ${node.y})`);
     group.addEventListener("pointerdown", (event) => {
+      if (!primaryPointer(event) || boardDrag.active) return;
       event.preventDefault();
       event.stopPropagation();
       if (state.selectedTool === "ground") {
@@ -395,12 +454,12 @@ export function renderCircuitBuilderModule({ t, language = "en" }: ModuleRenderC
         update();
         return;
       }
-      if (state.selectedTool === "erase" || state.selectedTool === "currentProbe") {
+      if (state.selectedTool === "edit" || state.selectedTool === "erase" || state.selectedTool === "currentProbe") {
         return;
       }
       const point = svgPoint(svg, event);
       state.draggingNode = { id: node.id, startX: point.x, startY: point.y, moved: false };
-      svg.setPointerCapture(event.pointerId);
+      boardDrag.start(event);
     });
 
     const hit = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -424,6 +483,7 @@ export function renderCircuitBuilderModule({ t, language = "en" }: ModuleRenderC
   svg.addEventListener(
     "pointerdown",
     (event) => {
+      if (!primaryPointer(event) || boardDrag.active) return;
       const point = svgPoint(svg, event);
 
       if (state.selectedTool === "select") {
@@ -435,7 +495,7 @@ export function renderCircuitBuilderModule({ t, language = "en" }: ModuleRenderC
         state.draggingProbe = probe;
         event.preventDefault();
         event.stopPropagation();
-        svg.setPointerCapture(event.pointerId);
+        boardDrag.start(event);
         return;
       }
 
@@ -454,11 +514,14 @@ export function renderCircuitBuilderModule({ t, language = "en" }: ModuleRenderC
     { capture: true },
   );
 
-  svg.addEventListener("pointerdown", (event) => {
-    const point = svgPoint(svg, event);
+  svg.addEventListener("pointerdown", event => {
+    if (!primaryPointer(event) || boardDrag.active) return;
+    placeAt(svgPoint(svg, event));
+  });
+  function placeAt(point: { x: number; y: number }) {
     const placementPoint = maybeSnapPoint(point);
 
-    if (state.selectedTool === "select") {
+    if (state.selectedTool === "select" || state.selectedTool === "edit") {
       return;
     }
 
@@ -549,9 +612,9 @@ export function renderCircuitBuilderModule({ t, language = "en" }: ModuleRenderC
     }
 
     update();
-  });
+  }
 
-  svg.addEventListener("pointermove", (event) => {
+  const boardDrag = pointerDrag(svg, (event) => {
     if (state.draggingProbe != null) {
       moveDraggingProbe(svgPoint(svg, event));
       renderBoard();
@@ -578,9 +641,11 @@ export function renderCircuitBuilderModule({ t, language = "en" }: ModuleRenderC
     node.x = targetPoint.x;
     node.y = targetPoint.y;
     renderBoard();
-  });
-
-  svg.addEventListener("pointerup", () => {
+  }, (_event, cancelled) => {
+    if (cancelled) {
+      state.draggingProbe = null; state.draggingComponent = null; state.draggingNode = null;
+      state.lastComponentClick = null; update(); return;
+    }
     if (state.draggingProbe != null) {
       state.draggingProbe = null;
       update();
@@ -613,7 +678,8 @@ export function renderCircuitBuilderModule({ t, language = "en" }: ModuleRenderC
     }
   });
 
-  boardPanel.append(snapControl, svg, results);
+  svg.setAttribute("tabindex", "0");
+  boardPanel.append(snapControl, editor, svg, results);
   layout.append(controls, boardPanel);
   content.append(header, layout, createPackageCredit(t));
   page.append(content);
@@ -782,11 +848,12 @@ function handleComponentDoubleClick(
   component: BoardComponent,
   point: { x: number; y: number },
   target: EventTarget | null,
+  edit: (component: BoardComponent) => void,
 ): boolean {
   const previous = state.lastComponentClick;
   const isDoubleClick =
     previous?.componentId === component.id &&
-    performance.now() - previous.time <= 450 &&
+    performance.now() - previous.time <= 750 &&
     Math.hypot(point.x - previous.x, point.y - previous.y) <= 8;
 
   state.lastComponentClick = {
@@ -804,7 +871,7 @@ function handleComponentDoubleClick(
   state.draggingComponent = null;
 
   if (shouldEditComponentOnDoubleClick(component, target)) {
-    editComponentValue(component);
+    edit(component);
   } else {
     splitComponentAtPoint(component, point);
   }
@@ -835,6 +902,7 @@ function moveDraggingComponent(point: { x: number; y: number }): boolean {
     return false;
   }
   dragging.moved = true;
+  state.lastComponentClick = null;
 
   if (state.snapToGrid && dragging.nodes.length > 0) {
     const referenceNode = dragging.nodes[0];
@@ -1194,35 +1262,6 @@ function getEffectiveGroundNode(): string | null {
 
   const firstBattery = state.components.find(isBatteryComponent);
   return firstBattery?.negativeNode ?? null;
-}
-
-function editComponentValue(component: BoardComponent): void {
-  if (component.type === "wire") {
-    return;
-  }
-
-  if (component.type === "resistor") {
-    const nextValue = window.prompt("Resistance (Ω)", formatResistance(component.resistanceOhms));
-    if (nextValue == null) {
-      return;
-    }
-    const parsed = parseSiValue(nextValue);
-    if (Number.isFinite(parsed) && parsed > 0) {
-      component.resistanceOhms = parsed;
-      state.lastResistanceOhms = parsed;
-    }
-    return;
-  }
-
-  const nextValue = window.prompt("Voltage (V)", formatVoltage(component.voltageVolts));
-  if (nextValue == null) {
-    return;
-  }
-  const parsed = parseSiValue(nextValue);
-  if (Number.isFinite(parsed)) {
-    component.voltageVolts = parsed;
-    state.lastBatteryVoltageVolts = parsed;
-  }
 }
 
 function renderPotentialProbe(probe: PotentialProbe): SVGElement {
@@ -2020,11 +2059,7 @@ function distanceToSegment(
 }
 
 function svgPoint(svg: SVGSVGElement, event: MouseEvent | PointerEvent): { x: number; y: number } {
-  const point = svg.createSVGPoint();
-  point.x = event.clientX;
-  point.y = event.clientY;
-  const transformed = point.matrixTransform(svg.getScreenCTM()?.inverse());
-  return { x: transformed.x, y: transformed.y };
+  return svgClientPoint(svg, event);
 }
 
 function clamp(value: number, minimum: number, maximum: number): number {
@@ -2194,7 +2229,9 @@ function createToolIcon(tool: Tool): SVGSVGElement {
     icon.append(node);
   };
 
-  if (tool === "select") {
+  if (tool === "edit") {
+    path("M 19 27 L 22 18 L 41 3 L 48 10 L 29 27 Z M 22 18 L 29 25");
+  } else if (tool === "select") {
     path("M 20 20 V 14 C 20 11 24 11 24 14 V 20 V 9 C 24 6 28 6 28 9 V 20 V 12 C 28 9 32 9 32 12 V 21 V 15 C 32 12 36 12 36 15 V 22 L 39 18 C 41 16 44 18 43 21 L 39 30 C 38 33 36 34 32 34 H 26 C 22 34 19 32 17 29 L 12 21 C 11 19 13 17 15 18 Z");
   } else if (tool === "wire") {
     line(8, 18, 56, 18);

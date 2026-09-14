@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { svgClientPoint } from '../../../../../../shared/interaction';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { RaytraceSimulation } from '../../simulations/raytrace/raytraceSimulation';
 import { useUiText } from '../../app/i18n';
 import { UI_PARAMS } from '../../app/uiParams';
@@ -14,6 +15,7 @@ export function RaytracePanel() {
   const text = useUiText().modules.raytrace;
   const [sourceXOffset, setSourceXOffset] = useState(sim.getState().sourceXOffset);
   const [radius, setRadius] = useState(sim.getState().radius);
+  const activePointer = useRef<number | null>(null);
   const [dragging, setDragging] = useState(false);
 
   const snapshot = useMemo(() => {
@@ -22,11 +24,12 @@ export function RaytracePanel() {
     return sim.compute();
   }, [sourceXOffset, radius]);
 
-  const offsetFromPointer = (evt: React.PointerEvent<SVGElement>) => {
-    const rect = evt.currentTarget.getBoundingClientRect();
-    const x = ((evt.clientX - rect.left) / rect.width) * 1000;
-    return x - 500;
-  };
+  useEffect(() => {
+    const cancel = () => { activePointer.current = null; setDragging(false); };
+    window.addEventListener('blur', cancel);
+    return () => window.removeEventListener('blur', cancel);
+  }, []);
+  const offsetFromPointer = (evt: React.PointerEvent<SVGSVGElement>) => svgClientPoint(evt.currentTarget, evt).x - 500;
 
   return (
     <section className="panel">
@@ -42,24 +45,30 @@ export function RaytracePanel() {
           className={dragging ? 'prism-canvas drag-hidden-cursor' : 'prism-canvas'}
           role="img"
           aria-label={text.canvasAria}
+          style={{ touchAction: 'none', userSelect: 'none' }}
           onPointerDown={(e) => {
+            if (e.button !== 0 || !e.isPrimary || activePointer.current !== null) return;
+            activePointer.current = e.pointerId;
             setDragging(true);
             e.currentTarget.setPointerCapture(e.pointerId);
             setSourceXOffset(offsetFromPointer(e));
           }}
           onPointerMove={(e) => {
-            if (!dragging) {
+            if (activePointer.current !== e.pointerId) {
               return;
             }
             setSourceXOffset(offsetFromPointer(e));
           }}
           onPointerUp={(e) => {
+            if (e.pointerId !== activePointer.current) return;
+            activePointer.current = null;
             if (e.currentTarget.hasPointerCapture(e.pointerId)) {
               e.currentTarget.releasePointerCapture(e.pointerId);
             }
             setDragging(false);
           }}
-          onPointerLeave={() => setDragging(false)}
+          onPointerCancel={() => { activePointer.current = null; setDragging(false); }}
+          onLostPointerCapture={() => { activePointer.current = null; setDragging(false); }}
         >
           <rect x="0" y="0" width="1000" height="520" fill="#0a1017" />
 

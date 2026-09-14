@@ -204,7 +204,11 @@ function loadSettings() {
 }
 
 function saveSettings(value) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
+  } catch {
+    // Private/embedded browsing can deny storage; keep the live controls working.
+  }
 }
 
 function parseHourLabels(text, start, end) {

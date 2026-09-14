@@ -109,7 +109,15 @@
       "instructions": "Choose a component, then click the board. Wires and volt/ohm-meters use two clicks. Drag nodes and components to reshape the circuit. Double-click components to edit their values, double-click wires to split them, and click nodes to split them.",
       "boardLabel": "Circuit builder sandbox",
       "emptyState": "Place a resistor, battery, wire, or ground to start.",
-      "noGround": "Place a battery or set a ground node to solve the circuit."
+      "noGround": "Place a battery or set a ground node to solve the circuit.",
+      "editTool": "Edit value",
+      "editInfo": "Select this tool, then click a resistor or battery to edit its value. You can also focus a component and press Enter.",
+      "saveValue": "Apply",
+      "cancelEdit": "Cancel",
+      "invalidValue": "Enter a valid number; resistance must be positive. SI prefixes are supported.",
+      "resistanceValue": "Resistance / Ω",
+      "voltageValue": "Voltage / V",
+      "componentAction": "Circuit component. Press Enter to edit its value."
     },
     "phasorDiagram": {
       "title": "Phasor Diagrams",

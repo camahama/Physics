@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { svgClientPoint } from '../../../../../../shared/interaction';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { RAINBOW_BANDS } from '../../physics/droplet/engine';
 import { DropletSimulation } from '../../simulations/droplet/dropletSimulation';
 import { translateSpectrumColor } from '../../app/uiText';
@@ -24,6 +25,7 @@ export function DropletPanel() {
   const [radius, setRadius] = useState<number>(initial.radius);
   const [primaryU, setPrimaryU] = useState<number[]>([...initial.primaryU]);
   const [secondaryU, setSecondaryU] = useState<number[]>([...initial.secondaryU]);
+  const activePointer = useRef<number | null>(null);
   const [draggingHandle, setDraggingHandle] = useState<'primary' | 'secondary' | null>(null);
 
   const snapshot = useMemo(() => {
@@ -41,18 +43,15 @@ export function DropletPanel() {
     return sim.compute();
   }, [visible, focusedIndex, showPrimary, showSecondary, radius, primaryU, secondaryU]);
 
-  const pointerToScene = (evt: React.PointerEvent<SVGSVGElement | SVGCircleElement>) => {
-    const rect = evt.currentTarget.getBoundingClientRect();
-    const sx = UI_PARAMS.droplet.layoutDefaults.width / rect.width;
-    const sy = UI_PARAMS.droplet.layoutDefaults.height / rect.height;
-    return {
-      x: (evt.clientX - rect.left) * sx,
-      y: (evt.clientY - rect.top) * sy,
-    };
-  };
+  useEffect(() => {
+    const cancel = () => { activePointer.current = null; setDraggingHandle(null); };
+    window.addEventListener('blur', cancel);
+    return () => window.removeEventListener('blur', cancel);
+  }, []);
+  const pointerToScene = (evt: React.PointerEvent<SVGSVGElement>) => svgClientPoint(evt.currentTarget, evt);
 
-  const updateFromPointer = (evt: React.PointerEvent<SVGSVGElement>) => {
-    if (!draggingHandle) {
+  const updateFromPointer = (evt: React.PointerEvent<SVGSVGElement>, handle = draggingHandle) => {
+    if (!handle) {
       return;
     }
 
@@ -61,7 +60,7 @@ export function DropletPanel() {
     const clampedPrimary = Math.max(-snapshot.layout.radius * 0.995, Math.min(-1e-3, dxRaw));
     const clampedSecondary = Math.max(1e-3, Math.min(snapshot.layout.radius * 0.995, dxRaw));
 
-    if (draggingHandle === 'primary') {
+    if (handle === 'primary') {
       const u = Math.max(0, Math.min(0.999, Math.abs(clampedPrimary) / (snapshot.layout.radius * 0.995)));
       const next = [...primaryU];
       next[focusedIndex] = u;
@@ -85,7 +84,10 @@ export function DropletPanel() {
             className={draggingHandle ? 'prism-canvas drag-hidden-cursor' : 'prism-canvas'}
             role="img"
             aria-label={text.canvasAria}
+            style={{ touchAction: 'none', userSelect: 'none' }}
             onPointerDown={(evt) => {
+              if (evt.button !== 0 || !evt.isPrimary || activePointer.current !== null) return;
+              activePointer.current = evt.pointerId;
               const p = pointerToScene(evt);
               const side = p.x < snapshot.layout.center.x ? 'primary' : 'secondary';
               setDraggingHandle(side);
@@ -95,16 +97,19 @@ export function DropletPanel() {
                 setShowSecondary(true);
               }
               evt.currentTarget.setPointerCapture(evt.pointerId);
-              updateFromPointer(evt);
+              updateFromPointer(evt, side);
             }}
-            onPointerMove={(evt) => updateFromPointer(evt)}
+            onPointerMove={(evt) => { if (evt.pointerId === activePointer.current) updateFromPointer(evt); }}
             onPointerUp={(evt) => {
+              if (evt.pointerId !== activePointer.current) return;
+              activePointer.current = null;
               if (evt.currentTarget.hasPointerCapture(evt.pointerId)) {
                 evt.currentTarget.releasePointerCapture(evt.pointerId);
               }
               setDraggingHandle(null);
             }}
-            onPointerLeave={() => setDraggingHandle(null)}
+            onPointerCancel={() => { activePointer.current = null; setDraggingHandle(null); }}
+            onLostPointerCapture={() => { activePointer.current = null; setDraggingHandle(null); }}
           >
           <rect x="0" y="0" width="1000" height="560" fill="#111720" />
           <circle

@@ -1511,3 +1511,6 @@ button {
   font-size: 0.95rem;
   text-align: right;
 }
+
+.process-builder-tool { touch-action: none; user-select: none; -webkit-user-select: none; }
+.process-builder-board { user-select: none; -webkit-user-select: none; }

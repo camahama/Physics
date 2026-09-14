@@ -1,6 +1,7 @@
 import { createPackageCredit } from "../../components/packageCredit.js";
 import { createFieldLineOverlayFromPotentialGrid } from "../electrostatics/visualization/fieldLineOverlay.js";
 
+let nextObjectId = 1;
 const GRID_SIZE = 750;
 const DEFAULT_PIECE_SIZE = 120;
 const MIN_PIECE_SIZE = 40;
@@ -247,7 +248,7 @@ function getMaterialStyle(type) {
 
 function createPiece(type, centerX, centerY) {
   return {
-    id: crypto.randomUUID(),
+    id: `material-object-${nextObjectId++}`,
     type,
     x: Math.round(centerX - DEFAULT_PIECE_SIZE / 2),
     y: Math.round(centerY - DEFAULT_PIECE_SIZE / 2),
@@ -258,7 +259,7 @@ function createPiece(type, centerX, centerY) {
 
 function createCharge(charge, centerX, centerY) {
   return {
-    id: crypto.randomUUID(),
+    id: `material-object-${nextObjectId++}`,
     charge,
     x: Math.round(centerX),
     y: Math.round(centerY),
@@ -718,6 +719,7 @@ export function renderElectrostaticsMaterialsModule({ t }) {
   });
 
   canvas.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0 || event.isPrimary === false || pointerState.pointerId !== null) return;
     const { x, y } = getCanvasPoint(event);
     const charge = findChargeAtPoint(x, y);
     const piece = findPieceAtPoint(x, y);
@@ -835,6 +837,10 @@ export function renderElectrostaticsMaterialsModule({ t }) {
     }
 
     resetPointerState();
+  });
+
+  canvas.addEventListener("lostpointercapture", (event) => {
+    if (pointerState.pointerId === event.pointerId) resetPointerState();
   });
 
   canvas.addEventListener("pointercancel", (event) => {

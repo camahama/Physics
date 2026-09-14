@@ -56,7 +56,7 @@
       "title": "Circuit Processes",
       "description": "Build a pV process diagram by placing isotherms, adiabats, isochores, and isobars. Snap endpoints together to create numbered states.",
       "toolsTitle": "State changes",
-      "instructions": "Drag a state change into the pV diagram or double-click a state-change tool. Drag endpoints to shape and snap the cycle.",
+      "instructions": "Double-click a process to add it, or drag it onto the diagram.",
       "boardTitle": "pV diagram",
       "boardLabel": "Thermodynamic process builder pV diagram",
       "dropHint": "Drag state change here",
@@ -87,7 +87,7 @@
         "temperatureDof": "The state temperatures span {min}–{max} K. For this gas, the fixed degrees of freedom model is only a rough approximation outside about {low}–{high} K."
       },
       "help": {
-        "stateChanges": "Drag state changes into the pV diagram. Endpoints snap into numbered states; use Erase state change and then click lines, endpoints, or state markers to remove them.",
+        "stateChanges": "Double-click or drag a process into the pV diagram. Endpoints snap into numbered states; use Erase state change and click a line, endpoint, or state marker to remove it.",
         "values": "Values in bold are manual inputs and are kept as constraints. Values not in bold have been calculated. The button Calculate fills in missing values; Recalculate replaces calculated values based on the bold manual ones.",
         "gasModel": "Choose units and working gas here. Mass and amount also become bold manual constraints when typed; if one is calculated, Recalculate may replace it.",
         "energy": "Heat and work are calculated from the current state changes and state values. For an ideal Stirling cycle, the extra boxes assume perfect regeneration, so the isochoric heat flows are recovered internally."

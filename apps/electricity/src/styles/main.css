@@ -2414,3 +2414,10 @@ button {
     font-size: 0.68rem;
   }
 }
+
+.circuit-builder-tool { touch-action: none; user-select: none; -webkit-user-select: none; }
+.circuit-builder-value-editor:not([hidden]) { display: flex; align-items: end; flex-wrap: wrap; gap: .6rem; padding: .8rem; margin-bottom: .7rem; border: 1px solid #b8cbd7; border-radius: 10px; background: #f0f6fa; }
+.circuit-builder-value-editor label { display: grid; gap: .3rem; flex: 1; }
+.circuit-builder-value-editor input { min-width: 0; padding: .5rem; font: inherit; }
+.circuit-builder-value-editor button { padding: .5rem .8rem; font: inherit; cursor: pointer; }
+.circuit-builder-component:focus-visible { outline: 2px solid #0e7893; }

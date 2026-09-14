@@ -159,7 +159,9 @@ export function renderHeatTemperatureModule({ t }: ModuleRenderContext): HTMLEle
     const braced = mode === "insulated";
     aligned.classList.toggle("gas-equations-braced", braced);
     expressions.forEach((expression, row) => {
-      const separator = expression.indexOf("<mo>=</mo>");
+      const separator = mode === "isothermal" && row === expressions.length - 1
+        ? expression.lastIndexOf("<mo>=</mo>")
+        : expression.indexOf("<mo>=</mo>");
       const cells = [expression.slice(0, separator), "<mo>=</mo>", expression.slice(separator + 10)];
       cells.forEach((markup, column) => {
         const math = document.createElementNS("http://www.w3.org/1998/Math/MathML", "math");
@@ -174,7 +176,9 @@ export function renderHeatTemperatureModule({ t }: ModuleRenderContext): HTMLEle
     if (braced) {
       const brace = svg("svg", { viewBox: "0 0 20 100", preserveAspectRatio: "none", class: "gas-poisson-brace", "aria-hidden": "true" });
       brace.append(svg("path", { d: "M18 1 C7 1 7 8 7 17 L7 39 Q7 50 1 50 Q7 50 7 61 L7 83 C7 92 7 99 18 99", fill: "none", stroke: "currentColor", "stroke-width": 2, "vector-effect": "non-scaling-stroke" }));
-      aligned.append(brace);
+      const braceSlot = el("div", "gas-poisson-brace-slot");
+      braceSlot.append(brace);
+      aligned.append(braceSlot);
     }
     equations.replaceChildren(aligned);
     control.input.min = (mode === "insulated" || mode === "isothermal") ? "0.45" : "-75";

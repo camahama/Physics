@@ -109,7 +109,15 @@
       "instructions": "Välj en komponent och klicka på ytan. Ledningar och volt/ohmmeter använder två klick. Dra noder och komponenter för att forma kretsen. Dubbelklicka på komponenter för att redigera värden, dubbelklicka på ledningar för att dela dem och klicka på noder för att dela dem.",
       "boardLabel": "Yta för att bygga kopplingar",
       "emptyState": "Placera en resistor, ett batteri, en ledning eller jord för att börja.",
-      "noGround": "Placera ett batteri eller ange en jordnod för att lösa kretsen."
+      "noGround": "Placera ett batteri eller ange en jordnod för att lösa kretsen.",
+      "editTool": "Ändra värde",
+      "editInfo": "Välj verktyget och klicka sedan på ett motstånd eller batteri för att ändra värdet. Du kan också fokusera en komponent och trycka Enter.",
+      "saveValue": "Verkställ",
+      "cancelEdit": "Avbryt",
+      "invalidValue": "Ange ett giltigt tal; resistansen måste vara positiv. SI-prefix kan användas.",
+      "resistanceValue": "Resistans / Ω",
+      "voltageValue": "Spänning / V",
+      "componentAction": "Kretskomponent. Tryck Enter för att ändra värdet."
     },
     "phasorDiagram": {
       "title": "Visardiagram",
