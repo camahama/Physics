@@ -13,6 +13,11 @@
 .gas-lesson strong { color: #354f60; font-size: 1.15rem; }
 .gas-lesson span { color: #596673; }
 .gas-stage { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.gas-stage.gas-stage-with-theory { grid-template-columns: minmax(0, .8fr) minmax(220px, .5fr) minmax(0, 1fr); }
+.gas-theory-panel[hidden] { display: none; }
+.gas-theory-panel { display: flex; flex-direction: column; }
+.gas-equations { display: flex; flex: 1; flex-direction: column; justify-content: center; gap: 1.5rem; padding: 1.5rem 0; color: #355165; }
+.gas-equations math { font-size: clamp(1.15rem, 1.7vw, 1.6rem); }
 .gas-panel { min-width: 0; border: 1px solid #d6e0e7; border-radius: 14px; background: linear-gradient(145deg,#fff,#f3f7fa); padding: 1rem; }
 .gas-panel-title { margin: 0; color: #385264; font-size: 1rem; font-weight: 700; }
 .gas-panel > svg { display: block; width: 100%; height: clamp(260px, 40vh, 430px); }
@@ -52,7 +57,7 @@
 .gas-model-details { color: #627583; font-size: .85rem; }
 .gas-model-details summary { cursor: pointer; }
 @media(max-width: 760px) {
-  .gas-stage { grid-template-columns: 1fr; }
+  .gas-stage, .gas-stage.gas-stage-with-theory { grid-template-columns: 1fr; }
   .gas-experiments { grid-template-columns: 1fr; }
   .gas-controls { flex-wrap: wrap; }
   .gas-controls .gas-slider { flex-basis: 100%; }
@@ -61,3 +66,17 @@
   .gas-meters > div { display: grid; padding: .5rem; }
   .gas-meters strong { font-size: 1.4rem; }
 }
+
+.gas-aligned-equations {
+  display: grid;
+  grid-template-columns: max-content max-content max-content;
+  align-items: baseline;
+  gap: 1.2em 0.2em;
+  align-self: center;
+}
+.gas-equations-braced { grid-template-columns: 0.7em max-content max-content max-content; }
+.gas-equation-cell { margin: 0; }
+.gas-equation-column-0 { justify-self: end; }
+.gas-equation-column-1 { justify-self: center; }
+.gas-equation-column-2 { justify-self: start; }
+.gas-poisson-brace { grid-column: 1; grid-row: 2 / 4; width: 100%; height: 100%; min-height: 0; align-self: stretch; }

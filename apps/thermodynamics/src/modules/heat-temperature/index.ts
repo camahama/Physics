@@ -33,7 +33,7 @@ export function renderHeatTemperatureModule({ t }: ModuleRenderContext): HTMLEle
   const stage = el("div", "gas-stage");
   const apparatus = el("section", "gas-panel");
   apparatus.append(el("h2", "gas-panel-title", tr("apparatus")));
-  const cylinder = svg("svg", { viewBox: "0 -25 600 425", role: "img", "aria-label": tr("apparatus") });
+  const cylinder = svg("svg", { viewBox: "65 -25 395 425", role: "img", "aria-label": tr("apparatus") });
   cylinder.innerHTML = `<defs><linearGradient id="gas-steel" x2="1" y2="0"><stop stop-color="#546675"/><stop offset=".25" stop-color="#eef5fa"/><stop offset=".55" stop-color="#b9c9d4"/><stop offset=".8" stop-color="#f5fafc"/><stop offset="1" stop-color="#627685"/></linearGradient><pattern id="gas-insulation" width="9" height="9" patternUnits="userSpaceOnUse"><path d="M0 9L9 0" stroke="#a38148" stroke-width="3"/></pattern></defs>`;
   const jacket = svg("path", {
     d: "M100 60H120V320H340V60H360V335H100Z",
@@ -86,6 +86,34 @@ export function renderHeatTemperatureModule({ t }: ModuleRenderContext): HTMLEle
   workArrow.setAttribute("text-anchor", "middle");
   cylinder.append(heatArrow, workArrow);
   apparatus.append(cylinder, el("p", "gas-caption", tr("particleNote")));
+  const theoryPanel = el("section", "gas-panel gas-theory-panel");
+  theoryPanel.append(el("h2", "gas-panel-title", tr("theory")));
+  const equations = el("div", "gas-equations");
+  // Native MathML keeps variables italic and constants/operators upright.
+  const theoryEquations: Partial<Record<Experiment, string[]>> = {
+    locked: [
+      '<mi>V</mi><mo>=</mo><mtext>const.</mtext>',
+      '<mi>W</mi><mo>=</mo><mn>0</mn>',
+      '<mi>Q</mi><mo>=</mo><mi mathvariant="normal">Δ</mi><mi>U</mi>',
+    ],
+    loaded: [
+      '<mi>p</mi><mo>=</mo><mtext>const.</mtext>',
+      '<mi>W</mi><mo>=</mo><mi>p</mi><mo>(</mo><msub><mi>V</mi><mn>2</mn></msub><mo>−</mo><msub><mi>V</mi><mn>1</mn></msub><mo>)</mo>',
+      '<mi>Q</mi><mo>=</mo><mi mathvariant="normal">Δ</mi><mi>U</mi><mo>+</mo><mi>p</mi><mi mathvariant="normal">Δ</mi><mi>V</mi>',
+    ],
+    isothermal: [
+      '<mi>T</mi><mo>=</mo><mtext>const.</mtext>',
+      '<mi mathvariant="normal">Δ</mi><mi>U</mi><mo>=</mo><mn>0</mn>',
+      '<mi>Q</mi><mo>=</mo><mi>W</mi><mo>=</mo><mi>n</mi><mi>R</mi><mi>T</mi><mspace width="thinmathspace"/><mi mathvariant="normal">ln</mi><mo>&#x2061;</mo><mfrac><msub><mi>V</mi><mn>2</mn></msub><msub><mi>V</mi><mn>1</mn></msub></mfrac>',
+    ],
+    insulated: [
+      '<mi>Q</mi><mo>=</mo><mn>0</mn>',
+      '<mi>T</mi><msup><mi>V</mi><mrow><mspace width="0.15em"/><mi>γ</mi><mo>−</mo><mn>1</mn></mrow></msup><mo>=</mo><mtext>const.</mtext>',
+      '<mi>p</mi><msup><mi>V</mi><mrow><mspace width="0.15em"/><mi>γ</mi></mrow></msup><mo>=</mo><mtext>const.</mtext>',
+      '<mi>W</mi><mo>=</mo><mo>−</mo><mi mathvariant="normal">Δ</mi><mi>U</mi>',
+    ],
+  };
+  theoryPanel.append(equations);
   const graphPanel = el("section", "gas-panel");
   const graphHead = el("div", "gas-graph-head");
   graphHead.append(el("h2", "gas-panel-title", tr("stateSpace")));
@@ -98,7 +126,7 @@ export function renderHeatTemperatureModule({ t }: ModuleRenderContext): HTMLEle
   const graphNote = el("p", "gas-caption");
   const rotate = slider(tr("rotate"), -180, 180, 1, rotation, value => { rotation = value; drawGraph(); });
   graphPanel.append(graphHead, graph, rotate.row, graphNote);
-  stage.append(apparatus, graphPanel);
+  stage.append(apparatus, theoryPanel, graphPanel);
   const meters = el("div", "gas-meters");
   const readouts = ["T / K", "V / l", "p / bar"].map(label => {
     const box = el("div"); const value = el("strong"); box.append(el("span", "", label), value); meters.append(box); return value;
@@ -124,6 +152,31 @@ export function renderHeatTemperatureModule({ t }: ModuleRenderContext): HTMLEle
   content.append(header, experiments, lesson, stage, meters, controls, energy, details, createPackageCredit(t)); page.append(content);
 
   function configure() {
+    const expressions = theoryEquations[mode] ?? [];
+    theoryPanel.hidden = expressions.length === 0;
+    stage.classList.toggle("gas-stage-with-theory", expressions.length > 0);
+    const aligned = el("div", "gas-aligned-equations");
+    const braced = mode === "insulated";
+    aligned.classList.toggle("gas-equations-braced", braced);
+    expressions.forEach((expression, row) => {
+      const separator = expression.indexOf("<mo>=</mo>");
+      const cells = [expression.slice(0, separator), "<mo>=</mo>", expression.slice(separator + 10)];
+      cells.forEach((markup, column) => {
+        const math = document.createElementNS("http://www.w3.org/1998/Math/MathML", "math");
+        math.setAttribute("display", "block");
+        math.setAttribute("class", `gas-equation-cell gas-equation-column-${column}`);
+        math.style.gridRow = String(row + 1);
+        math.style.gridColumn = String(column + (braced ? 2 : 1));
+        math.innerHTML = `<mrow>${markup}</mrow>`;
+        aligned.append(math);
+      });
+    });
+    if (braced) {
+      const brace = svg("svg", { viewBox: "0 0 20 100", preserveAspectRatio: "none", class: "gas-poisson-brace", "aria-hidden": "true" });
+      brace.append(svg("path", { d: "M18 1 C7 1 7 8 7 17 L7 39 Q7 50 1 50 Q7 50 7 61 L7 83 C7 92 7 99 18 99", fill: "none", stroke: "currentColor", "stroke-width": 2, "vector-effect": "non-scaling-stroke" }));
+      aligned.append(brace);
+    }
+    equations.replaceChildren(aligned);
     control.input.min = (mode === "insulated" || mode === "isothermal") ? "0.45" : "-75";
     control.input.max = (mode === "insulated" || mode === "isothermal") ? "2.5" : "225";
     control.input.step = (mode === "insulated" || mode === "isothermal") ? "0.01" : "1";
