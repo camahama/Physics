@@ -22,8 +22,6 @@ export type RainbowUiState = {
 export class RainbowSimulation {
   private view: RainbowView;
   private rainIntensity: number = this.sanitizeRainIntensity(UI_PARAMS.rainbow.defaults.rainIntensity);
-  private readonly acceleration: number = UI_PARAMS.rainbow.defaults.acceleration;
-  private readonly maxPoints: number = UI_PARAMS.rainbow.defaults.maxPoints;
   private readonly dropFallSpeed: number = UI_PARAMS.rainbow.defaults.dropFallSpeed;
   private readonly spawnRateAtMax: number = UI_PARAMS.rainbow.defaults.spawnRateAtMax;
   private readonly maxActiveDrops: number = UI_PARAMS.rainbow.defaults.maxActiveDrops;
@@ -114,7 +112,6 @@ export class RainbowSimulation {
     const dt = Math.max(0, Math.min(0.05, deltaMs / 1000));
 
     if (this.currentSpawnRate > 0 && dt > 0) {
-      this.currentSpawnRate = Math.min(this.maxPoints, this.currentSpawnRate * this.acceleration);
       this.spawnCarry += this.currentSpawnRate * dt;
       const spawnCount = Math.floor(this.spawnCarry);
       this.spawnCarry -= spawnCount;

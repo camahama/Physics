@@ -62,8 +62,6 @@ export const UI_PARAMS = {
     defaults: {
       rainIntensity: 0,
       spawnRateAtMax: 10000,
-      acceleration: 1.012,
-      maxPoints: 10000,
       dropFallSpeed: 150,
       maxActiveDrops: 100000,
     },
