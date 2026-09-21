@@ -2,8 +2,7 @@ import { svgClientPoint } from '../../../../../../shared/interaction';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { RAINBOW_BANDS } from '../../physics/droplet/engine';
 import { DropletSimulation } from '../../simulations/droplet/dropletSimulation';
-import { translateSpectrumColor } from '../../app/uiText';
-import { useUiText } from '../../app/i18n';
+import { translateSpectrumColor, useUiText } from '../../i18n';
 import { UI_PARAMS } from '../../app/uiParams';
 import { SimulationHeader } from './SimulationHeader';
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LanguageProvider } from './app/i18n';
+import { LanguageProvider, UI_TEXT, type Language } from './i18n';
 import { MasterMenu } from './ui/components/MasterMenu';
 import { RefractionPanel } from './ui/components/RefractionPanel';
 import { PrismPanel } from './ui/components/PrismPanel';
@@ -8,7 +8,6 @@ import { DropletPanel } from './ui/components/DropletPanel';
 import { Droplet2Panel } from './ui/components/Droplet2Panel';
 import { RainbowPanel } from './ui/components/RainbowPanel';
 import type { SimulationId } from './app/registry';
-import { UI_TEXT, type Language } from './app/uiText';
 import { DescriptionPage } from './ui/components/DescriptionPage';
 
 type ViewState =

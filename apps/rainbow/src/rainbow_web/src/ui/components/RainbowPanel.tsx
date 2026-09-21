@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { RainbowSimulation, type RainbowDropSample } from '../../simulations/rainbow/rainbowSimulation';
-import { useUiText } from '../../app/i18n';
+import { useUiText } from '../../i18n';
 import { UI_PARAMS } from '../../app/uiParams';
 import { SimulationHeader } from './SimulationHeader';
 

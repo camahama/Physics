@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { DROPLET2_BANDS } from '../../physics/droplet2/engine';
 import { Droplet2Simulation } from '../../simulations/droplet2/droplet2Simulation';
-import { useUiText } from '../../app/i18n';
+import { useUiText } from '../../i18n';
 import { UI_PARAMS } from '../../app/uiParams';
 import { SimulationHeader } from './SimulationHeader';
 

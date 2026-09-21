@@ -1,6 +1,6 @@
 import type { SimulationId } from '../../app/registry';
 import { SIMULATION_IDS } from '../../app/registry';
-import { UI_TEXT, type Language } from '../../app/uiText';
+import { UI_TEXT, type Language } from '../../i18n';
 
 type MasterMenuProps = {
   activeId: SimulationId | null;
@@ -11,6 +11,13 @@ type MasterMenuProps = {
 
 type MenuIconProps = {
   id: SimulationId;
+};
+
+// Keep the files language-specific here even while both languages share one PDF.
+// A translated presentation can later be introduced by changing only its URL.
+const PRESENTATION_URLS: Record<Language, string> = {
+  sv: './downloads/rainbow-presentation.pdf',
+  en: './downloads/rainbow-presentation.pdf',
 };
 
 function MenuIcon({ id }: MenuIconProps) {
@@ -132,6 +139,17 @@ export function MasterMenu({ activeId, language, onLanguageChange, onPick }: Mas
             {text.languageSwitch.en}
           </button>
         </div>
+
+        <a
+          className="presentation-download"
+          href={PRESENTATION_URLS[language]}
+          download
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3v11m0 0 4-4m-4 4-4-4M5 19h14" />
+          </svg>
+          {text.presentationDownload}
+        </a>
       </div>
 
       <section className="menu-grid" aria-label={text.menuAriaLabel}>

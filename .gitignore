@@ -5,3 +5,10 @@ dist
 __pycache__/
 *.pyc
 *.tsbuildinfo
+
+# Local intake and generated working files
+/media/
+/tmp/
+
+# Large local download assets are added separately after compression.
+/apps/rainbow/src/rainbow_web/public/downloads/rainbow-presentation.pdf

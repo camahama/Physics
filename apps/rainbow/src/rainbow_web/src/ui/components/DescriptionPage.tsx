@@ -1,5 +1,5 @@
 import type { SimulationId } from '../../app/registry';
-import { useLanguage, useUiText } from '../../app/i18n';
+import { useLanguage, useUiText } from '../../i18n';
 import { DescriptionDocument } from '../../descriptions/renderer';
 
 type DescriptionPageProps = {

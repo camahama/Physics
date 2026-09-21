@@ -1,7 +1,7 @@
 import { svgClientPoint } from '../../../../../../shared/interaction';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { RaytraceSimulation } from '../../simulations/raytrace/raytraceSimulation';
-import { useUiText } from '../../app/i18n';
+import { useUiText } from '../../i18n';
 import { UI_PARAMS } from '../../app/uiParams';
 import { SimulationHeader } from './SimulationHeader';
 

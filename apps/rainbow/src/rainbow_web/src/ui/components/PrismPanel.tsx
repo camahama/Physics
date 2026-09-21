@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PrismSimulation } from '../../simulations/prism/prismSimulation';
 import type { PrismMode, Vec2 } from '../../physics/prism/engine';
-import { translateSpectrumColor } from '../../app/uiText';
-import { useUiText } from '../../app/i18n';
+import { translateSpectrumColor, useUiText } from '../../i18n';
 import { UI_PARAMS } from '../../app/uiParams';
 import { SimulationHeader } from './SimulationHeader';
 

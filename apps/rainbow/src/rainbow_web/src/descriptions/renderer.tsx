@@ -1,6 +1,6 @@
 import katex from 'katex';
 import type { SimulationId } from '../app/registry';
-import type { Language } from '../app/uiText';
+import type { Language } from '../i18n';
 import dropletEn from './content/droplet.en.md?raw';
 import dropletSv from './content/droplet.sv.md?raw';
 import droplet2En from './content/droplet2.en.md?raw';

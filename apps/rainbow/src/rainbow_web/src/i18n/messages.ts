@@ -1,8 +1,8 @@
-import type { SimulationId } from './registry';
+import type { SimulationId } from '../app/registry';
 
 export type Language = 'sv' | 'en';
 
-const UI_TEXT_EN = {
+export const UI_TEXT_EN = {
   appTitle: 'Rainbow Physics Simulator - choose a module to begin',
   appSubtitle: 'vibecoded by martin.magnusson@fysik.lu.se 2026',
   menuButton: 'Menu',
@@ -14,6 +14,7 @@ const UI_TEXT_EN = {
     sv: 'Swedish',
     en: 'English',
   },
+  presentationDownload: 'Download rainbow presentation (PDF)',
   panel: {
     infoButton: '(i)',
     infoButtonAriaPrefix: 'Open description for',
@@ -127,7 +128,7 @@ const UI_TEXT_EN = {
   },
 };
 
-const UI_TEXT_SV: typeof UI_TEXT_EN = {
+export const UI_TEXT_SV: typeof UI_TEXT_EN = {
   appTitle: 'Regnbågsfysik-simulator - välj en modul för att börja',
   appSubtitle: 'vibekodad av martin.magnusson@fysik.lu.se 2026',
   menuButton: 'Meny',
@@ -139,6 +140,7 @@ const UI_TEXT_SV: typeof UI_TEXT_EN = {
     sv: 'Svenska',
     en: 'Engelska',
   },
+  presentationDownload: 'Ladda ner regnbågspresentation (PDF)',
   panel: {
     infoButton: '(i)',
     infoButtonAriaPrefix: 'Öppna beskrivning för',
@@ -254,11 +256,6 @@ const UI_TEXT_SV: typeof UI_TEXT_EN = {
 
 export type UiText = typeof UI_TEXT_EN;
 export type SpectrumColorName = keyof typeof UI_TEXT_EN.spectrumColors;
-
-export const UI_TEXT: Record<Language, UiText> = {
-  sv: UI_TEXT_SV,
-  en: UI_TEXT_EN,
-};
 
 export function translateSpectrumColor(text: UiText, englishName: string): string {
   return text.spectrumColors[englishName as SpectrumColorName] ?? englishName;

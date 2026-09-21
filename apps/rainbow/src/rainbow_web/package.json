@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "precompute:rainbow": "/usr/bin/python3 ../../tools/precompute_rainbow_profile.py",
+    "precompute:rainbow": "/usr/bin/python3 ../../tools/precompute_rainbow_profile.py --output-json src/data/rainbow_profile.generated.json --output-ts src/data/rainbow_profile.generated.ts --output-image /tmp/rainbow_profile.jpg",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

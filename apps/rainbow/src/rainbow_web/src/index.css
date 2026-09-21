@@ -56,6 +56,7 @@ body {
 }
 
 .hero {
+  position: relative;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -74,8 +75,13 @@ body {
 }
 
 .menu-toolbar {
-  margin-top: 1rem;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
   display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.55rem;
   justify-content: flex-end;
 }
 
@@ -104,8 +110,45 @@ body {
   background: #283242;
 }
 
+.presentation-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid #52627c;
+  border-radius: 999px;
+  background: #202938;
+  color: var(--ink);
+  padding: 0.48rem 0.78rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.presentation-download:hover {
+  background: #2b374a;
+  border-color: #7d92b8;
+  transform: translateY(-1px);
+}
+
+.presentation-download:focus-visible {
+  outline: 2px solid #9db9ff;
+  outline-offset: 2px;
+}
+
+.presentation-download svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .menu-grid {
-  margin-top: 1.2rem;
+  margin-top: 5.2rem;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.75rem;
@@ -954,7 +997,13 @@ input[type='range'] {
 }
 
 @media (max-width: 880px) {
+  .menu-toolbar {
+    position: static;
+    margin-top: 0.55rem;
+  }
+
   .menu-grid {
+    margin-top: 0.8rem;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
