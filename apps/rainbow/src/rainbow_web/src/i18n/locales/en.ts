@@ -1,6 +1,7 @@
 import type { SimulationId } from '../../app/registry';
 
 export const UI_TEXT_EN = {
+  windowTitle: 'Rainbow Physics Simulations',
   appTitle: 'Rainbow Physics Simulator',
   appSubtitle: 'vibecoded by martin.magnusson@fysik.lu.se 2026',
   menuButton: 'Menu',

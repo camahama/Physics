@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LanguageProvider, UI_TEXT, type Language } from './i18n';
 import { MasterMenu } from './ui/components/MasterMenu';
 import { RefractionPanel } from './ui/components/RefractionPanel';
@@ -22,6 +22,11 @@ function App() {
   const text = UI_TEXT[language];
   const isMenu = view.kind === 'menu';
   const activeId = view.kind === 'menu' ? null : view.id;
+
+  useEffect(() => {
+    document.title = text.windowTitle;
+    document.documentElement.lang = language;
+  }, [language, text.windowTitle]);
 
   const openSimulation = (id: SimulationId) => {
     setView({ kind: 'simulation', id });

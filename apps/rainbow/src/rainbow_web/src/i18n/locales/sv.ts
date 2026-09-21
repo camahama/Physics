@@ -1,6 +1,7 @@
 import type { UiText } from './en';
 
 export const UI_TEXT_SV: UiText = {
+  windowTitle: 'Simuleringar av regnbågsfysik',
   appTitle: 'Regnbågsfysik-simuleringar',
   appSubtitle: 'vibekodad av martin.magnusson@fysik.lu.se 2026',
   menuButton: 'Meny',
