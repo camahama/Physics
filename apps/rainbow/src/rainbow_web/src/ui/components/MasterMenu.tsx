@@ -16,8 +16,8 @@ type MenuIconProps = {
 // Keep the files language-specific here even while both languages share one PDF.
 // A translated presentation can later be introduced by changing only its URL.
 const PRESENTATION_URLS: Record<Language, string> = {
-  sv: './downloads/rainbow-presentation.pdf',
-  en: './downloads/rainbow-presentation.pdf',
+  sv: './downloads/rainbow-pres-SE.pdf',
+  en: './downloads/rainbow-pres-SE.pdf',
 };
 
 function MenuIcon({ id }: MenuIconProps) {
