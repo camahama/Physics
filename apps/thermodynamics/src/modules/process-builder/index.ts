@@ -889,6 +889,15 @@ function constrainProcessEndpoint(
   if (type === "isochor") {
     constrained.x = other.x;
   }
+  if (type === "isotherm" || type === "adiabat") {
+    if (endpoint === "start") {
+      constrained.x = Math.min(constrained.x, other.x);
+      constrained.y = Math.min(constrained.y, other.y);
+    } else {
+      constrained.x = Math.max(constrained.x, other.x);
+      constrained.y = Math.max(constrained.y, other.y);
+    }
+  }
 
   return constrained;
 }
@@ -1234,7 +1243,7 @@ function getConnectedEndpointRefs(point: Point): EndpointRef[] {
 }
 
 function moveEndpointRefsWithConstraints(refs: EndpointRef[], point: Point) {
-  const target = clampPoint(point);
+  const target = constrainConnectedEndpointPoint(uniqueRefs(refs), point, { x: true, y: true });
   const queue: Array<{ refs: EndpointRef[]; point: Point; axes: { x: boolean; y: boolean } }> = [
     { refs: uniqueRefs(refs), point: target, axes: { x: true, y: true } },
   ];
@@ -1247,7 +1256,10 @@ function moveEndpointRefsWithConstraints(refs: EndpointRef[], point: Point) {
       continue;
     }
 
-    for (const ref of uniqueRefs(item.refs)) {
+    const itemRefs = uniqueRefs(item.refs);
+    const constrainedPoint = constrainConnectedEndpointPoint(itemRefs, item.point, item.axes);
+
+    for (const ref of itemRefs) {
       const process = getProcess(ref.processId);
       if (!process) {
         continue;
@@ -1255,8 +1267,8 @@ function moveEndpointRefsWithConstraints(refs: EndpointRef[], point: Point) {
 
       const endpointPoint = process[ref.endpoint];
       const nextPoint = {
-        x: item.axes.x ? item.point.x : endpointPoint.x,
-        y: item.axes.y ? item.point.y : endpointPoint.y,
+        x: item.axes.x ? constrainedPoint.x : endpointPoint.x,
+        y: item.axes.y ? constrainedPoint.y : endpointPoint.y,
       };
       const otherEndpointName = ref.endpoint === "start" ? "end" : "start";
       const otherPointBefore = { ...process[otherEndpointName] };
@@ -1284,6 +1296,39 @@ function moveEndpointRefsWithConstraints(refs: EndpointRef[], point: Point) {
       normalizeProcessEndpoints(process);
     }
   }
+}
+
+function constrainConnectedEndpointPoint(
+  refs: EndpointRef[],
+  point: Point,
+  axes: { x: boolean; y: boolean },
+) {
+  const constrained = clampPoint(point);
+  let minX = PLOT.left;
+  let maxX = PLOT.right;
+  let minY = PLOT.top;
+  let maxY = PLOT.bottom;
+
+  for (const ref of refs) {
+    const process = getProcess(ref.processId);
+    if (!process || !isCurvedProcess(process)) {
+      continue;
+    }
+
+    const other = process[ref.endpoint === "start" ? "end" : "start"];
+    if (ref.endpoint === "start") {
+      maxX = Math.min(maxX, other.x);
+      maxY = Math.min(maxY, other.y);
+    } else {
+      minX = Math.max(minX, other.x);
+      minY = Math.max(minY, other.y);
+    }
+  }
+
+  return {
+    x: axes.x ? clamp(constrained.x, minX, maxX) : constrained.x,
+    y: axes.y ? clamp(constrained.y, minY, maxY) : constrained.y,
+  };
 }
 
 function moveProcessBy(processId: string, delta: Point) {
