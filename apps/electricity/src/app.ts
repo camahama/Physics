@@ -67,6 +67,14 @@ function renderHome({ t, language, onLanguageChange }) {
   description.className = "hero-description";
   description.textContent = t("home.description");
 
+  const developmentNotice = document.createElement("p");
+  developmentNotice.className = "development-notice";
+  developmentNotice.append(document.createTextNode(`${t("home.developmentNotice")} `));
+  const bugReportLink = document.createElement("a");
+  bugReportLink.href = "https://github.com/camahama/Physics/issues";
+  bugReportLink.textContent = t("home.bugReportLink");
+  developmentNotice.append(bugReportLink);
+
   const languagePicker = renderLanguagePicker({
     label: t("home.languageLabel"),
     language,
@@ -98,7 +106,7 @@ function renderHome({ t, language, onLanguageChange }) {
 
   const credit = createPackageCredit(t);
 
-  hero.append(branding, eyebrow, title, description, languagePicker, menuTitle, menu, credit);
+  hero.append(branding, eyebrow, title, description, developmentNotice, languagePicker, menuTitle, menu, credit);
   page.append(hero);
 
   return page;

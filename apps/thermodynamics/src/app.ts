@@ -75,6 +75,14 @@ function renderHome({
   description.className = "hero-description";
   description.textContent = t("home.description");
 
+  const developmentNotice = document.createElement("p");
+  developmentNotice.className = "development-notice";
+  developmentNotice.append(document.createTextNode(`${t("home.developmentNotice")} `));
+  const bugReportLink = document.createElement("a");
+  bugReportLink.href = "https://github.com/camahama/Physics/issues";
+  bugReportLink.textContent = t("home.bugReportLink");
+  developmentNotice.append(bugReportLink);
+
   const languagePicker = renderLanguagePicker({
     label: t("home.languageLabel"),
     language,
@@ -114,6 +122,7 @@ function renderHome({
     eyebrow,
     title,
     description,
+    developmentNotice,
     languagePicker,
     menuTitle,
     menu,

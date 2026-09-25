@@ -8,6 +8,8 @@
   "home": {
     "eyebrow": "Web applications developed for basic electricity courses at the Department of Physics, Lund University, Sweden",
     "description": "A collection of simple, presentation-ready electricity simulations for lectures and self-study. Practice building circuits, explore electrostatics, and visualize three-phase power, and continue until you have a strong intuition for how electric circuits and fields behave.",
+    "developmentNotice": "These simulations are works in progress.",
+    "bugReportLink": "Bug reports and feedback are welcome.",
     "menuTitle": "Modules",
     "languageLabel": "Language",
     "creditPrefix": "Vibecoded 2026 by Martin Magnusson, director of studies,",

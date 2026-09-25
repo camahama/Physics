@@ -8,6 +8,8 @@
   "home": {
     "eyebrow": "Webb-applikationer utvecklade för kurser i grundläggande termodynamik vid Fysiska institutionen, Lunds universitet",
     "description": "En samling enkla och presentationsvänliga simuleringar i termodynamik för föreläsningar och självstudier. Utforska temperatur, värmeflöde, motorer, entropi och tillståndsvariabler med visuella verktyg byggda för klassrumsintuition.",
+    "developmentNotice": "Dessa simuleringar är under utveckling.",
+    "bugReportLink": "Felrapporter och återkoppling är välkomna.",
     "menuTitle": "Moduler",
     "languageLabel": "Språk",
     "creditPrefix": "Vibekodat 2026 av Martin Magnusson, studierektor,",

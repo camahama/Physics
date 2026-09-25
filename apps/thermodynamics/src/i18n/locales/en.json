@@ -8,6 +8,8 @@
   "home": {
     "eyebrow": "Web applications developed for basic thermodynamics courses at the Department of Physics, Lund University, Sweden",
     "description": "A collection of simple, presentation-ready thermodynamics simulations for lectures and self-study. Explore temperature, heat flow, engines, entropy, and state variables with visual tools built for classroom intuition.",
+    "developmentNotice": "These simulations are works in progress.",
+    "bugReportLink": "Bug reports and feedback are welcome.",
     "menuTitle": "Modules",
     "languageLabel": "Language",
     "creditPrefix": "Vibecoded 2026 by Martin Magnusson, director of studies,",
