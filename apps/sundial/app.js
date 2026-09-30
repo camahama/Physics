@@ -92,13 +92,13 @@ function render() {
   dom.dialSvg.outerHTML = svgText.replace("<svg ", `<svg id="dialSvg" role="img" aria-labelledby="svgTitle" `);
   dom.dialSvg = document.getElementById("dialSvg");
 
-  dom.subtitle.textContent = `${titleCase(settings.kind)} dial · ${settings.plateWidth.toFixed(0)} × ${settings.plateHeight.toFixed(0)} mm · ${hourLabel(settings.startHour)} to ${hourLabel(settings.endHour)} standard time`;
+  dom.subtitle.textContent = `${settings.kind === "vertical" ? "Vertikalt" : "Horisontellt"} solur · ${settings.plateWidth.toFixed(0)} × ${settings.plateHeight.toFixed(0)} mm · ${hourLabel(settings.startHour)} till ${hourLabel(settings.endHour)} normaltid`;
   const artworkScale = (SVG_SIZE - 72) / Math.max(settings.plateWidth, settings.plateHeight);
-  dom.scaleReadout.textContent = `${artworkScale.toFixed(2)} px/mm preview scale`;
-  dom.declinationLabel.textContent = settings.kind === "vertical" ? "Wall angle" : "Layout angle";
-  dom.gnomonAngleOutput.textContent = `${latestLayout.gnomonAngleDegrees.toFixed(1)}° from plate`;
+  dom.scaleReadout.textContent = `${artworkScale.toFixed(2)} px/mm i förhandsvisningen`;
+  dom.declinationLabel.textContent = settings.kind === "vertical" ? "Väggvinkel" : "Orienteringsvinkel";
+  dom.gnomonAngleOutput.textContent = `${latestLayout.gnomonAngleDegrees.toFixed(1)}° från plattan`;
   dom.hoursOutput.textContent = `${settings.startHour}–${settings.endHour}`;
-  dom.boundsOutput.textContent = latestLayout.outOfBoundsHours.length ? latestLayout.outOfBoundsHours.join(", ") : "None";
+  dom.boundsOutput.textContent = latestLayout.outOfBoundsHours.length ? latestLayout.outOfBoundsHours.join(", ") : "Inga";
   dom.gnomonAngleFromPlate.disabled = settings.gnomonFollowsIdeal;
   dom.gnomonDirectionFromDown.disabled = settings.gnomonFollowsIdeal;
 }
@@ -146,19 +146,23 @@ function resetVisibleHourLabels() {
 
 function useBrowserLocation() {
   if (!navigator.geolocation) {
-    dom.locationMessage.textContent = "Geolocation is not available in this browser.";
+    dom.locationMessage.textContent = "Positionering är inte tillgänglig i den här webbläsaren.";
     return;
   }
-  dom.locationMessage.textContent = "Requesting location…";
+  dom.locationMessage.textContent = "Hämtar position…";
   navigator.geolocation.getCurrentPosition((position) => {
     settings.latitude = position.coords.latitude;
     settings.longitude = position.coords.longitude;
     settings.customText = formatLocationText(settings.latitude, settings.longitude);
     if (settings.gnomonFollowsIdeal) setIdealGnomon(false);
-    dom.locationMessage.textContent = "Location updated. Check UTC offset manually.";
+    dom.locationMessage.textContent = "Positionen har uppdaterats. Kontrollera UTC-förskjutningen manuellt.";
     render();
   }, (error) => {
-    dom.locationMessage.textContent = error.message;
+    dom.locationMessage.textContent = ({
+      1: "Åtkomst till positionen nekades.",
+      2: "Positionen kunde inte fastställas.",
+      3: "Tidsgränsen för att hämta positionen överskreds.",
+    })[error.code] ?? "Positionen kunde inte hämtas.";
   }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 });
 }
 
@@ -179,7 +183,7 @@ function calculateAngle() {
   latestAngle = dom.angleHelperMode.value === "sunParallelToPlateEdge"
     ? layoutAngleForPlateEdge(azimuth)
     : declinationFromSouthForAzimuth(azimuth);
-  dom.angleResult.textContent = `Solar azimuth: ${azimuth.toFixed(1)}°. Recommended angle: ${latestAngle.toFixed(1)}°.`;
+  dom.angleResult.textContent = `Solens azimut: ${azimuth.toFixed(1)}°. Rekommenderad vinkel: ${latestAngle.toFixed(1)}°.`;
 }
 
 function downloadSVG() {
@@ -217,10 +221,6 @@ function parseHourLabels(text, start, end) {
 
 function hourLabel(hour) {
   return `${String(hour).padStart(2, "0")}:00`;
-}
-
-function titleCase(value) {
-  return value.slice(0, 1).toUpperCase() + value.slice(1);
 }
 
 function toDatetimeLocalValue(date) {

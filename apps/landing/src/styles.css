@@ -160,3 +160,38 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+.language-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.5rem 0 2rem;
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
+}
+
+.language-label {
+  color: #43556d;
+  font-weight: 600;
+}
+
+.language-button {
+  padding: 0.55rem 1rem;
+  border: 1px solid rgba(28, 53, 87, 0.12);
+  border-radius: 999px;
+  background: white;
+  color: #132238;
+  cursor: pointer;
+  font: inherit;
+}
+
+.language-button.active {
+  border-color: transparent;
+  background: #0f6d8c;
+  color: white;
+}
+
+.language-button:focus-visible {
+  outline: 2px solid #0f6d8c;
+  outline-offset: 3px;
+}

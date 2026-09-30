@@ -38,6 +38,16 @@ npm run dev:stirling
 npm run build
 ```
 
+Preview the complete site, including working module links:
+
+```sh
+npm run build
+npm run preview
+```
+
+Open <http://127.0.0.1:5173/>. The landing-only development server does not
+serve the other apps. Rebuild after changes to update the complete-site preview.
+
 ## Deployment shape
 
 The root domain should deploy this landing page:

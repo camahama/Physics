@@ -66,7 +66,7 @@ const state: RlcState = {
   channel2Trace: "R",
 };
 
-export function renderRlcCircuitModule({ t, language = "en" }: ModuleRenderContext): HTMLElement {
+export function renderRlcCircuitModule({ t, language = "sv" }: ModuleRenderContext): HTMLElement {
   const page = document.createElement("main");
   page.className = "page-shell rlc-shell";
 
@@ -837,7 +837,7 @@ function labelNode(labelContent: string | Node): HTMLElement {
   return wrapper;
 }
 
-function formatNumber(value: number, language = "en"): string {
+function formatNumber(value: number, language = "sv"): string {
   if (value === Infinity) {
     return "∞";
   }

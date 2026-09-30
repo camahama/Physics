@@ -1,132 +1,132 @@
 <!doctype html>
-<html lang="en">
+<html lang="sv">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sundial Layout Designer</title>
+  <title>Solursdesigner</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
   <main class="app-shell">
-    <aside class="sidebar" aria-label="Sundial settings">
+    <aside class="sidebar" aria-label="Solursinställningar">
       <header class="brand">
-        <p class="eyebrow">Physics module</p>
-        <h1>Sundial Layout Designer</h1>
-        <p>Create location-specific horizontal and vertical sundial artwork.</p>
+        <p class="eyebrow">Fysikmodul</p>
+        <h1>Solursdesigner</h1>
+        <p>Skapa platsanpassade horisontella och vertikala solur.</p>
       </header>
 
       <section class="panel">
-        <h2>Layout</h2>
+        <h2>Utformning</h2>
         <label>
-          Type
+          Typ
           <select id="kind">
-            <option value="horizontal">Horizontal</option>
-            <option value="vertical">Vertical</option>
+            <option value="horizontal">Horisontellt</option>
+            <option value="vertical">Vertikalt</option>
           </select>
         </label>
         <div class="grid two">
-          <label>Width <span>mm</span><input id="plateWidth" type="number" min="1" step="1"></label>
-          <label>Height <span>mm</span><input id="plateHeight" type="number" min="1" step="1"></label>
+          <label>Bredd <span>mm</span><input id="plateWidth" type="number" min="1" step="1"></label>
+          <label>Höjd <span>mm</span><input id="plateHeight" type="number" min="1" step="1"></label>
         </div>
-        <label>Gnomon length <span>mm</span><input id="gnomonLength" type="number" min="1" step="1"></label>
+        <label>Visarlängd <span>mm</span><input id="gnomonLength" type="number" min="1" step="1"></label>
         <div class="grid two">
-          <label>Gnomon X <span>mm</span><input id="gnomonOffsetX" type="number" step="1"></label>
-          <label>Gnomon Y <span>mm</span><input id="gnomonOffsetY" type="number" step="1"></label>
+          <label>Visare X <span>mm</span><input id="gnomonOffsetX" type="number" step="1"></label>
+          <label>Visare Y <span>mm</span><input id="gnomonOffsetY" type="number" step="1"></label>
         </div>
-        <label>Title text <input id="customText" type="text"></label>
+        <label>Rubriktext <input id="customText" type="text"></label>
         <div class="button-row">
-          <button id="setTitleFromPosition" type="button">Set title from position</button>
-          <label class="check"><input id="monochrome" type="checkbox"> Monochrome</label>
+          <button id="setTitleFromPosition" type="button">Använd position som rubrik</button>
+          <label class="check"><input id="monochrome" type="checkbox"> Enfärgat</label>
         </div>
       </section>
 
       <section class="panel">
-        <h2>Location</h2>
+        <h2>Plats</h2>
         <div class="grid two">
-          <label>Latitude <span>deg</span><input id="latitude" type="number" min="-89" max="89" step="0.0001"></label>
-          <label>Longitude <span>deg</span><input id="longitude" type="number" step="0.0001"></label>
+          <label>Latitud <span>grader</span><input id="latitude" type="number" min="-89" max="89" step="0.0001"></label>
+          <label>Longitud <span>grader</span><input id="longitude" type="number" step="0.0001"></label>
         </div>
         <div class="button-row">
-          <button id="useBrowserLocation" type="button">Current location</button>
-          <button id="applyLund" type="button">Lund preset</button>
+          <button id="useBrowserLocation" type="button">Aktuell plats</button>
+          <button id="applyLund" type="button">Förval: Lund</button>
         </div>
         <p id="locationMessage" class="note" role="status"></p>
-        <label><span id="declinationLabel">Layout angle</span> <span>deg</span><input id="declinationFromSouth" type="number" step="0.1"></label>
+        <label><span id="declinationLabel">Orienteringsvinkel</span> <span>grader</span><input id="declinationFromSouth" type="number" step="0.1"></label>
         <div class="grid two">
-          <label>Start hour <input id="startHour" type="number" min="0" max="23" step="1"></label>
-          <label>End hour <input id="endHour" type="number" min="0" max="23" step="1"></label>
+          <label>Starttimme <input id="startHour" type="number" min="0" max="23" step="1"></label>
+          <label>Sluttimme <input id="endHour" type="number" min="0" max="23" step="1"></label>
         </div>
-        <label>Standard UTC offset <span>h</span><input id="standardTimeOffset" type="number" step="0.5"></label>
-        <p class="note">Use standard time, not daylight saving time. Longitude and equation-of-time corrections are included.</p>
+        <label>UTC-förskjutning vid normaltid <span>h</span><input id="standardTimeOffset" type="number" step="0.5"></label>
+        <p class="note">Använd normaltid, inte sommartid. Korrigeringar för longitud och tidsekvation ingår.</p>
       </section>
 
       <section class="panel">
-        <h2>Gnomon & labels</h2>
-        <label class="check"><input id="gnomonFollowsIdeal" type="checkbox"> Follow ideal polar-axis gnomon</label>
+        <h2>Visare och etiketter</h2>
+        <label class="check"><input id="gnomonFollowsIdeal" type="checkbox"> Följ ideal visare längs polaxeln</label>
         <div class="grid two">
-          <label>Gnomon angle <span>deg</span><input id="gnomonAngleFromPlate" type="number" step="0.1"></label>
-          <label>Gnomon direction <span>deg</span><input id="gnomonDirectionFromDown" type="number" step="0.1"></label>
+          <label>Visarvinkel <span>grader</span><input id="gnomonAngleFromPlate" type="number" step="0.1"></label>
+          <label>Visarriktning <span>grader</span><input id="gnomonDirectionFromDown" type="number" step="0.1"></label>
         </div>
         <div class="button-row">
-          <button id="setIdealGnomon" type="button">Set ideal</button>
-          <button id="setSimpleGnomon" type="button">Set 45° down</button>
+          <button id="setIdealGnomon" type="button">Använd ideal vinkel</button>
+          <button id="setSimpleGnomon" type="button">Ställ in 45° nedåt</button>
         </div>
         <label>
-          Hour labels
+          Timetiketter
           <select id="hourNumeralStyle">
-            <option value="roman">Roman</option>
-            <option value="arabic">Arabic</option>
+            <option value="roman">Romerska</option>
+            <option value="arabic">Arabiska</option>
           </select>
         </label>
-        <label>Hours to label <input id="visibleHourLabels" type="text" placeholder="8, 9, 10, 11, 12"></label>
-        <label class="check"><input id="showsLegendAnalemma" type="checkbox"> Show legend analemma</label>
+        <label>Timmar att märka ut <input id="visibleHourLabels" type="text" placeholder="8, 9, 10, 11, 12"></label>
+        <label class="check"><input id="showsLegendAnalemma" type="checkbox"> Visa analemma som referens</label>
         <div class="grid two">
-          <label>Legend X <span>mm</span><input id="legendOffsetX" type="number" step="1"></label>
-          <label>Legend Y <span>mm</span><input id="legendOffsetY" type="number" step="1"></label>
+          <label>Referens X <span>mm</span><input id="legendOffsetX" type="number" step="1"></label>
+          <label>Referens Y <span>mm</span><input id="legendOffsetY" type="number" step="1"></label>
         </div>
       </section>
 
       <section class="panel">
-        <h2>Angle helper</h2>
+        <h2>Vinkelhjälp</h2>
         <label>
           Observation
           <select id="angleHelperMode">
-            <option value="sunPerpendicularToWall">Sun perpendicular to wall</option>
-            <option value="sunParallelToPlateEdge">Sun parallel to plate edge</option>
+            <option value="sunPerpendicularToWall">Solen vinkelrät mot väggen</option>
+            <option value="sunParallelToPlateEdge">Solen parallell med plattans kant</option>
           </select>
         </label>
-        <label>Observed date/time <input id="observationDate" type="datetime-local"></label>
-        <label class="check"><input id="observationIncludesDST" type="checkbox"> Entered time is DST / summer time</label>
+        <label>Observerat datum och klockslag <input id="observationDate" type="datetime-local"></label>
+        <label class="check"><input id="observationIncludesDST" type="checkbox"> Angiven tid är sommartid</label>
         <div class="button-row">
-          <button id="calculateAngle" type="button">Calculate</button>
-          <button id="applyAngle" type="button">Apply angle</button>
+          <button id="calculateAngle" type="button">Beräkna</button>
+          <button id="applyAngle" type="button">Använd vinkeln</button>
         </div>
         <p id="angleResult" class="note"></p>
       </section>
 
       <section class="panel output-panel">
-        <h2>Output</h2>
+        <h2>Resultat</h2>
         <dl>
-          <div><dt>Gnomon angle</dt><dd id="gnomonAngleOutput"></dd></div>
-          <div><dt>Visible hours</dt><dd id="hoursOutput"></dd></div>
-          <div><dt>Out of bounds</dt><dd id="boundsOutput"></dd></div>
+          <div><dt>Visarvinkel</dt><dd id="gnomonAngleOutput"></dd></div>
+          <div><dt>Synliga timmar</dt><dd id="hoursOutput"></dd></div>
+          <div><dt>Utanför plattan</dt><dd id="boundsOutput"></dd></div>
         </dl>
         <div class="button-row">
-          <button id="downloadSVG" type="button">Download SVG</button>
-          <button id="printPage" type="button">Print / PDF</button>
+          <button id="downloadSVG" type="button">Ladda ner SVG</button>
+          <button id="printPage" type="button">Skriv ut / PDF</button>
         </div>
       </section>
 
       <footer class="credit">
-        Vibecoded 2026 by Martin Magnusson, Department of Physics, Lund University, Sweden.
+        Vibekodat 2026 av Martin Magnusson, Fysiska institutionen, Lunds universitet, Sverige.
         <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC-BY-NC-SA</a>
       </footer>
     </aside>
 
-    <section class="preview-pane" aria-label="Sundial preview">
+    <section class="preview-pane" aria-label="Förhandsvisning av solur">
       <header class="preview-header">
         <div>
-          <h2>Sundial layout</h2>
+          <h2>Solurets utformning</h2>
           <p id="subtitle"></p>
         </div>
         <div class="scale-readout" id="scaleReadout"></div>

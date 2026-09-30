@@ -131,7 +131,7 @@ export function renderSvg(dialLayout, width = 1000, height = 1000) {
   const textColor = "#333333";
   const elements = [];
 
-  elements.push(`<title id="svgTitle">Sundial layout</title>`);
+  elements.push(`<title id="svgTitle">Solurets utformning</title>`);
   elements.push(`<rect class="canvas" x="0" y="0" width="${fmt(width)}" height="${fmt(height)}" rx="8" ry="8"/>`);
   if (settings.customText.trim()) {
     elements.push(`<text class="title" x="${fmt(frame.x + frame.width / 2)}" y="${fmt(frame.y + 34)}">${escapeXml(settings.customText)}</text>`);
@@ -462,7 +462,7 @@ function legendElement(settings, frame, scale) {
   ].map(([x, y]) => `<circle class="month-mark" cx="${fmt(point(x, y).x)}" cy="${fmt(point(x, y).y)}" r="2.7"/>`);
   const anchor = mirrorsLegend ? "end" : "start";
   const labels = [
-    ["Jun 21", -3.0, -2.0], ["Sep 21", -6.0, 66.74], ["Dec 21", 61.0, 127.69], ["Mar 21", 62.0, 58.67],
+    ["21 juni", -3.0, -2.0], ["21 sep.", -6.0, 66.74], ["21 dec.", 61.0, 127.69], ["21 mars", 62.0, 58.67],
   ].map(([text, x, y]) => {
     const p = point(x, y);
     return `<text class="legend-label" x="${fmt(p.x)}" y="${fmt(p.y)}" text-anchor="${anchor}">${text}</text>`;

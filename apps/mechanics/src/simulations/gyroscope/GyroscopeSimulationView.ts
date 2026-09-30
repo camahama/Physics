@@ -240,7 +240,7 @@ export class GyroscopeSimulationView {
 
       const units = document.createElement("div");
       units.className = "glossary-units";
-      units.textContent = `Units: ${entry.units}`;
+      units.textContent = `Enheter: ${entry.units}`;
 
       const description = document.createElement("p");
       description.className = "glossary-description";

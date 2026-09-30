@@ -79,7 +79,7 @@ let nextNodeId = 1;
 let nextComponentId = 1;
 let nextProbeId = 1;
 
-export function renderCircuitBuilderModule({ t, language = "en" }: ModuleRenderContext): HTMLElement {
+export function renderCircuitBuilderModule({ t, language = "sv" }: ModuleRenderContext): HTMLElement {
   state.draggingNode = null; state.draggingComponent = null; state.draggingProbe = null; state.lastComponentClick = null;
   let suppressDoubleClickUntil = 0;
   const page = document.createElement("main");

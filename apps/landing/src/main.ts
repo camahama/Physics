@@ -1,85 +1,127 @@
 import "./styles.css";
-import { copy } from "./i18n/en";
+import { copy as sv } from "./i18n/sv";
+import { copy as en } from "./i18n/en";
 
-type PhysicsApp = {
-  title: string;
-  description: string;
-  href: string;
-  label: string;
-};
-
-const apps: PhysicsApp[] = [
-  {
-    title: copy.apps.electricity.title,
-    description: copy.apps.electricity.description,
-    href: "/electricity/",
-    label: copy.apps.electricity.label,
-  },
-  {
-    title: copy.apps.thermodynamics.title,
-    description: copy.apps.thermodynamics.description,
-    href: "/thermodynamics/",
-    label: copy.apps.thermodynamics.label,
-  },
-  {
-    title: copy.apps.rainbow.title,
-    description: copy.apps.rainbow.description,
-    href: "/rainbow/",
-    label: copy.apps.rainbow.label,
-  },
-  {
-    title: copy.apps.sundial.title,
-    description: copy.apps.sundial.description,
-    href: "/sundial/",
-    label: copy.apps.sundial.label,
-  },
-];
-
-const app = document.querySelector<HTMLDivElement>("#app");
-
-if (!app) {
-  throw new Error("App root was not found.");
+const dictionaries = { sv, en };
+type Language = keyof typeof dictionaries;
+let language: Language = "sv";
+try {
+  const saved = localStorage.getItem("physics-language");
+  if (saved === "sv" || saved === "en") language = saved;
+} catch {
+  // Keep Swedish as the default when storage is unavailable.
 }
 
-const moduleHref = (path: string) =>
-  new URL(path.replace(/^\/+/, ""), window.location.href).pathname;
+function render() {
+  const copy = dictionaries[language];
+  document.documentElement.lang = language;
+  document.title = `${copy.site.title} | Martin Magnusson`;
+  document.querySelector('meta[name="description"]')?.setAttribute("content", copy.site.intro);
 
-app.innerHTML = `
-  <main class="site-shell">
-    <section class="hero" aria-labelledby="page-title">
-      <p class="eyebrow">${copy.site.domain}</p>
-      <h1 id="page-title">${copy.site.title}</h1>
-      <p class="intro">${copy.site.intro}</p>
-    </section>
+  type PhysicsApp = {
+    title: string;
+    description: string;
+    href: string;
+    label: string;
+  };
 
-    <section class="app-grid" aria-label="${copy.appsAriaLabel}">
-      ${apps
-        .map(
-          (physicsApp) => `
-            <a class="app-card" href="${moduleHref(physicsApp.href)}">
-              <span class="status">${physicsApp.label}</span>
-              <h2>${physicsApp.title}</h2>
-              <p>${physicsApp.description}</p>
-            </a>
-          `,
-        )
-        .join("")}
-    </section>
+  const apps: PhysicsApp[] = [
+    {
+      title: copy.apps.electricity.title,
+      description: copy.apps.electricity.description,
+      href: "/electricity/",
+      label: copy.apps.electricity.label,
+    },
+    {
+      title: copy.apps.thermodynamics.title,
+      description: copy.apps.thermodynamics.description,
+      href: "/thermodynamics/",
+      label: copy.apps.thermodynamics.label,
+    },
+    {
+      title: copy.apps.rainbow.title,
+      description: copy.apps.rainbow.description,
+      href: "/rainbow/",
+      label: copy.apps.rainbow.label,
+    },
+    {
+      title: copy.apps.sundial.title,
+      description: copy.apps.sundial.description,
+      href: "/sundial/",
+      label: copy.apps.sundial.label,
+    },
+  ];
 
-    <p class="package-credit">
-      ${copy.site.creditPrefix}
-      <br />
-      <a href="mailto:${copy.site.creditEmail}">${copy.site.creditEmail}</a>.
-      ${copy.site.creditLicensePrefix}
-      <a href="${copy.site.creditLicenseUrl}" target="_blank" rel="license noopener noreferrer">
-        ${copy.site.creditLicenseLabel}
-      </a>
-    </p>
+  const app = document.querySelector<HTMLDivElement>("#app");
 
-    <p class="repository-link">
-      <a href="${copy.site.repositoryUrl}" target="_blank" rel="noopener noreferrer">
-        ${copy.site.repositoryLabel}
-      </a>
-    </p>
-  </main>
-`;
+  if (!app) {
+    throw new Error("App root was not found.");
+  }
+
+  const moduleHref = (path: string) =>
+    new URL(path.replace(/^\/+/, ""), window.location.href).pathname;
+
+  app.innerHTML = `
+    <main class="site-shell">
+      <section class="hero" aria-labelledby="page-title">
+        <p class="eyebrow">${copy.site.domain}</p>
+        <h1 id="page-title">${copy.site.title}</h1>
+        <p class="intro">${copy.site.intro}</p>
+        <div class="language-picker" role="group" aria-labelledby="language-label">
+          <span class="language-label" id="language-label">${language === "sv" ? "Språk" : "Language"}</span>
+          ${(["en", "sv"] as const).map((code) => `
+            <button type="button" class="language-button${language === code ? " active" : ""}"
+              data-language="${code}" aria-pressed="${language === code}">
+              ${code === "en" ? "English" : "Svenska"}
+            </button>
+          `).join("")}
+        </div>
+      </section>
+
+      <section class="app-grid" aria-label="${copy.appsAriaLabel}">
+        ${apps
+          .map(
+            (physicsApp) => `
+              <a class="app-card" href="${moduleHref(physicsApp.href)}">
+                <span class="status">${physicsApp.label}</span>
+                <h2>${physicsApp.title}</h2>
+                <p>${physicsApp.description}</p>
+              </a>
+            `,
+          )
+          .join("")}
+      </section>
+
+      <p class="package-credit">
+        ${copy.site.creditPrefix}
+        <br />
+        <a href="mailto:${copy.site.creditEmail}">${copy.site.creditEmail}</a>.
+        ${copy.site.creditLicensePrefix}
+        <a href="${copy.site.creditLicenseUrl}" target="_blank" rel="license noopener noreferrer">
+          ${copy.site.creditLicenseLabel}
+        </a>
+      </p>
+
+      <p class="repository-link">
+        <a href="${copy.site.repositoryUrl}" target="_blank" rel="noopener noreferrer">
+          ${copy.site.repositoryLabel}
+        </a>
+      </p>
+    </main>
+  `;
+
+  app.querySelectorAll<HTMLButtonElement>("[data-language]").forEach((button) => {
+    button.addEventListener("click", () => {
+      language = button.dataset.language as Language;
+      try {
+        localStorage.setItem("physics-language", language);
+      } catch {
+        // Language switching also works without storage access.
+      }
+      render();
+      app.querySelector<HTMLButtonElement>(`[data-language="${language}"]`)?.focus();
+    });
+  });
+}
+
+render();

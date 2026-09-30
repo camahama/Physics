@@ -73,7 +73,7 @@ const state: ThreePhaseState = {
   animationToken: 0,
 };
 
-export function renderThreePhaseModule({ t, language = "en" }: ModuleRenderContext): HTMLElement {
+export function renderThreePhaseModule({ t, language = "sv" }: ModuleRenderContext): HTMLElement {
   stopAnimation();
 
   const page = document.createElement("main");
