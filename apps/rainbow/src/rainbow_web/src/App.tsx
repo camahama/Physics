@@ -15,10 +15,39 @@ type ViewState =
   | { kind: 'simulation'; id: SimulationId }
   | { kind: 'description'; id: SimulationId };
 
+const PHONE_QUERY = '(pointer: coarse) and (max-width: 600px), (pointer: coarse) and (max-height: 600px)';
+const PRESENTATION_WIDTH = 1200;
+const PRESENTATION_HEIGHT = 800;
+
+function usePhonePresentation() {
+  const [viewport, setViewport] = useState({ phone: false, portrait: false, scale: 1 });
+  useEffect(() => {
+    const query = window.matchMedia(PHONE_QUERY);
+    const update = () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      setViewport({
+        phone: query.matches,
+        portrait: height > width,
+        scale: Math.min(width / PRESENTATION_WIDTH, height / PRESENTATION_HEIGHT, 1),
+      });
+    };
+    update();
+    query.addEventListener('change', update);
+    window.addEventListener('resize', update);
+    return () => {
+      query.removeEventListener('change', update);
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+  return viewport;
+}
+
 function App() {
   const [language, setLanguage] = useState<Language>('sv');
   const [view, setView] = useState<ViewState>({ kind: 'menu' });
 
+  const { phone, portrait, scale } = usePhonePresentation();
   const text = UI_TEXT[language];
   const isMenu = view.kind === 'menu';
   const activeId = view.kind === 'menu' ? null : view.id;
@@ -40,8 +69,17 @@ function App() {
 
   return (
     <LanguageProvider language={language}>
-      <div className="presentation-root">
-        <div className="stage">
+      <div className={`presentation-root${phone ? ' phone-presentation' : ''}`}>
+        {phone && portrait && (
+          <div className="rotate-prompt" role="status">
+            <span className="rotate-phone-icon" aria-hidden="true">↻</span>
+            <h1>{text.rotatePhoneTitle}</h1>
+            <p>{text.rotatePhoneBody}</p>
+          </div>
+        )}
+        <div className="presentation-frame" style={phone ? { width: 1200 * scale, height: 800 * scale } : undefined}
+          inert={phone && portrait} hidden={phone && portrait}>
+        <div className="stage" style={phone ? { transform: `scale(${scale})` } : undefined}>
           <div className={isMenu ? 'stage-scroll stage-scroll-menu' : 'stage-scroll stage-scroll-workspace'}>
             {isMenu ? (
               <header className="hero">
@@ -115,6 +153,7 @@ function App() {
               </main>
             )}
           </div>
+        </div>
         </div>
       </div>
     </LanguageProvider>

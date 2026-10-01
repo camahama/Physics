@@ -4,6 +4,8 @@ export const UI_TEXT_SV: UiText = {
   windowTitle: 'Simuleringar av regnbågsfysik',
   appTitle: 'Regnbågsfysik-simuleringar',
   appSubtitle: 'vibekodad av martin.magnusson@fysik.lu.se 2026',
+  rotatePhoneTitle: 'Vrid telefonen',
+  rotatePhoneBody: 'Använd liggande läge för att utforska simuleringarna.',
   menuButton: 'Meny',
   fallbackTitle: 'Modulen är inte tillgänglig',
   fallbackBody: 'Den här modulen finns inte med i den aktuella byggnaden.',

@@ -4,6 +4,8 @@ export const UI_TEXT_EN = {
   windowTitle: 'Rainbow Physics Simulations',
   appTitle: 'Rainbow Physics Simulator',
   appSubtitle: 'vibecoded by martin.magnusson@fysik.lu.se 2026',
+  rotatePhoneTitle: 'Rotate your phone',
+  rotatePhoneBody: 'Use landscape orientation to explore the simulations.',
   menuButton: 'Menu',
   fallbackTitle: 'Module unavailable',
   fallbackBody: 'This module is not available in the current build.',
