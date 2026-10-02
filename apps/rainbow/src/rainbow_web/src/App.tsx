@@ -23,7 +23,22 @@ function usePhonePresentation() {
   const [viewport, setViewport] = useState({ phone: false, portrait: false, scale: 1 });
   useEffect(() => {
     const query = window.matchMedia(PHONE_QUERY);
+    const viewportMeta = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
+    const originalViewport = viewportMeta?.content;
+    // Block browser zoom gestures without cancelling single-finger slider input.
+    const preventZoom = (event: Event) => {
+      if (query.matches) event.preventDefault();
+    };
+    const preventMultiTouch = (event: TouchEvent) => {
+      if (query.matches && event.touches.length > 1) event.preventDefault();
+    };
     const update = () => {
+      document.documentElement.classList.toggle('phone-presentation-locked', query.matches);
+      if (viewportMeta) {
+        viewportMeta.content = query.matches
+          ? 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
+          : originalViewport ?? 'width=device-width, initial-scale=1';
+      }
       const width = window.innerWidth;
       const height = window.innerHeight;
       setViewport({
@@ -35,9 +50,19 @@ function usePhonePresentation() {
     update();
     query.addEventListener('change', update);
     window.addEventListener('resize', update);
+    document.addEventListener('gesturestart', preventZoom, { passive: false });
+    document.addEventListener('gesturechange', preventZoom, { passive: false });
+    document.addEventListener('touchstart', preventMultiTouch, { passive: false });
+    document.addEventListener('touchmove', preventMultiTouch, { passive: false });
     return () => {
       query.removeEventListener('change', update);
       window.removeEventListener('resize', update);
+      document.removeEventListener('gesturestart', preventZoom);
+      document.removeEventListener('gesturechange', preventZoom);
+      document.removeEventListener('touchstart', preventMultiTouch);
+      document.removeEventListener('touchmove', preventMultiTouch);
+      document.documentElement.classList.remove('phone-presentation-locked');
+      if (viewportMeta && originalViewport !== undefined) viewportMeta.content = originalViewport;
     };
   }, []);
   return viewport;
