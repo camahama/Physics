@@ -1,4 +1,5 @@
-import { svgClientPoint } from '../../../../../../shared/interaction';
+import { TouchRange } from './TouchRange';
+import { svgPointerPoint } from '../interaction/svgPointer';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { RaytraceSimulation } from '../../simulations/raytrace/raytraceSimulation';
 import { useUiText } from '../../i18n';
@@ -29,7 +30,7 @@ export function RaytracePanel() {
     window.addEventListener('blur', cancel);
     return () => window.removeEventListener('blur', cancel);
   }, []);
-  const offsetFromPointer = (evt: React.PointerEvent<SVGSVGElement>) => svgClientPoint(evt.currentTarget, evt).x - 500;
+  const offsetFromPointer = (evt: React.PointerEvent<SVGSVGElement>) => svgPointerPoint(evt.currentTarget, evt).x - 500;
 
   return (
     <section className="panel">
@@ -115,13 +116,13 @@ export function RaytracePanel() {
         <div className="raytrace-corner-control">
           <label>
             <span>{text.size} {radius.toFixed(0)}</span>
-            <input
+            <TouchRange
               type="range"
               min={UI_PARAMS.raytrace.radiusRange.min}
               max={UI_PARAMS.raytrace.radiusRange.max}
               step={1}
               value={radius}
-              onChange={(e) => setRadius(Number(e.target.value))}
+              onValueChange={(value) => setRadius(value)}
             />
           </label>
         </div>

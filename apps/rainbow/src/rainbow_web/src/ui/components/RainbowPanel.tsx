@@ -1,3 +1,4 @@
+import { TouchRange } from './TouchRange';
 import { useEffect, useRef, useState } from 'react';
 import { RainbowSimulation, type RainbowDropSample } from '../../simulations/rainbow/rainbowSimulation';
 import { useUiText } from '../../i18n';
@@ -221,14 +222,14 @@ export function RainbowPanel() {
         <div className="refraction-corner-control rainbow-corner-control">
           <label>
             <span>{text.rainIntensity}</span>
-            <input
+            <TouchRange
               type="range"
               min={UI_PARAMS.rainbow.rainIntensityRange.min}
               max={UI_PARAMS.rainbow.rainIntensityRange.max}
               step={UI_PARAMS.rainbow.rainIntensityRange.step}
               value={ui.rainIntensity}
-              onChange={(e) => {
-                sim.setRainIntensity(Number(e.target.value));
+              onValueChange={(value) => {
+                sim.setRainIntensity(value);
                 setUi(sim.uiState());
               }}
             />

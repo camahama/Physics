@@ -1,3 +1,4 @@
+import { TouchRange } from './TouchRange';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PrismSimulation } from '../../simulations/prism/prismSimulation';
 import type { PrismMode, Vec2 } from '../../physics/prism/engine';
@@ -270,14 +271,14 @@ export function PrismPanel() {
         <div className="prism-corner-control">
           <label>
             <span>{text.angle} {incidentDeg.toFixed(1)}°</span>
-            <input
+            <TouchRange
               type="range"
               min={UI_PARAMS.prism.incidentDeg.min}
               max={UI_PARAMS.prism.incidentDeg.max}
               step={UI_PARAMS.prism.incidentDeg.step}
               value={incidentDeg}
-              onChange={(e) => {
-                setIncidentDeg(snapAngle(Number(e.target.value)));
+              onValueChange={(value) => {
+                setIncidentDeg(snapAngle(value));
                 raceStartMs.current = performance.now();
                 setRunning(true);
                 setClockSec(0);
@@ -286,14 +287,14 @@ export function PrismPanel() {
           </label>
           <label>
             <span>{text.colorSeparation} {colorSeparation.toFixed(1)}</span>
-            <input
+            <TouchRange
               type="range"
               min={UI_PARAMS.prism.colorSeparation.min}
               max={UI_PARAMS.prism.colorSeparation.max}
               step={UI_PARAMS.prism.colorSeparation.step}
               value={colorSeparation}
-              onChange={(e) => {
-                setColorSeparation(Number(e.target.value));
+              onValueChange={(value) => {
+                setColorSeparation(value);
                 raceStartMs.current = performance.now();
                 setRunning(true);
                 setClockSec(0);

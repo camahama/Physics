@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { LanguageProvider, UI_TEXT, type Language } from './i18n';
 import { MasterMenu } from './ui/components/MasterMenu';
 import { RefractionPanel } from './ui/components/RefractionPanel';
@@ -125,7 +125,7 @@ function App() {
             <p>{text.rotatePhoneBody}</p>
           </div>
         )}
-        <div className="presentation-frame" style={phone ? { width: 1200 * scale, height: 800 * scale } : undefined}
+        <div className="presentation-frame" style={phone ? { width: 1200 * scale, height: 800 * scale, "--phone-hit-size": `${36 / scale}px`, "--phone-thumb-size": `${24 / scale}px`, "--phone-control-width": `${140 / scale}px` } as CSSProperties : undefined}
           inert={phone && portrait} hidden={phone && portrait}>
         <div className="stage" style={phone ? { transform: `scale(${scale})` } : undefined}>
           <div className={isMenu ? 'stage-scroll stage-scroll-menu' : 'stage-scroll stage-scroll-workspace'}>

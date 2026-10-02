@@ -1131,3 +1131,45 @@ html.phone-presentation-page #root {
   background: #121212;
   font-size: 12px;
 }
+
+/* Keep touch controls usable in screen pixels, independent of stage scaling. */
+.phone-presentation input[type='range'] {
+  appearance: none;
+  -webkit-appearance: none;
+  height: var(--phone-hit-size);
+  margin: 0;
+  background: transparent;
+}
+.phone-presentation input[type='range']::-webkit-slider-runnable-track {
+  height: 6px;
+  background: #777;
+  border-radius: 999px;
+}
+.phone-presentation input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: var(--phone-thumb-size);
+  height: var(--phone-thumb-size);
+  margin-top: calc((6px - var(--phone-thumb-size)) / 2);
+  border-radius: 50%;
+  background: #f2f2f2;
+  border: 2px solid #555;
+}
+.phone-presentation input[type='range']::-moz-range-track {
+  height: 6px;
+  background: #777;
+}
+.phone-presentation input[type='range']::-moz-range-thumb {
+  width: var(--phone-thumb-size);
+  height: var(--phone-thumb-size);
+  border-radius: 50%;
+  background: #f2f2f2;
+  border: 0;
+}
+.phone-presentation [class*='corner-control'] {
+  min-width: var(--phone-control-width);
+}
+.phone-presentation button,
+.phone-presentation select,
+.phone-presentation .vis-item {
+  min-height: var(--phone-hit-size);
+}

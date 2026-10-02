@@ -1,3 +1,4 @@
+import { TouchRange } from './TouchRange';
 import { useEffect, useRef, useState } from 'react';
 import { DROPLET2_BANDS } from '../../physics/droplet2/engine';
 import { Droplet2Simulation } from '../../simulations/droplet2/droplet2Simulation';
@@ -210,14 +211,14 @@ export function Droplet2Panel() {
         <div className="droplet2-corner-control">
           <label>
             <span>{text.radius} {ui.radius.toFixed(0)}</span>
-            <input
+            <TouchRange
               type="range"
               min={UI_PARAMS.droplet2.radiusRange.min}
               max={UI_PARAMS.droplet2.radiusRange.max}
               step={1}
               value={ui.radius}
-              onChange={(e) => {
-                sim.setRadius(Number(e.target.value));
+              onValueChange={(value) => {
+                sim.setRadius(value);
                 resetAllLayers();
                 setUi(sim.uiState());
               }}

@@ -1,3 +1,4 @@
+import { TouchRange } from './TouchRange';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useUiText } from '../../i18n';
 import { UI_PARAMS } from '../../app/uiParams';
@@ -232,19 +233,19 @@ export function RefractionPanel() {
         <div className="refraction-corner-control">
           <label>
             <span>{text.interfaceAngle} {fmt(interfaceAngleDeg, 1)}°</span>
-            <input
+            <TouchRange
               type="range"
               min={0}
               max={45}
               step={0.1}
               value={interfaceAngleDeg}
-              onChange={(e) => setInterfaceAngleDeg(Number(e.target.value))}
+              onValueChange={(value) => setInterfaceAngleDeg(value)}
             />
           </label>
 
           <label>
             <span>{text.mediumIndex} {fmt(n2, 2)}</span>
-            <input type="range" min={1} max={3} step={0.01} value={n2} onChange={(e) => setN2(Number(e.target.value))} />
+            <TouchRange type="range" min={1} max={3} step={0.01} value={n2} onValueChange={(value) => setN2(value)} />
           </label>
         </div>
       </div>

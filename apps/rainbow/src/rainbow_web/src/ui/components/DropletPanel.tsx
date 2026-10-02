@@ -1,4 +1,5 @@
-import { svgClientPoint } from '../../../../../../shared/interaction';
+import { TouchRange } from './TouchRange';
+import { svgPointerPoint } from '../interaction/svgPointer';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { RAINBOW_BANDS } from '../../physics/droplet/engine';
 import { DropletSimulation } from '../../simulations/droplet/dropletSimulation';
@@ -47,7 +48,7 @@ export function DropletPanel() {
     window.addEventListener('blur', cancel);
     return () => window.removeEventListener('blur', cancel);
   }, []);
-  const pointerToScene = (evt: React.PointerEvent<SVGSVGElement>) => svgClientPoint(evt.currentTarget, evt);
+  const pointerToScene = (evt: React.PointerEvent<SVGSVGElement>) => svgPointerPoint(evt.currentTarget, evt);
 
   const updateFromPointer = (evt: React.PointerEvent<SVGSVGElement>, handle = draggingHandle) => {
     if (!handle) {
@@ -241,13 +242,13 @@ export function DropletPanel() {
 
           <label>
             {text.radius}: <strong>{radius.toFixed(0)} {text.pxSuffix}</strong>
-            <input
+            <TouchRange
               type="range"
               min={UI_PARAMS.droplet.radiusRange.min}
               max={UI_PARAMS.droplet.radiusRange.max}
               step={1}
               value={radius}
-              onChange={(e) => setRadius(Number(e.target.value))}
+              onValueChange={(value) => setRadius(value)}
             />
           </label>
         </aside>
