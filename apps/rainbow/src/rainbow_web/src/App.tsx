@@ -23,23 +23,19 @@ function usePhonePresentation() {
   const [viewport, setViewport] = useState({ phone: false, portrait: false, scale: 1 });
   useEffect(() => {
     const query = window.matchMedia(PHONE_QUERY);
-    const viewportMeta = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
-    const originalViewport = viewportMeta?.content;
-    // Block browser zoom gestures without cancelling single-finger slider input.
+    // Only gestures that start inside the presentation belong to the app.
+    // The black margins retain Safari's native pan and zoom behavior.
+    const startsInApp = (event: Event) =>
+      query.matches && event.target instanceof Element &&
+      Boolean(event.target.closest('.presentation-frame'));
     const preventZoom = (event: Event) => {
-      if (query.matches) event.preventDefault();
+      if (startsInApp(event)) event.preventDefault();
     };
     const preventMultiTouch = (event: TouchEvent) => {
-      if (query.matches && event.touches.length > 1) event.preventDefault();
+      if (startsInApp(event) && event.touches.length > 1) event.preventDefault();
     };
     const update = () => {
-      document.documentElement.classList.toggle('phone-presentation-locked', query.matches);
-      if (viewportMeta) {
-        const content = query.matches
-          ? 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
-          : originalViewport ?? 'width=device-width, initial-scale=1';
-        if (viewportMeta.content !== content) viewportMeta.content = content;
-      }
+      document.documentElement.classList.toggle('phone-presentation-page', query.matches);
       const width = window.innerWidth;
       const height = window.innerHeight;
       setViewport({
@@ -66,8 +62,7 @@ function usePhonePresentation() {
       document.removeEventListener('gesturechange', preventZoom);
       document.removeEventListener('touchstart', preventMultiTouch);
       document.removeEventListener('touchmove', preventMultiTouch);
-      document.documentElement.classList.remove('phone-presentation-locked');
-      if (viewportMeta && originalViewport !== undefined) viewportMeta.content = originalViewport;
+      document.documentElement.classList.remove('phone-presentation-page');
     };
   }, []);
   return viewport;
