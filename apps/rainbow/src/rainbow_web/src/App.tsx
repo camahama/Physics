@@ -35,9 +35,10 @@ function usePhonePresentation() {
     const update = () => {
       document.documentElement.classList.toggle('phone-presentation-locked', query.matches);
       if (viewportMeta) {
-        viewportMeta.content = query.matches
+        const content = query.matches
           ? 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
           : originalViewport ?? 'width=device-width, initial-scale=1';
+        if (viewportMeta.content !== content) viewportMeta.content = content;
       }
       const width = window.innerWidth;
       const height = window.innerHeight;
@@ -50,6 +51,8 @@ function usePhonePresentation() {
     update();
     query.addEventListener('change', update);
     window.addEventListener('resize', update);
+    document.addEventListener('fullscreenchange', update);
+    window.visualViewport?.addEventListener('resize', update);
     document.addEventListener('gesturestart', preventZoom, { passive: false });
     document.addEventListener('gesturechange', preventZoom, { passive: false });
     document.addEventListener('touchstart', preventMultiTouch, { passive: false });
@@ -57,6 +60,8 @@ function usePhonePresentation() {
     return () => {
       query.removeEventListener('change', update);
       window.removeEventListener('resize', update);
+      document.removeEventListener('fullscreenchange', update);
+      window.visualViewport?.removeEventListener('resize', update);
       document.removeEventListener('gesturestart', preventZoom);
       document.removeEventListener('gesturechange', preventZoom);
       document.removeEventListener('touchstart', preventMultiTouch);
@@ -71,6 +76,23 @@ function usePhonePresentation() {
 function App() {
   const [language, setLanguage] = useState<Language>('sv');
   const [view, setView] = useState<ViewState>({ kind: 'menu' });
+  const [fullscreen, setFullscreen] = useState(Boolean(document.fullscreenElement));
+  const [fullscreenError, setFullscreenError] = useState(false);
+  useEffect(() => {
+    const update = () => setFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener('fullscreenchange', update);
+    return () => document.removeEventListener('fullscreenchange', update);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    setFullscreenError(false);
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await document.documentElement.requestFullscreen();
+    } catch {
+      setFullscreenError(true);
+    }
+  };
 
   const { phone, portrait, scale } = usePhonePresentation();
   const text = UI_TEXT[language];
@@ -95,6 +117,12 @@ function App() {
   return (
     <LanguageProvider language={language}>
       <div className={`presentation-root${phone ? ' phone-presentation' : ''}`}>
+        {phone && document.fullscreenEnabled && (
+          <button type="button" className="phone-fullscreen-button" onClick={toggleFullscreen}>
+            {fullscreen ? text.exitFullscreen : text.enterFullscreen}
+          </button>
+        )}
+        {phone && fullscreenError && <p className="phone-fullscreen-error" role="status">{text.fullscreenError}</p>}
         {phone && portrait && (
           <div className="rotate-prompt" role="status">
             <span className="rotate-phone-icon" aria-hidden="true">↻</span>
