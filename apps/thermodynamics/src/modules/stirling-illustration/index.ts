@@ -556,8 +556,27 @@ function renderEngine(svg: SVGSVGElement, values: CycleValues, phase: number, t:
       const a = Math.PI - i * Math.PI / 180;
       points.push(`${i ? "L" : "M"} ${cx + radius * Math.cos(a)} ${cy + radius * Math.sin(a)}`);
     }
-    return svgNode("path", { d: points.join(" ") + " Z", class: cls,
-      transform: `rotate(${angle} ${cx} ${cy})` });
+    const guide = svgGroup(cls);
+    guide.setAttribute("transform", `rotate(${angle} ${cx} ${cy})`);
+    // Cut through the guide so the spokes and shaft can be seen through its slot.
+    const maskId = `stirling-${kind}-open-channel`;
+    const mask = svgNode("mask", {
+      id: maskId, maskUnits: "userSpaceOnUse",
+      x: "500", y: "0", width: "620", height: "620",
+    });
+    mask.append(svgNode("rect", { x: "500", y: "0", width: "620", height: "620", fill: "white" }));
+    mask.append(svgNode("path", {
+      d: points.join(" ") + " Z", fill: "none", stroke: "black",
+      "stroke-width": kind === "power" ? "14" : "10", "stroke-linejoin": "round",
+    }));
+    defs.append(mask);
+    guide.setAttribute("mask", `url(#${maskId})`);
+    for (const surface of ["edge", "face", "groove"]) {
+      guide.append(svgNode("path", {
+        d: points.join(" ") + " Z", class: `stirling-cam-${surface}`,
+      }));
+    }
+    return guide;
   };
   const defs = svgNode("defs", {});
   const metalGradient = (id: string, colors: string[], shaft = false) => {
@@ -583,15 +602,45 @@ function renderEngine(svg: SVGSVGElement, values: CycleValues, phase: number, t:
   ]);
   metalGradient("stirling-bore", ["#647581", "#cbd6dc", "#f5f8fa", "#c2cfd7", "#647783"]);
   metalGradient("stirling-shaft", ["#3c515e", "#eff8ff", "#a8bcc9", "#405866"], true);
+  metalGradient("stirling-cam-steel", ["#243e54", "#709dbb", "#e0f2ff", "#5b88a8", "#294b66"]);
+  metalGradient("stirling-cam-brass", ["#65451b", "#c99742", "#fff0b0", "#bb862e", "#70501d"]);
+  const brassRod = svgNode("linearGradient", {
+    id: "stirling-brass-rod", gradientUnits: "userSpaceOnUse",
+    x1: "0", x2: "0", y1: "306", y2: "314",
+  });
+  ["#745019", "#d6aa4f", "#fff3bb", "#d1a044", "#79511b"].forEach((color, i) =>
+    brassRod.append(svgNode("stop", { offset: `${i * 25}%`, "stop-color": color })));
+  defs.append(brassRod);
   metalGradient("stirling-flame", ["#ffdf74", "#ffad32", "#e85020"]);
   const wheel = svgGroup("stirling-cam-wheel");
-  wheel.append(svgNode("circle", { cx: String(cx), cy: String(cy), r: "278", class: "stirling-flywheel" }));
-  wheel.append(svgNode("circle", { cx: String(cx), cy: String(cy), r: "270", class: "stirling-rim-highlight" }));
+  // The brass guide is mounted on the rear face; rim and spokes occlude it.
+  wheel.append(cam("regenerator", 470, "stirling-cam-track regenerator"));
+  const rim = svgGroup("stirling-perforated-rim");
+  const rimMask = svgNode("mask", {
+    id: "stirling-rim-perforations", maskUnits: "userSpaceOnUse",
+    x: "500", y: "0", width: "620", height: "620",
+  });
+  rimMask.append(svgNode("rect", { x: "500", y: "0", width: "620", height: "620", fill: "white" }));
+  rim.append(svgNode("circle", { cx: String(cx), cy: String(cy), r: "261", class: "stirling-rim-edge" }));
+  rim.append(svgNode("circle", { cx: String(cx), cy: String(cy), r: "261", class: "stirling-flywheel" }));
+  rim.append(svgNode("circle", { cx: String(cx), cy: String(cy), r: "283", class: "stirling-rim-highlight" }));
+  // Actual openings reveal the rear cam, with a dark machined lip around each bore.
+  for (let i = 0; i < 24; i++) {
+    const a = (angle + 7.5 + i * 15) * Math.PI / 180;
+    const position = { cx: String(cx + 261 * Math.cos(a)), cy: String(cy + 261 * Math.sin(a)) };
+    rimMask.append(svgNode("circle", { ...position, r: "10", fill: "black" }));
+    rim.append(svgNode("circle", {
+      ...position, r: "11", fill: "none", stroke: "#293b47", "stroke-width": "3",
+    }));
+  }
+  defs.append(rimMask);
+  rim.setAttribute("mask", "url(#stirling-rim-perforations)");
+  wheel.append(rim);
   for (let i = 0; i < 6; i++) {
     const a = (angle + i * 60) * Math.PI / 180;
-    wheel.append(line(cx + 25 * Math.cos(a), cy + 25 * Math.sin(a), cx + 264 * Math.cos(a), cy + 264 * Math.sin(a), "stirling-wheel-spoke"));
+    wheel.append(line(cx + 25 * Math.cos(a), cy + 25 * Math.sin(a), cx + 250 * Math.cos(a), cy + 250 * Math.sin(a), "stirling-wheel-spoke"));
   }
-  wheel.append(cam("power", 445, "stirling-cam-track power"), cam("regenerator", 470, "stirling-cam-track regenerator"));
+  wheel.append(cam("power", 445, "stirling-cam-track power"));
   const parts: SVGElement[] = [defs, wheel,
     rect(62, 222, 320, 152, "stirling-cylinder-shell"),
     rect(80, 240, 282, 116, "stirling-cylinder-cut"),
@@ -625,7 +674,7 @@ function renderEngine(svg: SVGSVGElement, values: CycleValues, phase: number, t:
   parts.push(
     svgNode("circle", { cx: String(power + 445), cy: "310", r: "9", class: "stirling-cam-follower power" }),
     svgNode("circle", { cx: String(regenerator + 470), cy: "310", r: "7", class: "stirling-cam-follower regenerator" }),
-    svgNode("circle", { cx: String(cx), cy: String(cy), r: "18", class: "stirling-flywheel-hub" }),
+    svgNode("circle", { cx: String(cx), cy: String(cy), r: "30", class: "stirling-flywheel-hub" }),
     svgNode("path", { d: "M 40 420 H 112 M 55 417 C 36 397 58 382 70 368 C 66 392 102 397 88 417", class: "stirling-heat-source" }),
     svgText(t("modules.stirlingIllustration.engine.hot"), 40, 456, "stirling-engine-label hot"),
     svgText(t("modules.stirlingIllustration.engine.cooler"), 266, 456, "stirling-engine-label cool"),

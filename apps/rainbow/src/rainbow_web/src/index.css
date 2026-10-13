@@ -1168,8 +1168,3 @@ html.phone-presentation-page #root {
 .phone-presentation [class*='corner-control'] {
   min-width: var(--phone-control-width);
 }
-.phone-presentation button,
-.phone-presentation select,
-.phone-presentation .vis-item {
-  min-height: var(--phone-hit-size);
-}

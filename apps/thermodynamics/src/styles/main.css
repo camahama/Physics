@@ -1408,11 +1408,17 @@ button {
 
 .stirling-engine-model .stirling-power-piston { fill: url(#stirling-metal); }
 .stirling-wheel-spoke { stroke: #c5cdd2; stroke-width: 13; }
-.stirling-cam-track { fill: none; stroke-width: 5; }
-.stirling-cam-track.power { stroke: #42677e; }
-.stirling-cam-track.regenerator { stroke: #b97821; }
+.stirling-cam-track { fill: none; stroke-linejoin: round; }
+.stirling-cam-edge { stroke: #24333e; stroke-width: 32; }
+.stirling-cam-face { stroke-width: 28; }
+.stirling-cam-track.power .stirling-cam-face { stroke: url(#stirling-cam-steel); }
+.stirling-cam-track.regenerator .stirling-cam-face { stroke: url(#stirling-cam-brass); }
+.stirling-cam-groove { stroke: #23313b; stroke-width: 18; }
+.stirling-cam-track.regenerator .stirling-cam-edge { stroke: #59421f; stroke-width: 28; }
+.stirling-cam-track.regenerator .stirling-cam-face { stroke-width: 24; }
+.stirling-cam-track.regenerator .stirling-cam-groove { stroke: #59421f; stroke-width: 14; }
 .stirling-power-shaft { stroke: #7c929f; stroke-width: 16; }
-.stirling-regenerator-shaft { stroke: #bf832f; stroke-width: 4; }
+.stirling-regenerator-shaft { stroke: url(#stirling-brass-rod); stroke-width: 8; stroke-linecap: round; }
 .stirling-cam-follower { fill: #fff; stroke-width: 4; }
 .stirling-cam-follower.power { stroke: #42677e; }
 .stirling-cam-follower.regenerator { stroke: #b97821; }
@@ -1431,12 +1437,13 @@ button {
   fill: url(#stirling-bore);
   stroke: #586c79;
 }
+.stirling-rim-edge { fill: none; stroke: #293b47; stroke-width: 52; }
 .stirling-engine-model .stirling-flywheel {
   stroke: url(#stirling-dark-metal);
-  stroke-width: 18;
+  stroke-width: 48;
 }
 .stirling-rim-highlight { fill: none; stroke: #d7e3e9; stroke-width: 2; }
-.stirling-engine-model .stirling-wheel-spoke { stroke: url(#stirling-metal); stroke-width: 16; }
+.stirling-engine-model .stirling-wheel-spoke { stroke: url(#stirling-dark-metal); stroke-width: 32; stroke-linecap: round; }
 .stirling-engine-model .stirling-flywheel-hub {
   fill: url(#stirling-metal);
   stroke: #40515d;
