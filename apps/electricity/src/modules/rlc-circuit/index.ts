@@ -1,3 +1,4 @@
+import { formatQuantity, parseQuantity, refineSteps } from "./quantity.js";
 import type { ModuleRenderContext } from "../../config/modules.js";
 import { createPackageCredit } from "../../components/packageCredit.js";
 import {
@@ -14,10 +15,10 @@ const PHASOR_WIDTH = 360;
 const PHASOR_HEIGHT = 460;
 const TIME_SCALE_STEPS = [0.5e-3, 1e-3, 2e-3, 5e-3, 10e-3, 20e-3, 50e-3];
 const VOLTAGE_SCALE_STEPS = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50];
-const RESISTANCE_STEPS = [0, 1, 10, 20, 50, 100, 200, 500, 1000];
-const INDUCTANCE_STEPS = [0, 10, 20, 50, 100, 200, 500, 1000];
-const CAPACITANCE_STEPS = [0, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, Infinity];
-const SOURCE_VOLTAGE_STEPS = [1, 2, 5, 10, 20, 50];
+const RESISTANCE_STEPS = refineSteps([0, 1, 10, 20, 50, 100, 200, 500, 1000]);
+const INDUCTANCE_STEPS = refineSteps([0, 10, 20, 50, 100, 200, 500, 1000]);
+const CAPACITANCE_STEPS = refineSteps([0, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, Infinity]);
+const SOURCE_VOLTAGE_STEPS = refineSteps([1, 2, 5, 10, 20, 50]);
 const ANIMATION_SLOWDOWN = 100;
 const SCOPE_SAMPLES_PER_PERIOD = 64;
 const SCOPE_MAX_SAMPLES = 6000;
@@ -205,7 +206,7 @@ export function renderRlcCircuitModule({ t, language = "sv" }: ModuleRenderConte
         state.sourceVoltage = value;
         updateDiagrams();
       }),
-      slider(controlLabel(t("modules.rlcCircuit.frequency"), "f"), state.frequency, 1, 1000, 1, "Hz", (value) => {
+      slider(controlLabel(t("modules.rlcCircuit.frequency"), "f"), state.frequency, 1, 1000, 0.1, "Hz", (value) => {
         state.frequency = value;
         updateDiagrams();
       }),
@@ -429,7 +430,7 @@ export function renderRlcCircuitModule({ t, language = "sv" }: ModuleRenderConte
   ) {
     const row = element("label", "rlc-slider");
     const headerRow = element("span", "rlc-slider-header");
-    const valueLabel = element("strong", "", `${formatNumber(value, language)} ${unit}`);
+    const valueLabel = element("strong", "", formatQuantity(value, unit, language));
     headerRow.append(labelNode(labelContent), valueLabel);
     const input = document.createElement("input");
     input.type = "range";
@@ -439,9 +440,10 @@ export function renderRlcCircuitModule({ t, language = "sv" }: ModuleRenderConte
     input.value = String(value);
     input.addEventListener("input", () => {
       const nextValue = Number(input.value);
-      valueLabel.textContent = `${formatNumber(nextValue, language)} ${unit}`;
+      valueLabel.textContent = formatQuantity(nextValue, unit, language);
       onInput(nextValue);
     });
+    enableValueEditing(valueLabel, input, unit, onInput);
     row.append(headerRow, input);
     return row;
   }
@@ -454,9 +456,10 @@ export function renderRlcCircuitModule({ t, language = "sv" }: ModuleRenderConte
     onInput: (value: number) => void,
   ) {
     const row = element("label", "rlc-slider");
-    const index = Math.max(0, steps.findIndex((step) => step === value));
+    const index = steps.reduce((best, step, candidate) =>
+      step === value || Math.abs(step - value) < Math.abs(steps[best] - value) ? candidate : best, 0);
     const headerRow = element("span", "rlc-slider-header");
-    const valueLabel = element("strong", "", `${formatNumber(value, language)} ${unit}`);
+    const valueLabel = element("strong", "", formatQuantity(value, unit, language));
     headerRow.append(labelNode(labelContent), valueLabel);
     const input = document.createElement("input");
     input.type = "range";
@@ -466,11 +469,51 @@ export function renderRlcCircuitModule({ t, language = "sv" }: ModuleRenderConte
     input.value = String(index);
     input.addEventListener("input", () => {
       const nextValue = steps[Number(input.value)];
-      valueLabel.textContent = `${formatNumber(nextValue, language)} ${unit}`;
+      valueLabel.textContent = formatQuantity(nextValue, unit, language);
       onInput(nextValue);
     });
+    enableValueEditing(valueLabel, input, unit, onInput);
     row.append(headerRow, input);
     return row;
+  }
+
+  function enableValueEditing(
+    label: HTMLElement,
+    input: HTMLInputElement,
+    unit: string,
+    onInput: (value: number) => void,
+  ) {
+    const hint = language === "sv" ? "Dubbelklicka för att ange ett värde" : "Double-click to enter a value";
+    label.title = hint;
+    label.tabIndex = 0;
+    label.setAttribute("role", "button");
+    label.setAttribute("aria-label", `${label.parentElement?.textContent ?? label.textContent}. ${hint}`);
+    input.setAttribute("aria-label", label.parentElement?.firstChild?.textContent ?? unit);
+    const edit = () => {
+      let initial = label.textContent ?? "";
+      let invalid = false;
+      while (true) {
+        const message = language === "sv"
+          ? `${invalid ? "Ogiltigt värde. " : ""}Ange ett icke-negativt värde (f > 0), t.ex. 45.2 pF. Utan enhet används ${unit}.`
+          : `${invalid ? "Invalid value. " : ""}Enter a non-negative value (f > 0), e.g. 45.2 pF. Without a unit, ${unit} is used.`;
+        const answer = window.prompt(message, initial);
+        if (answer === null) return;
+        // Formatted readouts may contain locale grouping spaces.
+        const value = parseQuantity(answer.replace(/(\d)[\s\u00a0\u202f]+(?=\d)/g, "$1"), unit);
+        if (value !== null) {
+          onInput(value);
+          renderControls();
+          return;
+        }
+        initial = answer;
+        invalid = true;
+      }
+    };
+    label.addEventListener("click", (event) => event.preventDefault());
+    label.addEventListener("dblclick", (event) => { event.preventDefault(); edit(); });
+    label.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") { event.preventDefault(); edit(); }
+    });
   }
 
   function renderCircuitDiagram(label: string) {

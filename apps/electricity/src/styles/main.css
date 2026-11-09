@@ -458,6 +458,7 @@ button {
 }
 
 .rlc-slider-header strong {
+  cursor: text;
   color: var(--text-primary);
   font-family: ui-monospace, "SFMono-Regular", monospace;
 }
