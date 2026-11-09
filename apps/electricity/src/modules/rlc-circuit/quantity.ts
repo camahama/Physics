@@ -37,9 +37,18 @@ export function formatQuantity(value: number, unit: string, language: string): s
   return `${new Intl.NumberFormat(language === "sv" ? "sv-SE" : "en-US", { maximumSignificantDigits: 12, useGrouping: false }).format(magnitude / 10 ** exponent)} ${prefix}${base}`;
 }
 
+/** Fill each decade with round steps: 1…9, 10…90, 100…900, etc. */
 export function refineSteps(steps: number[]): number[] {
-  return steps.flatMap((value, index) => {
-    const next = steps[index + 1];
-    return Number.isFinite(next) ? [value, ...[1, 2, 3].map((part) => Number((value + (next - value) * part / 4).toPrecision(12)))] : [value];
-  });
+  const positive = steps.filter((value) => Number.isFinite(value) && value > 0);
+  if (positive.length === 0) return [...steps];
+  const min = Math.min(...positive);
+  const max = Math.max(...positive);
+  const values = new Set(steps);
+  for (let exponent = Math.floor(Math.log10(min)); exponent <= Math.floor(Math.log10(max)); exponent += 1) {
+    for (let digit = 1; digit <= 9; digit += 1) {
+      const value = Number((digit * 10 ** exponent).toPrecision(12));
+      if (value >= min && value <= max) values.add(value);
+    }
+  }
+  return [...values].sort((a, b) => a - b);
 }

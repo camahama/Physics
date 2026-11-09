@@ -26,5 +26,10 @@ test("rejects invalid quantities and nonphysical values", () => {
 test("formats small values without rounding them to zero and retains slider endpoints", () => {
   assert.equal(formatQuantity(0.0000452, "µF", "en"), "45.2 pF");
   assert.equal(formatQuantity(2500, "Ω", "en"), "2.5 kΩ");
-  assert.deepEqual(refineSteps([0, 1, Infinity]), [0, 0.25, 0.5, 0.75, 1, Infinity]);
+  assert.deepEqual(refineSteps([0, 1, Infinity]), [0, 1, Infinity]);
+  const capacitanceSteps = refineSteps([0, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, Infinity]);
+  assert.deepEqual(capacitanceSteps.filter((value) => value >= 10 && value <= 100),
+    [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  assert.ok(capacitanceSteps.includes(0.4));
+  assert.ok(!capacitanceSteps.includes(42.5));
 });
