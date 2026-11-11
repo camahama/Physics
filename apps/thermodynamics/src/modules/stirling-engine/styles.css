@@ -632,88 +632,6 @@ math.report-value-math {
   box-shadow: 0 12px 30px rgba(16, 28, 38, 0.06);
 }
 
-@page {
-  size: A4 portrait;
-  margin: 12mm;
-}
-
-@media print {
-  body {
-    background: #fff;
-  }
-
-  .app-shell {
-    max-width: 210mm;
-    min-height: auto;
-    padding: 0;
-    gap: 0.35rem;
-    background: #fff;
-  }
-
-  .header-actions {
-    display: none;
-  }
-
-  .hero {
-    padding: 0.7rem 0.85rem;
-  }
-
-  .report-paper {
-    gap: 0.45rem;
-    padding: 0.65rem 0.75rem 0.7rem;
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  .report-section {
-    gap: 0.35rem;
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  .report-heading-row {
-    padding-bottom: 0.2rem;
-  }
-
-  .report-values-grid {
-    gap: 0.45rem;
-  }
-
-  .report-values-card {
-    gap: 0.35rem;
-    padding: 0.55rem 0.65rem;
-  }
-
-  .report-definition-list {
-    gap: 0.2rem;
-  }
-
-  .report-definition-list div {
-    padding-bottom: 0.12rem;
-  }
-
-  .report-preview-panel {
-    padding: 0.2rem 0.25rem 0.25rem;
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  .report-preview-panel .image-wrap {
-    max-width: 84% !important;
-    margin: 0 auto;
-  }
-
-  .app-footer {
-    display: none;
-  }
-
-  .print-layout .hero,
-  .print-layout .report-paper {
-    border-color: #d7e2e8;
-    box-shadow: none;
-  }
-}
-
 @media (min-width: 840px) {
   .app-shell {
     grid-template-columns: 1fr 1.5fr;
@@ -733,12 +651,6 @@ math.report-value-math {
   }
 
   .print-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 839px) {
-  .report-values-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -961,5 +873,136 @@ input:focus-visible {
 
   .help-tooltip {
     font-size: 0.9rem;
+  }
+}
+
+/* The report is one physical sheet. Only its on-screen preview is scaled. */
+.report-viewport {
+  --report-scale: 1;
+  width: 100%;
+  height: calc(297mm * var(--report-scale));
+  overflow: hidden;
+}
+
+.app-shell.print-layout {
+  width: 210mm;
+  max-width: none;
+  height: 297mm;
+  min-height: 0;
+  padding: 12mm;
+  margin: 0 auto;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 3mm;
+  background: white;
+  color: #172026;
+  font-size: 10pt;
+  line-height: 1.35;
+  transform: scale(var(--report-scale));
+  transform-origin: top left;
+}
+
+.print-layout .hero {
+  padding: 3mm;
+  box-shadow: none;
+}
+
+.print-layout .hero-topbar {
+  flex-direction: row;
+  align-items: center;
+}
+
+.print-layout .hero h1 {
+  font-size: 18pt;
+}
+
+.print-layout .report-paper {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 3mm;
+}
+
+.print-layout .report-section {
+  min-height: 0;
+  gap: 2mm;
+}
+
+.print-layout .report-values-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3mm;
+}
+
+.print-layout .report-values-card {
+  padding: 3mm;
+  gap: 2mm;
+}
+
+.print-layout .report-heading-row h2 {
+  font-size: 12pt;
+}
+
+.print-layout .report-values-card h3,
+.print-layout .report-definition-list dd {
+  font-size: 10pt;
+}
+
+.print-layout .report-definition-list {
+  gap: 1mm;
+}
+
+.print-layout .report-definition-list div {
+  gap: 2mm;
+  padding-bottom: 1mm;
+  overflow-wrap: anywhere;
+}
+
+.print-layout .report-figure-section {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.print-layout .report-preview-panel.preview {
+  min-height: 0;
+  padding: 2mm;
+  align-items: center;
+  justify-content: center;
+}
+
+.print-layout .report-preview-panel .image-wrap {
+  /* Bound portrait and landscape photographs without distorting the overlay. */
+  width: min(100%, calc(155mm * var(--plot-ratio, 1))) !important;
+  max-width: 100% !important;
+  flex: 0 0 auto;
+}
+
+.print-layout .app-footer {
+  display: none;
+}
+
+@media print {
+  :host {
+    display: block;
+    min-height: 0;
+    background: white;
+    page: stirling-report;
+  }
+
+  .report-viewport {
+    width: 210mm;
+    height: 297mm;
+  }
+
+  .app-shell.print-layout {
+    transform: none;
+    margin: 0;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    break-inside: avoid;
+  }
+
+  .print-layout .header-actions {
+    display: none;
   }
 }

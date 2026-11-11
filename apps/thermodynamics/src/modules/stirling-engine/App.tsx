@@ -1,6 +1,6 @@
 import { resolveLanguage, rememberLanguage } from "../../../../shared/language.js";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import type { ChangeEvent, MouseEvent, PointerEvent as ReactPointerEvent, ReactNode, SyntheticEvent } from "react";
+import type { ChangeEvent, MouseEvent, PointerEvent as ReactPointerEvent, ReactNode, SyntheticEvent, CSSProperties } from "react";
 import { messages, type Locale } from "./i18n/messages";
 import { normalizeWhiteboardImage, type Point as OutlinePoint } from "./utils/normalizeImage";
 
@@ -23,6 +23,18 @@ export function App() {
   const [locale, setLocale] = useState<Locale>(() => resolveLanguage());
   useEffect(() => { rememberLanguage(locale); }, [locale]);
   const [printLayout, setPrintLayout] = useState(false);
+  const reportViewportRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!printLayout || !reportViewportRef.current) return;
+    const viewport = reportViewportRef.current;
+    const observer = new ResizeObserver(([entry]) => {
+      // CSS pixels per millimetre are defined as 96 / 25.4.
+      const scale = Math.min(1, entry.contentRect.width / (210 * 96 / 25.4));
+      viewport.style.setProperty("--report-scale", String(scale));
+    });
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, [printLayout]);
   const [sourceImageUrl, setSourceImageUrl] = useState<string | null>(DEFAULT_IMAGE_DATA_URL);
   const [normalizedImageUrl, setNormalizedImageUrl] = useState<string | null>(DEFAULT_IMAGE_DATA_URL);
   const [imageSize, setImageSize] = useState<Point | null>(null);
@@ -458,8 +470,9 @@ export function App() {
               position: "relative",
               width: "100%",
               maxWidth: printLayout ? "100%" : "92%",
-              aspectRatio: `${plotWidth} / ${plotHeight}`
-            }}
+              aspectRatio: `${plotWidth} / ${plotHeight}`,
+              "--plot-ratio": plotWidth / plotHeight
+            } as CSSProperties}
             onPointerMove={printLayout ? undefined : (event) => {
               updateDraggingContourPoint(event);
               updateDraggingCornerPoint(event);
@@ -848,6 +861,7 @@ export function App() {
   );
 
   return (
+    <div ref={reportViewportRef} className={printLayout ? "report-viewport" : undefined}>
     <main className={`app-shell ${printLayout ? "print-layout" : ""}`}>
       <header className="hero">
         <div className="hero-topbar">
@@ -1126,6 +1140,7 @@ export function App() {
         <small>{t.copyrightText}</small>
       </footer>
     </main>
+    </div>
   );
 }
 

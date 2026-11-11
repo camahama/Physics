@@ -1538,3 +1538,24 @@ button {
 
 .process-builder-tool { touch-action: none; user-select: none; -webkit-user-select: none; }
 .process-builder-board { user-select: none; -webkit-user-select: none; }
+
+/* Page rules belong to the document, outside the Stirling module's shadow DOM. */
+@page stirling-report {
+  size: A4 portrait;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body,
+  #app,
+  .react-module-host {
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .react-module-host {
+    page: stirling-report;
+  }
+}
