@@ -742,3 +742,224 @@ math.report-value-math {
     grid-template-columns: 1fr;
   }
 }
+
+/* Keep the photograph scrollable; only draggable handles own touch gestures. */
+.image-wrap,
+.image-plane {
+  touch-action: auto;
+}
+
+.app-shell > *,
+.workflow-step,
+.field-row,
+.visual-column {
+  min-width: 0;
+}
+
+.preview-tools {
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.preview-tools p {
+  margin: 0 0 0.5rem;
+}
+
+.mobile-controls-button {
+  display: none;
+}
+
+.step-heading,
+.instrument-head {
+  position: relative;
+}
+
+.help-container {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.help-badge {
+  position: static;
+  font-family: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+
+.help-tooltip {
+  left: 0;
+  transform: none;
+  width: min(20rem, 100%);
+  opacity: 1;
+  font-weight: 400;
+}
+
+.help-tooltip[hidden] {
+  display: none;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid #1d6fd6;
+  outline-offset: 3px;
+}
+
+.drag-point {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@media screen and (pointer: coarse) {
+  .drag-point {
+    width: 44px !important;
+    height: 44px !important;
+    background: radial-gradient(circle, #ffb000 0 5px, transparent 6px) !important;
+  }
+
+  .corner-point {
+    background: radial-gradient(circle, #e32929 0 5px, transparent 6px) !important;
+  }
+
+  button,
+  .help-badge {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+@media screen and (max-width: 839px) {
+  .app-shell {
+    padding: 0.75rem max(0.5rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+    gap: 0.75rem;
+  }
+
+  .hero,
+  .panel {
+    padding: 0.85rem;
+  }
+
+  .hero-topbar,
+  .step-inline,
+  .calibration-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .hero h1 {
+    font-size: clamp(1.35rem, 5vw, 1.8rem);
+    overflow-wrap: anywhere;
+  }
+
+  .workflow-step {
+    padding: 0.75rem;
+  }
+
+  .step-heading h2 {
+    flex: 1;
+  }
+
+  .inline-upload,
+  .calibration-button-stack {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .inline-upload {
+    grid-template-columns: 1fr;
+  }
+
+  .calibration-grid {
+    width: 100%;
+  }
+
+  .compact-field input {
+    max-width: none;
+    min-width: 0;
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  button,
+  .help-badge {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .compact-button {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .tight-row > button {
+    flex: 1 1 8rem;
+  }
+
+  .stirling-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stirling-readout {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    min-width: 0;
+  }
+
+  .panel.preview {
+    min-height: 0;
+    padding: 0.65rem;
+    scroll-margin-top: 0.5rem;
+  }
+
+  .preview .image-wrap {
+    max-width: 100% !important;
+  }
+
+  .mobile-controls-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .controls {
+    scroll-margin-top: 0.5rem;
+  }
+
+  .result-panels {
+    padding: 0;
+  }
+
+  .result-panels .instrument-panel-grid {
+    width: 100%;
+  }
+
+  .instrument-panel {
+    min-width: 0;
+    padding: 0.75rem;
+  }
+
+  .instrument-reading {
+    flex-wrap: wrap;
+  }
+
+  .instrument-value {
+    font-size: clamp(1.1rem, 5vw, 1.7rem);
+    overflow-wrap: anywhere;
+  }
+
+  .instrument-label {
+    letter-spacing: 0.02em;
+    overflow-wrap: anywhere;
+  }
+
+  .help-tooltip {
+    font-size: 0.9rem;
+  }
+}

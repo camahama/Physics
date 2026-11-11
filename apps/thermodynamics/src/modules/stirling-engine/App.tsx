@@ -1,5 +1,5 @@
 import { resolveLanguage, rememberLanguage } from "../../../../shared/language.js";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, MouseEvent, PointerEvent as ReactPointerEvent, ReactNode, SyntheticEvent } from "react";
 import { messages, type Locale } from "./i18n/messages";
 import { normalizeWhiteboardImage, type Point as OutlinePoint } from "./utils/normalizeImage";
@@ -46,6 +46,32 @@ export function App() {
   const [stirlingEnabled, setStirlingEnabled] = useState(false);
   const [tCold, setTCold] = useState<string>("300");
   const [tHot, setTHot] = useState<string>("400");
+
+  const previewSectionRef = useRef<HTMLElement | null>(null);
+  const controlsRef = useRef<HTMLElement | null>(null);
+  const [imageError, setImageError] = useState(false);
+  const mobile = locale === "sv" ? {
+    controls: "Till reglagen", close: "Stäng konturen", undo: "Ångra punkt",
+    corners: `Tryck på bildens fyra hörn (${cornerPoints.length}/4). Dra för att justera.`,
+    max: "Tryck på punkten för V min, p max i bilden.",
+    min: "Tryck på punkten för V max, p min i bilden.",
+    contour: "Tryck längs konturen. Stäng den när minst tre punkter är markerade.",
+    ready: "Välj ett verktyg i reglagen. Dra i punkterna för att justera.",
+    error: "Bilden kunde inte öppnas. Prova en JPEG- eller PNG-bild.",
+  } : {
+    controls: "Back to controls", close: "Close contour", undo: "Undo point",
+    corners: `Tap the four image corners (${cornerPoints.length}/4). Drag to adjust.`,
+    max: "Tap the V min, p max point on the image.",
+    min: "Tap the V max, p min point on the image.",
+    contour: "Tap along the contour. Close it after marking at least three points.",
+    ready: "Choose a tool in the controls. Drag points to adjust.",
+    error: "This image could not be opened. Try a JPEG or PNG image.",
+  };
+  const revealPreview = () => {
+    if (window.matchMedia("(max-width: 839px)").matches) {
+      requestAnimationFrame(() => previewSectionRef.current?.scrollIntoView({ block: "start" }));
+    }
+  };
 
   const previewImageRef = useRef<HTMLImageElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -100,6 +126,7 @@ export function App() {
       return;
     }
 
+    setImageError(false);
     revokeUploadedObjectUrl();
     const nextUrl = URL.createObjectURL(file);
     uploadedObjectUrlRef.current = nextUrl;
@@ -123,6 +150,7 @@ export function App() {
   };
 
   const resetToDefaultImage = () => {
+    setImageError(false);
     revokeUploadedObjectUrl();
     setImageSize({ x: DEFAULT_IMAGE_SIZE, y: DEFAULT_IMAGE_SIZE });
     setSourceImageUrl(DEFAULT_IMAGE_DATA_URL);
@@ -141,14 +169,21 @@ export function App() {
 
     const img = new Image();
     img.onload = () => {
-      const normalized = normalizeWhiteboardImage(img, orderedCornerPoints);
-      setImageSize(null);
-      setNormalizedImageUrl(normalized.normalizedDataUrl);
-      resetContour();
-      resetCalibration();
+      if (uploadedObjectUrlRef.current !== img.src) return;
+      try {
+        const normalized = normalizeWhiteboardImage(img, orderedCornerPoints);
+        setImageError(false);
+        setImageSize(null);
+        setNormalizedImageUrl(normalized.normalizedDataUrl);
+        resetContour();
+        resetCalibration();
+        revealPreview();
+      } catch {
+        setImageError(true);
+      }
     };
     img.onerror = () => {
-      setNormalizedImageUrl(sourceImageUrl);
+      if (uploadedObjectUrlRef.current === img.src) setImageError(true);
     };
     img.src = sourceImageUrl;
   };
@@ -156,12 +191,18 @@ export function App() {
   const startCornerSelection = () => {
     setCornerPoints([]);
     setCornerStepActive(true);
+    setContourStepActive(false);
+    setClickTarget(null);
+    revealPreview();
   };
 
   const startContourSelection = () => {
     setContourPoints([]);
     setContourClosed(false);
     setContourStepActive(true);
+    setCornerStepActive(false);
+    setClickTarget(null);
+    revealPreview();
     setDraggingContourIndex(null);
   };
 
@@ -171,7 +212,10 @@ export function App() {
     } else {
       setMinPoint(null);
     }
+    setCornerStepActive(false);
+    setContourStepActive(false);
     setClickTarget(target);
+    revealPreview();
   };
 
   const onPreviewClick = (event: MouseEvent<HTMLImageElement>) => {
@@ -214,7 +258,7 @@ export function App() {
       return;
     }
 
-    if (contourPoints.length >= 3 && isNearPoint(point, contourPoints[0], CLOSE_RADIUS)) {
+    if (contourPoints.length >= 3 && isNearPoint(point, contourPoints[0], Math.max(CLOSE_RADIUS, imageWidth * 22 / (previewImageRef.current?.getBoundingClientRect().width || imageWidth)))) {
       setContourClosed(true);
       setContourStepActive(false);
       return;
@@ -224,6 +268,7 @@ export function App() {
   };
 
   const onContourPointPointerDown = (event: ReactPointerEvent<HTMLDivElement>, index: number) => {
+    if (!event.isPrimary || event.button !== 0) return;
     event.preventDefault();
     event.stopPropagation();
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -231,6 +276,7 @@ export function App() {
   };
 
   const onCornerPointPointerDown = (event: ReactPointerEvent<HTMLDivElement>, index: number) => {
+    if (!event.isPrimary || event.button !== 0) return;
     event.preventDefault();
     event.stopPropagation();
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -392,7 +438,18 @@ export function App() {
   };
 
   const previewSection = (
-    <section className={`panel preview ${printLayout ? "report-preview-panel" : ""}`}>
+    <section ref={previewSectionRef} className={`panel preview ${printLayout ? "report-preview-panel" : ""}`}>
+      {!printLayout ? <div className="preview-tools">
+        <p role="status">{cornerStepActive ? mobile.corners : clickTarget === "max" ? mobile.max : clickTarget === "min" ? mobile.min : contourStepActive ? mobile.contour : mobile.ready}</p>
+        <div className="button-row">
+          <button type="button" className="action-button mobile-controls-button" onClick={() => controlsRef.current?.scrollIntoView({ block: "start" })}>{mobile.controls}</button>
+          {contourStepActive ? <>
+            <button type="button" className="action-button" disabled={contourPoints.length === 0} onClick={() => setContourPoints(points => points.slice(0, -1))}>{mobile.undo}</button>
+            <button type="button" className="action-button prominent-button" disabled={contourPoints.length < 3} onClick={() => { setContourClosed(true); setContourStepActive(false); }}>{mobile.close}</button>
+          </> : null}
+        </div>
+      </div> : null}
+      {imageError ? <p role="alert" className="warning-text">{mobile.error}</p> : null}
       {previewImageUrl ? (
         hasImageSize ? (
           <div
@@ -411,7 +468,7 @@ export function App() {
               setDraggingContourIndex(null);
               setDraggingCornerIndex(null);
             }}
-            onPointerLeave={printLayout ? undefined : () => {
+            onLostPointerCapture={printLayout ? undefined : () => {
               setDraggingContourIndex(null);
               setDraggingCornerIndex(null);
             }}
@@ -426,6 +483,7 @@ export function App() {
                 src={previewImageUrl}
                 alt={t.previewAlt}
                 draggable={false}
+                onError={() => setImageError(true)}
                 onLoad={onPreviewImageLoad}
                 onDragStart={(event) => event.preventDefault()}
                 onClick={printLayout ? undefined : onPreviewClick}
@@ -450,6 +508,7 @@ export function App() {
 
             {cornerPoints.map((pt, idx) => (
               <div
+                className={printLayout ? undefined : "drag-point corner-point"}
                 key={`corner-${idx}`}
                 style={{
                   position: "absolute",
@@ -572,7 +631,8 @@ export function App() {
                       x2={next.x}
                       y2={next.y}
                       stroke="transparent"
-                      strokeWidth="18"
+                      strokeWidth="22"
+                      vectorEffect="non-scaling-stroke"
                       onClick={(event) => onContourSegmentClick(event, idx)}
                     />
                   );
@@ -614,6 +674,7 @@ export function App() {
 
             {!stirlingEnabled ? contourPoints.map((pt, idx) => (
               <div
+                className={printLayout ? undefined : "drag-point contour-point"}
                 key={`contour-${idx}`}
                 style={{
                   position: "absolute",
@@ -745,6 +806,7 @@ export function App() {
               src={previewImageUrl}
               alt={t.previewAlt}
               draggable={false}
+              onError={() => setImageError(true)}
               onLoad={onPreviewImageLoad}
               onDragStart={(event) => event.preventDefault()}
               style={{
@@ -866,7 +928,7 @@ export function App() {
         </section>
       ) : (
         <>
-      <section className="panel controls">
+      <section ref={controlsRef} className="panel controls">
         <div className="workflow-step">
           <div className="step-inline">
             <div className="step-heading">
@@ -1368,10 +1430,14 @@ function orderCornersForQuad(points: Point[]): Point[] {
 }
 
 function HelpBadge({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  const id = useId();
   return (
-    <span className="help-badge" tabIndex={0} aria-label={text}>
-      ?
-      <span className="help-tooltip" role="tooltip">{text}</span>
+    <span className="help-container">
+      <button type="button" className="help-badge" aria-label={text} aria-expanded={open} aria-controls={id}
+        onClick={() => setOpen(value => !value)} onBlur={() => setOpen(false)}
+        onKeyDown={event => { if (event.key === "Escape") setOpen(false); }}>?</button>
+      <span id={id} className="help-tooltip" hidden={!open}>{text}</span>
     </span>
   );
 }

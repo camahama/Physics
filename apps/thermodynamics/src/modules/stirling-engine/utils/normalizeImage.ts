@@ -10,8 +10,11 @@ export function normalizeWhiteboardImage(
   corners?: Point[]
 ): NormalizationResult {
   const srcCanvas = document.createElement("canvas");
-  srcCanvas.width = image.naturalWidth;
-  srcCanvas.height = image.naturalHeight;
+  // Phone photos can exceed 40 MP. Bound the pixel buffers before perspective
+  // correction, and map the selected corners into the resized source image.
+  const scale = Math.min(1, 2048 / Math.max(image.naturalWidth, image.naturalHeight));
+  srcCanvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+  srcCanvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
   const srcCtx = srcCanvas.getContext("2d");
 
   if (!srcCtx) {
@@ -22,20 +25,21 @@ export function normalizeWhiteboardImage(
 
   srcCtx.fillStyle = "white";
   srcCtx.fillRect(0, 0, srcCanvas.width, srcCanvas.height);
-  srcCtx.drawImage(image, 0, 0);
+  srcCtx.drawImage(image, 0, 0, srcCanvas.width, srcCanvas.height);
 
   let workingCanvas = srcCanvas;
 
   if (corners && corners.length === 4) {
-    const ordered = orderCorners(corners);
+    const ordered = orderCorners(corners.map(point => ({
+      x: point.x * srcCanvas.width / image.naturalWidth,
+      y: point.y * srcCanvas.height / image.naturalHeight
+    })));
     const [tl, tr, br, bl] = ordered;
     const widthA = Math.hypot(tr.x - tl.x, tr.y - tl.y);
     const widthB = Math.hypot(br.x - bl.x, br.y - bl.y);
     const heightA = Math.hypot(bl.x - tl.x, bl.y - tl.y);
     const heightB = Math.hypot(br.x - tr.x, br.y - tr.y);
-    let outSize = Math.max(600, Math.round(Math.max(widthA, widthB, heightA, heightB)));
-
-    if (!isFinite(outSize) || outSize > 2200) outSize = 800;
+    const outSize = Math.min(1600, Math.max(600, Math.round(Math.max(widthA, widthB, heightA, heightB))));
 
     const H = computeHomography(ordered, [
       { x: 0, y: 0 },
