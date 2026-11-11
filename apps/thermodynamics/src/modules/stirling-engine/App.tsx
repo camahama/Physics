@@ -1,3 +1,4 @@
+import { resolveLanguage, rememberLanguage } from "../../../../shared/language.js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, MouseEvent, PointerEvent as ReactPointerEvent, ReactNode, SyntheticEvent } from "react";
 import { messages, type Locale } from "./i18n/messages";
@@ -19,7 +20,8 @@ const DEFAULT_IMAGE_DATA_URL = `data:image/svg+xml;utf8,${encodeURIComponent(
 )}`;
 
 export function App() {
-  const [locale, setLocale] = useState<Locale>("sv");
+  const [locale, setLocale] = useState<Locale>(() => resolveLanguage());
+  useEffect(() => { rememberLanguage(locale); }, [locale]);
   const [printLayout, setPrintLayout] = useState(false);
   const [sourceImageUrl, setSourceImageUrl] = useState<string | null>(DEFAULT_IMAGE_DATA_URL);
   const [normalizedImageUrl, setNormalizedImageUrl] = useState<string | null>(DEFAULT_IMAGE_DATA_URL);

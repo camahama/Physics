@@ -1,3 +1,4 @@
+import { resolveLanguage, rememberLanguage } from "../../../../shared/language.js";
 import { useEffect, useState, type CSSProperties } from 'react';
 import { LanguageProvider, UI_TEXT, type Language } from './i18n';
 import { MasterMenu } from './ui/components/MasterMenu';
@@ -69,7 +70,7 @@ function usePhonePresentation() {
 }
 
 function App() {
-  const [language, setLanguage] = useState<Language>('sv');
+  const [language, setLanguage] = useState<Language>(() => resolveLanguage());
   const [view, setView] = useState<ViewState>({ kind: 'menu' });
   const [fullscreen, setFullscreen] = useState(Boolean(document.fullscreenElement));
   const [fullscreenError, setFullscreenError] = useState(false);
@@ -95,6 +96,7 @@ function App() {
   const activeId = view.kind === 'menu' ? null : view.id;
 
   useEffect(() => {
+    rememberLanguage(language);
     document.title = text.windowTitle;
     document.documentElement.lang = language;
   }, [language, text.windowTitle]);

@@ -1,3 +1,4 @@
+import { resolveLanguage } from "../../shared/language.js";
 import { moduleRegistry } from "./config/modules.js";
 import { createPackageCredit } from "./components/packageCredit.js";
 import { createI18n } from "./i18n/index.js";
@@ -40,7 +41,11 @@ export async function createApp(container) {
     document.title = i18n.t("app.meta.title");
   }
 
-  window.addEventListener("hashchange", render);
+  window.addEventListener("hashchange", async () => {
+    const language = resolveLanguage();
+    if (language !== i18n.language) await i18n.setLanguage(language);
+    render();
+  });
 
   render();
 }

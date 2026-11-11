@@ -1,16 +1,11 @@
+import { resolveLanguage, rememberLanguage, type Language } from "../../shared/language.js";
 import "./styles.css";
 import { copy as sv } from "./i18n/sv";
 import { copy as en } from "./i18n/en";
 
 const dictionaries = { sv, en };
-type Language = keyof typeof dictionaries;
-let language: Language = "sv";
-try {
-  const saved = localStorage.getItem("physics-language");
-  if (saved === "sv" || saved === "en") language = saved;
-} catch {
-  // Keep Swedish as the default when storage is unavailable.
-}
+let language = resolveLanguage();
+rememberLanguage(language);
 
 function render() {
   const copy = dictionaries[language];
@@ -59,7 +54,7 @@ function render() {
   }
 
   const moduleHref = (path: string) =>
-    new URL(path.replace(/^\/+/, ""), window.location.href).pathname;
+    `${new URL(path.replace(/^\/+/, ""), window.location.href).pathname}?lang=${language}`;
 
   app.innerHTML = `
     <main class="site-shell">
@@ -113,11 +108,7 @@ function render() {
   app.querySelectorAll<HTMLButtonElement>("[data-language]").forEach((button) => {
     button.addEventListener("click", () => {
       language = button.dataset.language as Language;
-      try {
-        localStorage.setItem("physics-language", language);
-      } catch {
-        // Language switching also works without storage access.
-      }
+      rememberLanguage(language);
       render();
       app.querySelector<HTMLButtonElement>(`[data-language="${language}"]`)?.focus();
     });
