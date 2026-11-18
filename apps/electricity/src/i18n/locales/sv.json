@@ -82,6 +82,7 @@
       "title": "Elektriska kretsar",
       "description": "Bygg en krets och beräkna potentialer och strömmar. Tips: bygg en krets och räkna ut strömmar och potentialer för hand först. Använd sedan simuleringen för att kontrollera dina svar.",
       "componentsTitle": "Komponenter",
+      "animateCurrent": "Animera strömmen",
       "snapToGrid": "Fäst till rutnätet",
       "selectTool": "Flytta / ändra",
       "wireTool": "Ledning",

@@ -62,6 +62,7 @@ const state = {
   pendingVoltmeterNode: null as string | null,
   pendingOhmmeterNode: null as string | null,
   snapToGrid: true,
+  animateCurrent: false,
   draggingNode: null as DraggingNode | null,
   draggingProbe: null as DraggingProbe | null,
   draggingComponent: null as DraggingComponent | null,
@@ -102,6 +103,16 @@ export function renderCircuitBuilderModule({ t, language = "sv" }: ModuleRenderC
   const layout = element("div", "circuit-builder-layout");
   const controls = element("aside", "circuit-builder-controls");
   const boardPanel = element("section", "circuit-builder-board-panel");
+  const boardCanvas = element("div", "circuit-builder-board-canvas");
+  const animationControl = element("label", "circuit-builder-snap-control circuit-builder-animation-control");
+  const animationCheckbox = document.createElement("input");
+  animationCheckbox.type = "checkbox";
+  animationCheckbox.checked = state.animateCurrent;
+  animationCheckbox.addEventListener("change", () => {
+    state.animateCurrent = animationCheckbox.checked;
+    renderBoard();
+  });
+  animationControl.append(animationCheckbox, element("span", "", t("modules.circuitBuilder.animateCurrent")));
   const snapControl = element("label", "circuit-builder-snap-control");
   const snapCheckbox = document.createElement("input");
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -247,6 +258,8 @@ export function renderCircuitBuilderModule({ t, language = "sv" }: ModuleRenderC
       svg.append(renderComponent(component));
     }
 
+    if (state.animateCurrent) renderCurrentFlow();
+
     for (const probe of state.currentProbes) {
       svg.append(renderCurrentProbe(probe));
     }
@@ -263,6 +276,41 @@ export function renderCircuitBuilderModule({ t, language = "sv" }: ModuleRenderC
     for (const node of state.nodes) {
       svg.append(renderNode(node));
     }
+  }
+
+  function renderCurrentFlow() {
+    const groundNode = getEffectiveGroundNode();
+    if (groundNode == null) return;
+    let currents: ReturnType<typeof solveLinearCircuit>["componentCurrents"];
+    try {
+      currents = solveLinearCircuit({
+        nodes: physicsNodes(), groundNode, components: physicsComponents(),
+      }).componentCurrents;
+    } catch {
+      return;
+    }
+    const maximum = Math.max(0, ...currents.map(entry => Math.abs(entry.currentAmps ?? 0)));
+    if (maximum === 0) return;
+    const currentById = new Map(currents.map(entry => [entry.componentId, entry.currentAmps]));
+    const overlay = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    overlay.setAttribute("class", "circuit-builder-current-flow");
+    overlay.setAttribute("aria-hidden", "true");
+    for (const component of state.components) {
+      const current = currentById.get(component.id);
+      if (current == null || !Number.isFinite(current) || current === 0) continue;
+      const endpoints = componentEndpoints(component);
+      const start = current > 0 ? endpoints.start : endpoints.end;
+      const end = current > 0 ? endpoints.end : endpoints.start;
+      const width = 14 * Math.abs(current) / maximum;
+      appendLine(overlay, start.x, start.y, end.x, end.y, "circuit-builder-current-flow-track");
+      overlay.lastElementChild!.setAttribute("stroke-width", String(width));
+      appendLine(overlay, start.x, start.y, end.x, end.y, "circuit-builder-current-flow-pulse");
+      const pulse = overlay.lastElementChild as SVGLineElement;
+      pulse.setAttribute("stroke-width", String(width));
+      // Keep the flow phase stable when editing or moving the circuit.
+      pulse.style.animationDelay = `-${(performance.now() % 1000) / 1000}s`;
+    }
+    svg.append(overlay);
   }
 
   function renderResults() {
@@ -679,7 +727,8 @@ export function renderCircuitBuilderModule({ t, language = "sv" }: ModuleRenderC
   });
 
   svg.setAttribute("tabindex", "0");
-  boardPanel.append(snapControl, editor, svg, results);
+  boardCanvas.append(svg, snapControl, animationControl);
+  boardPanel.append(editor, boardCanvas, results);
   layout.append(controls, boardPanel);
   content.append(header, layout, createPackageCredit(t));
   page.append(content);

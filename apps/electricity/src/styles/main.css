@@ -1404,6 +1404,48 @@ button {
   accent-color: #0e7893;
 }
 
+.circuit-builder-board-canvas {
+  position: relative;
+  width: min(900px, 100%);
+}
+
+.circuit-builder-animation-control {
+  top: auto;
+  bottom: 0.75rem;
+  cursor: pointer;
+}
+
+.circuit-builder-animation-control input {
+  accent-color: #dc2626;
+}
+
+.circuit-builder-current-flow {
+  pointer-events: none;
+}
+
+.circuit-builder-current-flow-track {
+  stroke: #ef4444;
+  opacity: 0.22;
+}
+
+.circuit-builder-current-flow-pulse {
+  stroke: #dc2626;
+  stroke-dasharray: 12 20;
+  opacity: 0.8;
+  animation: circuit-builder-current-flow 1s linear infinite;
+}
+
+@keyframes circuit-builder-current-flow {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -32; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .circuit-builder-current-flow-pulse {
+    animation: none;
+  }
+}
+
 .circuit-builder-board {
   display: block;
   width: min(900px, 100%);

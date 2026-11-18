@@ -82,6 +82,7 @@
       "title": "Circuit Builder",
       "description": "Build a circuit and solve for potentials and currents. Suggestion: build a circuit and calculate currents and potentials by hand first. Then use the simulation to check your answers.",
       "componentsTitle": "Tools and components",
+      "animateCurrent": "Animate current",
       "snapToGrid": "Snap to grid",
       "selectTool": "Move / edit",
       "wireTool": "Wire",
